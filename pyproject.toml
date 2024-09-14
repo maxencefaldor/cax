@@ -1,0 +1,70 @@
+[build-system]
+requires = ["setuptools>=74.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cax"
+version = "0.1.1"
+dependencies = [
+	"numpy>=2.1.0",
+	"jax>=0.4.31",
+	"flax>=0.9.0",
+	"optax>=0.2.3",
+	"datasets>=2.21.0",
+	"pillow>=10.4.0",
+	"ipython>=8.26.0",
+	"ipykernel>=6.29.5",
+	"ipywidgets>=8.1.5",
+	"mediapy>=1.2.2",
+]
+requires-python = ">=3.11"
+authors = [
+  { name="Maxence Faldor", email="maxencefaldor@gmail.com" },
+]
+description = "Cellular Automata Accelerated in JAX"
+readme = "README.md"
+license = {file = "LICENSE"}
+keywords = ["cellular automata", "self-organization", "emergence"]
+classifiers = [
+	"Programming Language :: Python :: 3",
+	"License :: OSI Approved :: MIT License",
+	"Operating System :: OS Independent",
+]
+
+[project.optional-dependencies]
+cuda = [
+	"jax[cuda12]",
+]
+tpu = [
+	"jax[tpu]",
+]
+dev = [
+	"pytest>=8.3.2",
+	"pytest-cov>=5.0.0",
+	"ruff>=0.6.4",
+	"mypy>=1.11.2",
+	"pre-commit",
+]
+
+[project.urls]
+Homepage = "https://github.com/maxencefaldor/cax"
+Issues = "https://github.com/maxencefaldor/cax/issues"
+
+[tool.ruff]
+src = ["cax", "tests"]
+target-version = "py312"
+line-length = 120
+
+[tool.ruff.lint]
+select = ["E", "D", "F", "I", "N", "SIM", "UP", "W"]
+ignore = ["D203", "D206", "D213", "W191"]
+
+[tool.ruff.format]
+indent-style = "tab"
+
+[tool.mypy]
+python_version = "3.12"
+
+[[tool.mypy.overrides]]
+module = ["requests.*"]
+ignore_missing_imports = true
