@@ -1,59 +1,59 @@
-"""Pool implementation for NCA training."""
+"""Pool module."""
 
 from functools import partial
-from typing import Self
+from typing import Any, Self
 
 import jax
 from flax import struct
 
 
 class Pool(struct.PyTreeNode):
-	"""Pool class for for NCA training."""
+	"""Pool class."""
 
 	size: int = struct.field(pytree_node=False)
 	data: dict[str, jax.Array]
 
 	@classmethod
-	def create(cls, **kwargs):
-		"""Create a new Pool instance from the given data.
+	def create(cls, data: Any):
+		"""Create a new Pool instance.
 
 		Args:
-			**kwargs: Keyword arguments representing the data to be stored in the pool.
+			data: Data to store in the pool.
 
 		Returns:
 			A new Pool instance.
 
 		"""
-		size = next(iter(kwargs.values())).shape[0]
-		return cls(size=size, data=kwargs)
-
-	@partial(jax.jit, static_argnames=("sample_size",))
-	def sample(self, key: jax.Array, *, sample_size: int) -> tuple[jax.Array, dict[str, jax.Array]]:
-		"""Sample a subset of data from the pool.
-
-		Args:
-			key: A JAX random key.
-			sample_size: The number of items to sample.
-
-		Returns:
-			A tuple containing the sampled indices and the sampled data.
-
-		"""
-		index = jax.random.choice(key, self.size, shape=(sample_size,), replace=False)
-		sampled_data = {k: v[index] for k, v in self.data.items()}
-		return index, sampled_data
+		size = jax.tree.leaves(data)[0].shape[0]
+		return cls(size=size, data=data)
 
 	@jax.jit
-	def add(self, index: jax.Array, **kwargs) -> Self:
-		"""Add items in the pool at the specified indices.
+	def update(self, indices: jax.Array, batch: Any) -> Self:
+		"""Update batch in the pool at the specified indices.
 
 		Args:
-			index: The indices at which to add or update items.
-			**kwargs: The data to be added or updated.
+			indices: The indices at which to update the batch.
+			batch: The batch to update at the specified indices.
 
 		Returns:
-			A new Pool instance with the updated data.
+			A new Pool instance with the updated batch.
 
 		"""
-		updated_data = {k: self.data[k].at[index].set(kwargs[k]) for k in self.data}
-		return self.replace(data=updated_data)
+		data = jax.tree.map(lambda data_leaf, batch_leaf: data_leaf.at[indices].set(batch_leaf), self.data, batch)
+		return self.replace(data=data)
+
+	@partial(jax.jit, static_argnames=("batch_size",))
+	def sample(self, key: jax.Array, *, batch_size: int) -> tuple[jax.Array, Any]:
+		"""Sample a batch from the pool.
+
+		Args:
+			key: A random key.
+			batch_size: The size of the batch to sample.
+
+		Returns:
+			A tuple containing the batch indices in the pool and the batch.
+
+		"""
+		indices = jax.random.choice(key, self.size, shape=(batch_size,))
+		batch = jax.tree.map(lambda leaf: leaf[indices], self.data)
+		return indices, batch
