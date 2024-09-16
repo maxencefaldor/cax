@@ -3,7 +3,7 @@
 import jax.numpy as jnp
 import pytest
 from cax.core.ca import CA
-from cax.core.perceive.dwconv_perceive import DWConvPerceive
+from cax.core.perceive.depthwise_conv_perceive import DepthwiseConvPerceive
 from cax.core.perceive.kernels import identity_kernel, neighbors_kernel
 from cax.core.update.life_update import LifeUpdate
 from flax import nnx
@@ -51,13 +51,13 @@ def test_life_update():
 	glider = jnp.array([[0, 1, 0], [0, 0, 1], [1, 1, 1]])
 	state = state.at[1:4, 1:4, 0].set(glider)
 
-	perceive = DWConvPerceive(channel_size, rngs, num_kernels=2, kernel_size=(3, 3))
+	perceive = DepthwiseConvPerceive(channel_size, rngs, num_kernels=2, kernel_size=(3, 3))
 	update = LifeUpdate()
 
 	# Set up perception kernels
 	kernel = jnp.concatenate([identity_kernel(2), neighbors_kernel(2)], axis=-1)
 	kernel = jnp.expand_dims(kernel, axis=-2)
-	perceive.dwconv.kernel = nnx.Param(kernel)
+	perceive.depthwise_conv.kernel = nnx.Param(kernel)
 
 	ca = CA(perceive, update)
 

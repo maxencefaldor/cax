@@ -8,10 +8,10 @@ from cax.core.perceive.perceive import Perceive
 from cax.types import Perception, State
 
 
-class DWConvPerceive(Perceive):
+class DepthwiseConvPerceive(Perceive):
 	"""Depthwise Convolution Perceive class."""
 
-	dwconv: nnx.Conv
+	depthwise_conv: nnx.Conv
 
 	def __init__(
 		self,
@@ -22,7 +22,7 @@ class DWConvPerceive(Perceive):
 		kernel_size: Sequence[int] = (3, 3),
 		use_bias: bool = False,
 	):
-		"""Initialize the DWConvPerceive module.
+		"""Initialize the DepthwiseConvPerceive module.
 
 		Args:
 			channel_size: Number of input channels.
@@ -32,7 +32,7 @@ class DWConvPerceive(Perceive):
 			use_bias: Whether to use bias in the convolution.
 
 		"""
-		self.dwconv = nnx.Conv(
+		self.depthwise_conv = nnx.Conv(
 			channel_size,
 			num_kernels * channel_size,
 			kernel_size=kernel_size,
@@ -51,5 +51,5 @@ class DWConvPerceive(Perceive):
 			The processed perception.
 
 		"""
-		perception = self.dwconv(state)
+		perception = self.depthwise_conv(state)
 		return perception

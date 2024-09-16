@@ -50,7 +50,7 @@ pip install jax[tpu]
 ```python
 import jax
 from cax.core.ca import CA
-from cax.core.perceive.dwconv_perceive import DWConvPerceive
+from cax.core.perceive.depthwise_conv_perceive import DepthwiseConvPerceive
 from cax.core.update.nca_update import NCAUpdate
 from flax import nnx
 
@@ -64,7 +64,7 @@ cell_dropout_rate = 0.5
 key = jax.random.PRNGKey(seed)
 rngs = nnx.Rngs(seed)
 
-perceive = DWConvPerceive(channel_size, rngs)
+perceive = DepthwiseConvPerceive(channel_size, rngs)
 update = NCAUpdate(
 	channel_size,
 	num_kernels*channel_size,
