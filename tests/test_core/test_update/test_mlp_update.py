@@ -3,7 +3,7 @@
 import jax.numpy as jnp
 import pytest
 from cax.core.ca import CA
-from cax.core.perceive.dwconv_perceive import DWConvPerceive
+from cax.core.perceive.depthwise_conv_perceive import DepthwiseConvPerceive
 from cax.core.update.mlp_update import MLPUpdate
 from flax import nnx
 
@@ -75,7 +75,7 @@ def test_mlp_update_in_ca():
 	state = jnp.zeros((*spatial_dims, channel_size))
 	state = state.at[8:11, 8:11, :].set(1.0)
 
-	perceive = DWConvPerceive(channel_size, rngs)
+	perceive = DepthwiseConvPerceive(channel_size, rngs)
 	update = MLPUpdate(
 		len(spatial_dims), channel_size, input_size + num_kernels * channel_size, hidden_layer_sizes, rngs
 	)
