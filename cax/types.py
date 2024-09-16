@@ -1,7 +1,8 @@
 """Type definitions for CAX."""
 
-import jax
 from typing import TypeAlias
+
+import jax
 
 State: TypeAlias = jax.Array
 Perception: TypeAlias = jax.Array

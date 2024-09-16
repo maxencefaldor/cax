@@ -5,9 +5,8 @@ from functools import partial
 from flax import nnx
 
 from cax.core.perceive.perceive import Perceive
-from cax.core.state import State
 from cax.core.update.update import Update
-from cax.types import Input
+from cax.types import Input, State
 
 
 class CA(nnx.Module):
