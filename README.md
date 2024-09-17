@@ -26,23 +26,16 @@ The library works with discrete or continuous cellular automata of any spatial d
 
 ## Installation 🛠️
 
-You will need Python 3.12 or later. Then, install CAX from PyPi:
+You will need Python 3.11 or later, and a working JAX installation.
 
+Then, install CAX from PyPi:
 ```
 pip install cax
 ```
 
 To upgrade to the latest version of CAX, you can use:
-
 ```
 pip install --upgrade git+https://github.com/maxencefaldor/cax.git
-```
-
-By default, CAX is installed on CPU, but you can install it on GPU or TPU with:
-
-```
-pip install jax[cuda12]
-pip install jax[tpu]
 ```
 
 ## Getting Started 🚦

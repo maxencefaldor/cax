@@ -32,18 +32,11 @@ classifiers = [
 ]
 
 [project.optional-dependencies]
-cuda = [
-	"jax[cuda12]",
-]
-tpu = [
-	"jax[tpu]",
-]
 dev = [
 	"pytest>=8.3.2",
 	"pytest-cov>=5.0.0",
 	"ruff>=0.6.4",
 	"mypy>=1.11.2",
-	"pre-commit",
 ]
 
 [project.urls]
