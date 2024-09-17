@@ -5,6 +5,7 @@ from collections.abc import Sequence
 import jax
 import jax.numpy as jnp
 from flax import nnx
+from flax.nnx.nnx import rnglib
 
 
 class Encoder(nnx.Module):
@@ -136,6 +137,7 @@ class VAE(nnx.Module):
 
 	encoder: Encoder
 	decoder: Decoder
+	rngs: rnglib.Rngs
 
 	def __init__(self, spatial_dims: tuple[int, int], features: Sequence[int], latent_size: int, rngs: nnx.Rngs):
 		"""Initialize the VAE module.
@@ -150,35 +152,34 @@ class VAE(nnx.Module):
 		super().__init__()
 		self.encoder = Encoder(spatial_dims=spatial_dims, features=features, latent_size=latent_size, rngs=rngs)
 		self.decoder = Decoder(spatial_dims=spatial_dims, features=features[::-1], latent_size=latent_size, rngs=rngs)
+		self.rngs = rngs
 
-	def reparameterize(self, mean, logvar, key):
+	def reparameterize(self, mean, logvar):
 		"""Perform the reparameterization trick.
 
 		Args:
 			mean: Mean of the latent distribution.
 			logvar: Log variance of the latent distribution.
-			key: Random key for sampling.
 
 		Returns:
 			Sampled latent vector.
 
 		"""
-		eps = jax.random.normal(key, shape=mean.shape)
+		eps = jax.random.normal(self.rngs(), shape=mean.shape)
 		return eps * jnp.exp(logvar * 0.5) + mean
 
-	def encode(self, x, key):
+	def encode(self, x):
 		"""Encode input to latent space.
 
 		Args:
 			x: Input tensor.
-			key: Random key for sampling.
 
 		Returns:
 			Tuple of sampled latent vector, mean, and log variance.
 
 		"""
 		mean, logvar = self.encoder(x)
-		return self.reparameterize(mean, logvar, key), mean, logvar
+		return self.reparameterize(mean, logvar), mean, logvar
 
 	def decode(self, z):
 		"""Decode latent vector to output space.
@@ -204,18 +205,17 @@ class VAE(nnx.Module):
 		"""
 		return jax.nn.sigmoid(self.decoder(z))
 
-	def __call__(self, x, key):
+	def __call__(self, x):
 		"""Forward pass of the VAE.
 
 		Args:
 			x: Input tensor.
-			key: Random key for sampling.
 
 		Returns:
 			Tuple of reconstructed logits, mean, and log variance.
 
 		"""
-		z, mean, logvar = self.encode(x, key)
+		z, mean, logvar = self.encode(x)
 		logits = self.decode(z)
 		return logits, mean, logvar
 
