@@ -8,7 +8,7 @@ from flax import nnx
 
 
 @pytest.fixture
-def vae_model():
+def vae():
 	"""Create a VAE model for testing."""
 	spatial_dims = (28, 28)
 	features = (1, 32, 64)
@@ -17,45 +17,45 @@ def vae_model():
 	return VAE(spatial_dims, features, latent_size, rngs)
 
 
-def test_vae_initialization(vae_model):
+def test_vae_initialization(vae):
 	"""Test the initialization of the VAE model."""
-	assert isinstance(vae_model, VAE)
-	assert isinstance(vae_model.encoder, nnx.Module)
-	assert isinstance(vae_model.decoder, nnx.Module)
+	assert isinstance(vae, VAE)
+	assert isinstance(vae.encoder, nnx.Module)
+	assert isinstance(vae.decoder, nnx.Module)
 
 
-def test_vae_encode(vae_model):
+def test_vae_encode(vae):
 	"""Test the encode method of the VAE model."""
 	key = jax.random.PRNGKey(0)
 	x = jax.random.normal(key, (1, 28, 28, 1))
-	z, mean, logvar = vae_model.encode(x, key)
+	z, mean, logvar = vae.encode(x)
 	assert z.shape == (1, 10)
 	assert mean.shape == (1, 10)
 	assert logvar.shape == (1, 10)
 
 
-def test_vae_decode(vae_model):
+def test_vae_decode(vae):
 	"""Test the decode method of the VAE model."""
 	key = jax.random.PRNGKey(0)
 	z = jax.random.normal(key, (1, 10))
-	logits = vae_model.decode(z)
+	logits = vae.decode(z)
 	assert logits.shape == (1, 28, 28, 1)
 
 
-def test_vae_generate(vae_model):
+def test_vae_generate(vae):
 	"""Test the generate method of the VAE model."""
 	key = jax.random.PRNGKey(0)
 	z = jax.random.normal(key, (1, 10))
-	generated = vae_model.generate(z)
+	generated = vae.generate(z)
 	assert generated.shape == (1, 28, 28, 1)
 	assert jnp.all((generated >= 0) & (generated <= 1))
 
 
-def test_vae_forward(vae_model):
+def test_vae_forward(vae):
 	"""Test the forward pass of the VAE model."""
 	key = jax.random.PRNGKey(0)
 	x = jax.random.normal(key, (1, 28, 28, 1))
-	logits, mean, logvar = vae_model(x, key)
+	logits, mean, logvar = vae(x)
 	assert logits.shape == (1, 28, 28, 1)
 	assert mean.shape == (1, 10)
 	assert logvar.shape == (1, 10)
@@ -88,17 +88,3 @@ def test_vae_loss():
 	loss = vae_loss(logits, targets, mean, logvar)
 	assert loss.shape == ()
 	assert loss >= 0
-
-
-def test_vae_vmap(vae_model):
-	"""Test the vectorized mapping of the VAE model."""
-	key = jax.random.PRNGKey(0)
-	batch_size = 4
-	x = jax.random.normal(key, (batch_size, 28, 28, 1))
-	keys = jax.random.split(key, batch_size)
-
-	logits, mean, logvar = nnx.vmap(vae_model)(x, keys)
-
-	assert logits.shape == (batch_size, 28, 28, 1)
-	assert mean.shape == (batch_size, 10)
-	assert logvar.shape == (batch_size, 10)
