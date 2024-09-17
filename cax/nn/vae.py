@@ -5,7 +5,6 @@ from collections.abc import Sequence
 import jax
 import jax.numpy as jnp
 from flax import nnx
-from flax.nnx.nnx import rnglib
 
 
 class Encoder(nnx.Module):
@@ -17,6 +16,7 @@ class Encoder(nnx.Module):
 	linear: nnx.Linear
 	mean: nnx.Linear
 	logvar: nnx.Linear
+	rngs: nnx.Rngs
 
 	def __init__(self, spatial_dims: Sequence[int], features: Sequence[int], latent_size: int, rngs: nnx.Rngs):
 		"""Initialize the Encoder module.
@@ -52,6 +52,7 @@ class Encoder(nnx.Module):
 		self.linear = nnx.Linear(in_features=flattened_size, out_features=flattened_size, rngs=rngs)
 		self.mean = nnx.Linear(in_features=flattened_size, out_features=self.latent_size, rngs=rngs)
 		self.logvar = nnx.Linear(in_features=flattened_size, out_features=self.latent_size, rngs=rngs)
+		self.rngs = rngs
 
 	def __call__(self, x):
 		"""Forward pass of the encoder.
@@ -70,6 +71,19 @@ class Encoder(nnx.Module):
 		mean = self.mean(x)
 		logvar = self.logvar(x)
 		return mean, logvar
+
+	def reparameterize(self, mean, logvar):
+		"""Perform the reparameterization trick.
+
+		Args:
+			mean: Mean of the latent distribution.
+			logvar: Log variance of the latent distribution.
+
+		Returns:
+			Sampled latent vector.
+
+		"""
+		return mean + jnp.exp(logvar * 0.5) * jax.random.normal(self.rngs(), shape=mean.shape)
 
 
 class Decoder(nnx.Module):
@@ -137,7 +151,6 @@ class VAE(nnx.Module):
 
 	encoder: Encoder
 	decoder: Decoder
-	rngs: rnglib.Rngs
 
 	def __init__(self, spatial_dims: tuple[int, int], features: Sequence[int], latent_size: int, rngs: nnx.Rngs):
 		"""Initialize the VAE module.
@@ -152,21 +165,6 @@ class VAE(nnx.Module):
 		super().__init__()
 		self.encoder = Encoder(spatial_dims=spatial_dims, features=features, latent_size=latent_size, rngs=rngs)
 		self.decoder = Decoder(spatial_dims=spatial_dims, features=features[::-1], latent_size=latent_size, rngs=rngs)
-		self.rngs = rngs
-
-	def reparameterize(self, mean, logvar):
-		"""Perform the reparameterization trick.
-
-		Args:
-			mean: Mean of the latent distribution.
-			logvar: Log variance of the latent distribution.
-
-		Returns:
-			Sampled latent vector.
-
-		"""
-		eps = jax.random.normal(self.rngs(), shape=mean.shape)
-		return eps * jnp.exp(logvar * 0.5) + mean
 
 	def encode(self, x):
 		"""Encode input to latent space.
@@ -179,7 +177,7 @@ class VAE(nnx.Module):
 
 		"""
 		mean, logvar = self.encoder(x)
-		return self.reparameterize(mean, logvar), mean, logvar
+		return self.encoder.reparameterize(mean, logvar), mean, logvar
 
 	def decode(self, z):
 		"""Decode latent vector to output space.
