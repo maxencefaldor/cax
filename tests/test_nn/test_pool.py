@@ -23,7 +23,7 @@ def test_pool_create(init_pool):
 
 def test_pool_sample(init_pool):
 	"""Test the sample method of the Pool class."""
-	key = jax.random.PRNGKey(0)
+	key = jax.random.key(0)
 	index, sampled_data = init_pool.sample(key, batch_size=3)
 
 	assert index.shape == (3,)

@@ -45,7 +45,7 @@ Issues = "https://github.com/maxencefaldor/cax/issues"
 
 [tool.ruff]
 src = ["cax", "tests"]
-target-version = "py312"
+target-version = "py311"
 line-length = 120
 
 [tool.ruff.lint]
@@ -56,7 +56,7 @@ ignore = ["D203", "D206", "D213", "W191"]
 indent-style = "tab"
 
 [tool.mypy]
-python_version = "3.12"
+python_version = "3.11"
 
 [[tool.mypy.overrides]]
 module = ["requests.*"]

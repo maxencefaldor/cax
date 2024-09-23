@@ -26,7 +26,7 @@ def test_vae_initialization(vae):
 
 def test_vae_encode(vae):
 	"""Test the encode method of the VAE model."""
-	key = jax.random.PRNGKey(0)
+	key = jax.random.key(0)
 	x = jax.random.normal(key, (1, 28, 28, 1))
 	z, mean, logvar = vae.encode(x)
 	assert z.shape == (1, 10)
@@ -36,7 +36,7 @@ def test_vae_encode(vae):
 
 def test_vae_decode(vae):
 	"""Test the decode method of the VAE model."""
-	key = jax.random.PRNGKey(0)
+	key = jax.random.key(0)
 	z = jax.random.normal(key, (1, 10))
 	logits = vae.decode(z)
 	assert logits.shape == (1, 28, 28, 1)
@@ -44,7 +44,7 @@ def test_vae_decode(vae):
 
 def test_vae_generate(vae):
 	"""Test the generate method of the VAE model."""
-	key = jax.random.PRNGKey(0)
+	key = jax.random.key(0)
 	z = jax.random.normal(key, (1, 10))
 	generated = vae.generate(z)
 	assert generated.shape == (1, 28, 28, 1)
@@ -53,7 +53,7 @@ def test_vae_generate(vae):
 
 def test_vae_forward(vae):
 	"""Test the forward pass of the VAE model."""
-	key = jax.random.PRNGKey(0)
+	key = jax.random.key(0)
 	x = jax.random.normal(key, (1, 28, 28, 1))
 	logits, mean, logvar = vae(x)
 	assert logits.shape == (1, 28, 28, 1)
