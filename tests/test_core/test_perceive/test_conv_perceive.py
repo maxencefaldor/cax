@@ -28,7 +28,7 @@ def test_conv_perceive_initialization(conv_perceive):
 
 def test_conv_perceive_output_shape(conv_perceive):
 	"""Test the output shape of ConvPerceive."""
-	key = jax.random.PRNGKey(0)
+	key = jax.random.key(0)
 	state = jax.random.normal(key, (10, 10, 4))
 	perception = conv_perceive(state)
 	assert perception.shape == (10, 10, 8)
@@ -53,7 +53,7 @@ def test_conv_perceive_custom_params(rngs):
 
 def test_conv_perceive_forward_pass(conv_perceive):
 	"""Test the forward pass of ConvPerceive."""
-	key = jax.random.PRNGKey(0)
+	key = jax.random.key(0)
 	state = jax.random.normal(key, (10, 10, 4))
 	perception = conv_perceive(state)
 	assert jnp.any(perception != 0)  # Ensure non-zero output

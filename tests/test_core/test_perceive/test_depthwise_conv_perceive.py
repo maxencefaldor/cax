@@ -42,7 +42,7 @@ def test_depthwise_conv_perceive_custom_params(rngs):
 
 def test_depthwise_conv_perceive_forward_pass(depthwise_conv_perceive):
 	"""Test the forward pass of DepthwiseConvPerceive."""
-	key = jax.random.PRNGKey(0)
+	key = jax.random.key(0)
 	state = jax.random.normal(key, (10, 10, 4))
 	perception = depthwise_conv_perceive(state)
 	assert jnp.any(perception != 0)  # Ensure non-zero output

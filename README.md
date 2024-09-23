@@ -54,7 +54,7 @@ num_kernels = 3
 hidden_size = 128
 cell_dropout_rate = 0.5
 
-key = jax.random.PRNGKey(seed)
+key = jax.random.key(seed)
 rngs = nnx.Rngs(seed)
 
 perceive = DepthwiseConvPerceive(channel_size, rngs)

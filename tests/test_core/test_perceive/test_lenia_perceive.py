@@ -61,7 +61,7 @@ def test_lenia_perceive_initialization(lenia_perceive, lenia_config):
 
 def test_lenia_perceive_call(lenia_perceive):
 	"""Test the __call__ method of LeniaPerceive."""
-	key = jax.random.PRNGKey(0)
+	key = jax.random.key(0)
 	state = jax.random.uniform(key, (128, 128, 3))  # Updated shape
 	perception = lenia_perceive(state)
 	assert perception.shape == (128, 128, 15)  # Updated shape
@@ -85,7 +85,7 @@ def test_lenia_perceive_different_config():
 	assert perceive.kernel_fft.shape == (64, 64, 3)
 	assert perceive.reshape_c_k.shape == (3, 3)
 
-	key = jax.random.PRNGKey(0)
+	key = jax.random.key(0)
 	state = jax.random.uniform(key, (64, 64, 3))
 	perception = perceive(state)
 	assert perception.shape == (64, 64, 3)
@@ -103,7 +103,7 @@ def test_lenia_perceive_different_sizes(state_size, channel_size):
 		"channel_size": channel_size,
 	}
 	perceive = LeniaPerceive(config)
-	key = jax.random.PRNGKey(0)
+	key = jax.random.key(0)
 	state = jax.random.uniform(key, (state_size, state_size, channel_size))
 	perception = perceive(state)
 	assert perception.shape == (state_size, state_size, channel_size)
