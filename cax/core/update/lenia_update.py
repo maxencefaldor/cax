@@ -1,13 +1,15 @@
 """Lenia update module."""
 
 import jax.numpy as jnp
+from chex import Numeric
+from jax import Array
 
 from cax.core.perceive.lenia_perceive import bell
 from cax.core.update.update import Update
 from cax.types import Input, Perception, State
 
 
-def growth(x, mean, stdev):
+def growth(x: Array, mean: Numeric, stdev: Numeric) -> Array:
 	"""Calculate the growth function for Lenia.
 
 	Args:
@@ -25,7 +27,7 @@ def growth(x, mean, stdev):
 class LeniaUpdate(Update):
 	"""Lenia update class."""
 
-	def __init__(self, config: dict):
+	def __init__(self, config: dict) -> None:
 		"""Initialize the LeniaUpdate.
 
 		Args:
@@ -37,7 +39,7 @@ class LeniaUpdate(Update):
 		self._config = config
 		self.init()
 
-	def init(self):
+	def init(self) -> None:
 		"""Initialize Lenia parameters from the configuration."""
 		self.m = jnp.array([k["m"] for k in self._config["kernel_params"]])  # (k,)
 		self.s = jnp.array([k["s"] for k in self._config["kernel_params"]])  # (k,)
@@ -53,7 +55,7 @@ class LeniaUpdate(Update):
 		for i, k in enumerate(self._config["kernel_params"]):
 			self.reshape_k_c = self.reshape_k_c.at[i, k["c1"]].set(1.0)
 
-	def __call__(self, state: State, perception: Perception, input: Input) -> State:
+	def __call__(self, state: State, perception: Perception, input: Input | None = None) -> State:
 		"""Apply the Lenia update rule.
 
 		Args:

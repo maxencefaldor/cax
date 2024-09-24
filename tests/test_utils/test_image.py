@@ -1,6 +1,7 @@
 """Tests for image utility functions."""
 
 import io
+from collections.abc import Generator
 from unittest.mock import MagicMock, patch
 
 import jax.numpy as jnp
@@ -10,20 +11,20 @@ from cax.utils.image import get_emoji, get_image_from_url
 
 
 @pytest.fixture
-def mock_requests_get():
+def mock_requests_get() -> Generator[MagicMock, None, None]:
 	"""Fixture to mock requests.get."""
 	with patch("requests.get") as mock_get:
 		yield mock_get
 
 
 @pytest.fixture
-def mock_pil_image():
+def mock_pil_image() -> Generator[MagicMock, None, None]:
 	"""Fixture to mock PIL.Image.open."""
 	with patch("PIL.Image.open") as mock_open:
 		yield mock_open
 
 
-def test_get_image_from_url(mock_requests_get, mock_pil_image):
+def test_get_image_from_url(mock_requests_get: MagicMock, mock_pil_image: MagicMock) -> None:
 	"""Test the get_image_from_url function."""
 	mock_response = MagicMock()
 	mock_response.content = b"fake image content"
@@ -52,7 +53,9 @@ def test_get_image_from_url(mock_requests_get, mock_pil_image):
 		("🐶", 64, 4),
 	],
 )
-def test_get_emoji(emoji, size, padding, mock_requests_get, mock_pil_image):
+def test_get_emoji(
+	emoji: str, size: int, padding: int, mock_requests_get: MagicMock, mock_pil_image: MagicMock
+) -> None:
 	"""Test the get_emoji function."""
 	mock_response = MagicMock()
 	mock_response.content = b"fake image content"

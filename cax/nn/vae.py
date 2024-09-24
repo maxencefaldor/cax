@@ -1,10 +1,11 @@
-"""Variational Autoencoder (VAE) implementation using JAX and Flax."""
+"""Variational Autoencoder implementation using JAX and Flax."""
 
 from collections.abc import Sequence
 
 import jax
 import jax.numpy as jnp
 from flax import nnx
+from jax import Array
 
 
 class Encoder(nnx.Module):
@@ -54,7 +55,7 @@ class Encoder(nnx.Module):
 		self.logvar = nnx.Linear(in_features=flattened_size, out_features=self.latent_size, rngs=rngs)
 		self.rngs = rngs
 
-	def __call__(self, x):
+	def __call__(self, x: Array) -> tuple[Array, Array]:
 		"""Forward pass of the encoder.
 
 		Args:
@@ -66,13 +67,13 @@ class Encoder(nnx.Module):
 		"""
 		for conv in self.convs:
 			x = jax.nn.relu(conv(x))
-		x = x.reshape(*x.shape[:-3], -1)
+		x = jnp.reshape(x, x.shape[:-3] + (-1,))
 		x = jax.nn.relu(self.linear(x))
 		mean = self.mean(x)
 		logvar = self.logvar(x)
 		return mean, logvar
 
-	def reparameterize(self, mean, logvar):
+	def reparameterize(self, mean: Array, logvar: Array) -> Array:
 		"""Perform the reparameterization trick.
 
 		Args:
@@ -128,7 +129,7 @@ class Decoder(nnx.Module):
 				)
 			)
 
-	def __call__(self, z):
+	def __call__(self, z: Array) -> Array:
 		"""Forward pass of the decoder.
 
 		Args:
@@ -139,15 +140,15 @@ class Decoder(nnx.Module):
 
 		"""
 		x = jax.nn.relu(self.linear(z))
-		x = x.reshape(*x.shape[:-1], *self._spatial_dims, self.features[0])
+		x = jnp.reshape(x, x.shape[:-1] + self._spatial_dims + (self.features[0],))
 		for conv in self.convs[:-1]:
 			x = jax.nn.relu(conv(x))
 		x = self.convs[-1](x)
-		return x
+		return x  # type: ignore
 
 
 class VAE(nnx.Module):
-	"""Variational Autoencoder (VAE) module."""
+	"""Variational Autoencoder module."""
 
 	encoder: Encoder
 	decoder: Decoder
@@ -166,7 +167,7 @@ class VAE(nnx.Module):
 		self.encoder = Encoder(spatial_dims=spatial_dims, features=features, latent_size=latent_size, rngs=rngs)
 		self.decoder = Decoder(spatial_dims=spatial_dims, features=features[::-1], latent_size=latent_size, rngs=rngs)
 
-	def encode(self, x):
+	def encode(self, x: Array) -> tuple[Array, Array, Array]:
 		"""Encode input to latent space.
 
 		Args:
@@ -179,7 +180,7 @@ class VAE(nnx.Module):
 		mean, logvar = self.encoder(x)
 		return self.encoder.reparameterize(mean, logvar), mean, logvar
 
-	def decode(self, z):
+	def decode(self, z: Array) -> Array:
 		"""Decode latent vector to output space.
 
 		Args:
@@ -191,7 +192,7 @@ class VAE(nnx.Module):
 		"""
 		return self.decoder(z)
 
-	def generate(self, z):
+	def generate(self, z: Array) -> Array:
 		"""Generate output from latent vector.
 
 		Args:
@@ -201,9 +202,9 @@ class VAE(nnx.Module):
 			Generated output tensor.
 
 		"""
-		return jax.nn.sigmoid(self.decoder(z))
+		return jax.nn.sigmoid(self.decoder(z))  # type: ignore
 
-	def __call__(self, x):
+	def __call__(self, x: Array) -> tuple[Array, Array, Array]:
 		"""Forward pass of the VAE.
 
 		Args:
@@ -219,7 +220,7 @@ class VAE(nnx.Module):
 
 
 @jax.jit
-def kl_divergence(mean, logvar):
+def kl_divergence(mean: Array, logvar: Array) -> Array:
 	"""Compute KL divergence between latent distribution and standard normal.
 
 	Args:
@@ -234,7 +235,7 @@ def kl_divergence(mean, logvar):
 
 
 @jax.jit
-def binary_cross_entropy_with_logits(logits, labels):
+def binary_cross_entropy_with_logits(logits: Array, labels: Array) -> Array:
 	"""Compute binary cross-entropy loss with logits.
 
 	Args:
@@ -250,7 +251,7 @@ def binary_cross_entropy_with_logits(logits, labels):
 
 
 @jax.jit
-def vae_loss(logits, targets, mean, logvar):
+def vae_loss(logits: Array, targets: Array, mean: Array, logvar: Array) -> Array:
 	"""Compute VAE loss.
 
 	Args:
@@ -263,6 +264,6 @@ def vae_loss(logits, targets, mean, logvar):
 		Total VAE loss.
 
 	"""
-	bce_loss = binary_cross_entropy_with_logits(logits, targets).mean()
-	kld_loss = kl_divergence(mean, logvar).mean()
+	bce_loss = jnp.mean(binary_cross_entropy_with_logits(logits, targets))
+	kld_loss = jnp.mean(kl_divergence(mean, logvar))
 	return bce_loss + kld_loss

@@ -27,7 +27,7 @@ class CA(nnx.Module):
 		self.update = update
 
 	@nnx.jit
-	def step(self, state: State, input: Input = None) -> State:
+	def step(self, state: State, input: Input | None = None) -> State:
 		"""Perform a single step of the CA.
 
 		Args:
@@ -46,7 +46,7 @@ class CA(nnx.Module):
 	def __call__(
 		self,
 		state: State,
-		input: Input = None,
+		input: Input | None = None,
 		*,
 		num_steps: int = 1,
 		all_steps: bool = False,
@@ -66,10 +66,10 @@ class CA(nnx.Module):
 
 		"""
 
-		def step(carry, input):
+		def step(carry: tuple[CA, State], input: Input | None) -> tuple[tuple[CA, State], State]:
 			ca, state = carry
 			state = ca.step(state, input)
-			return (ca, state), state if all_steps else None
+			return (ca, state), state if all_steps else None  # type: ignore
 
 		(_, state), states = nnx.scan(
 			step,

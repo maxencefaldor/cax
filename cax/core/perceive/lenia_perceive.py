@@ -1,13 +1,14 @@
 """Lenia perception module for cellular automata."""
 
-import jax
 import jax.numpy as jnp
+from chex import Numeric
+from jax import Array
 
 from cax.core.perceive.perceive import Perceive
 from cax.types import Perception, State
 
 
-def bell(x: jax.Array, mean: float, stdev: float) -> jax.Array:
+def bell(x: Array, mean: Numeric, stdev: Numeric) -> Array:
 	"""Compute the bell curve (Gaussian function) for given input values.
 
 	Args:
@@ -29,8 +30,8 @@ class LeniaPerceive(Perceive):
 	"""
 
 	_config: dict
-	kernel_fft: jax.Array
-	reshape_c_k: jax.Array
+	kernel_fft: Array
+	reshape_c_k: Array
 
 	def __init__(self, config: dict):
 		"""Initialize the LeniaPerceive layer.

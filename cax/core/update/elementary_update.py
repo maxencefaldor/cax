@@ -2,6 +2,7 @@
 
 import jax
 import jax.numpy as jnp
+from jax import Array
 
 from cax.core.update.update import Update
 from cax.types import Input, Perception, State
@@ -10,8 +11,8 @@ from cax.types import Input, Perception, State
 class ElementaryUpdate(Update):
 	"""Elementary Cellular Automata update class."""
 
-	patterns: jax.Array
-	values: jax.Array
+	patterns: Array
+	values: Array
 
 	def __init__(self, wolfram_code: str = "01101110"):
 		"""Initialize the ElementaryUpdate.
@@ -34,7 +35,7 @@ class ElementaryUpdate(Update):
 		)
 		self.values = jnp.array([int(bit) for bit in wolfram_code])
 
-	def __call__(self, state: State, perception: Perception, input: Input) -> State:
+	def __call__(self, state: State, perception: Perception, input: Input | None = None) -> State:
 		"""Apply the Elementary Cellular Automata update rule.
 
 		Args:
@@ -47,7 +48,7 @@ class ElementaryUpdate(Update):
 
 		"""
 
-		def update_pattern(pattern, value):
+		def update_pattern(pattern: Array, value: Array) -> Array:
 			return jnp.where(jnp.all(perception == pattern, axis=-1, keepdims=True), value, 0.0)
 
 		state = jnp.sum(jax.vmap(update_pattern)(self.patterns, self.values), axis=0)

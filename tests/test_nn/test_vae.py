@@ -8,7 +8,7 @@ from flax import nnx
 
 
 @pytest.fixture
-def vae():
+def vae() -> VAE:
 	"""Create a VAE model for testing."""
 	spatial_dims = (28, 28)
 	features = (1, 32, 64)
@@ -17,14 +17,14 @@ def vae():
 	return VAE(spatial_dims, features, latent_size, rngs)
 
 
-def test_vae_initialization(vae):
+def test_vae_initialization(vae: VAE) -> None:
 	"""Test the initialization of the VAE model."""
 	assert isinstance(vae, VAE)
 	assert isinstance(vae.encoder, nnx.Module)
 	assert isinstance(vae.decoder, nnx.Module)
 
 
-def test_vae_encode(vae):
+def test_vae_encode(vae: VAE) -> None:
 	"""Test the encode method of the VAE model."""
 	key = jax.random.key(0)
 	x = jax.random.normal(key, (1, 28, 28, 1))
@@ -34,7 +34,7 @@ def test_vae_encode(vae):
 	assert logvar.shape == (1, 10)
 
 
-def test_vae_decode(vae):
+def test_vae_decode(vae: VAE) -> None:
 	"""Test the decode method of the VAE model."""
 	key = jax.random.key(0)
 	z = jax.random.normal(key, (1, 10))
@@ -42,7 +42,7 @@ def test_vae_decode(vae):
 	assert logits.shape == (1, 28, 28, 1)
 
 
-def test_vae_generate(vae):
+def test_vae_generate(vae: VAE) -> None:
 	"""Test the generate method of the VAE model."""
 	key = jax.random.key(0)
 	z = jax.random.normal(key, (1, 10))
@@ -51,7 +51,7 @@ def test_vae_generate(vae):
 	assert jnp.all((generated >= 0) & (generated <= 1))
 
 
-def test_vae_forward(vae):
+def test_vae_forward(vae: VAE) -> None:
 	"""Test the forward pass of the VAE model."""
 	key = jax.random.key(0)
 	x = jax.random.normal(key, (1, 28, 28, 1))
@@ -61,7 +61,7 @@ def test_vae_forward(vae):
 	assert logvar.shape == (1, 10)
 
 
-def test_kl_divergence():
+def test_kl_divergence() -> None:
 	"""Test the KL divergence calculation."""
 	mean = jnp.array([0.0, 1.0, -1.0])
 	logvar = jnp.array([0.0, 0.5, -0.5])
@@ -70,7 +70,7 @@ def test_kl_divergence():
 	assert kl_div >= 0
 
 
-def test_binary_cross_entropy_with_logits():
+def test_binary_cross_entropy_with_logits() -> None:
 	"""Test the binary cross-entropy with logits calculation."""
 	logits = jnp.array([-1.0, 0.0, 1.0])
 	labels = jnp.array([0.0, 0.5, 1.0])
@@ -79,7 +79,7 @@ def test_binary_cross_entropy_with_logits():
 	assert bce >= 0
 
 
-def test_vae_loss():
+def test_vae_loss() -> None:
 	"""Test the VAE loss calculation."""
 	logits = jnp.array([[[-1.0, 0.0, 1.0]]])
 	targets = jnp.array([[[0.0, 0.5, 1.0]]])
