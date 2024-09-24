@@ -1,7 +1,6 @@
 """Pool module."""
 
 from functools import partial
-from typing import Self
 
 import jax
 from chex import ArrayTree
@@ -16,7 +15,7 @@ class Pool(struct.PyTreeNode):
 	data: ArrayTree
 
 	@classmethod
-	def create(cls, data: ArrayTree) -> Self:
+	def create(cls, data: ArrayTree) -> "Pool":
 		"""Create a new Pool instance.
 
 		Args:
@@ -30,7 +29,7 @@ class Pool(struct.PyTreeNode):
 		return cls(size=size, data=data)
 
 	@jax.jit
-	def update(self, indices: Array, batch: ArrayTree) -> Self:
+	def update(self, indices: Array, batch: ArrayTree) -> "Pool":
 		"""Update batch in the pool at the specified indices.
 
 		Args:

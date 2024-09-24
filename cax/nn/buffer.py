@@ -1,7 +1,6 @@
 """Buffer module."""
 
 from functools import partial
-from typing import Self
 
 import jax
 import jax.numpy as jnp
@@ -19,7 +18,7 @@ class Buffer(struct.PyTreeNode):
 	index: Array
 
 	@classmethod
-	def create(cls, size: int, datum: ArrayTree) -> Self:
+	def create(cls, size: int, datum: ArrayTree) -> "Buffer":
 		"""Create a new Buffer instance.
 
 		Args:
@@ -40,7 +39,7 @@ class Buffer(struct.PyTreeNode):
 		)
 
 	@jax.jit
-	def add(self, batch: ArrayTree) -> Self:
+	def add(self, batch: ArrayTree) -> "Buffer":
 		"""Add a batch to the buffer.
 
 		Args:
