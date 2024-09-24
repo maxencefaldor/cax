@@ -81,7 +81,7 @@ To cite this repository:
 	author = {Faldor, Maxence and Cully, Antoine},
 	title = {{CAX}: Cellular Automata Accelerated in {JAX}},
 	url = {http://github.com/maxencefaldor/cax},
-	version = {0.1.0},
+	version = {0.1.5},
 	year = {2024},
 }
 ```
