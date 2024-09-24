@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "cax"
-version = "0.1.4"
+version = "0.1.5"
 dependencies = [
 	"numpy>=1.26.4",
 	"jax>=0.4.31",
