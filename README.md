@@ -1,4 +1,5 @@
 # CAX: Cellular Automata Accelerated
+[![Pyversions](https://img.shields.io/pypi/pyversions/cax.svg?style=flat-square)](https://pypi.python.org/pypi/cax) [![PyPI version](https://badge.fury.io/py/cax.svg)](https://badge.fury.io/py/cax)
 
 CAX is a high-performance cellular automata library built on top of JAX/Flax that is **designed for flexiblity**.
 
@@ -26,7 +27,7 @@ The library works with discrete or continuous cellular automata of any spatial d
 
 ## Installation 🛠️
 
-You will need Python 3.11 or later, and a working JAX installation.
+You will need Python 3.10 or later, and a working JAX installation.
 
 Then, install CAX from PyPi:
 ```
