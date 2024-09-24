@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "cax"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
 	"numpy>=2.1.0",
 	"jax>=0.4.31",
@@ -17,7 +17,7 @@ dependencies = [
 	"ipywidgets>=8.1.5",
 	"mediapy>=1.2.2",
 ]
-requires-python = ">=3.11"
+requires-python = ">=3.10"
 authors = [
   { name="Maxence Faldor", email="maxencefaldor@gmail.com" },
 ]
@@ -41,6 +41,9 @@ dev = [
 
 [project.urls]
 Homepage = "https://github.com/maxencefaldor/cax"
+
+[tool.setuptools]
+packages = ["cax"]
 
 [tool.ruff]
 src = ["cax", "tests"]
