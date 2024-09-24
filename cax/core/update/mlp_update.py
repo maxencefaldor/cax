@@ -47,7 +47,7 @@ class MLPUpdate(Update):
 		]
 		self.activation_fn = activation_fn
 
-	def __call__(self, state: State, perception: Perception, input: Input) -> State:
+	def __call__(self, state: State, perception: Perception, input: Input | None = None) -> State:
 		"""Apply the MLP update to the given state and perception.
 
 		Args:

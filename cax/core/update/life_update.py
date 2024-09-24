@@ -9,7 +9,7 @@ from cax.types import Input, Perception, State
 class LifeUpdate(Update):
 	"""Life update class."""
 
-	def __call__(self, state: State, perception: Perception, input: Input) -> State:
+	def __call__(self, state: State, perception: Perception, input: Input | None = None) -> State:
 		"""Apply the Game of Life rules to update the cellular automaton state.
 
 		Args:

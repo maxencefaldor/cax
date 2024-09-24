@@ -17,7 +17,7 @@ class Update(nnx.Module):
 	It inherits from flax.nnx.Module to leverage Flax's neural network functionalities.
 	"""
 
-	def __call__(self, state: State, perception: Perception, input: Input) -> State:
+	def __call__(self, state: State, perception: Perception, input: Input | None = None) -> State:
 		"""Process the current state, perception, and input to produce a new state.
 
 		This method should be implemented by subclasses to define specific update logic.

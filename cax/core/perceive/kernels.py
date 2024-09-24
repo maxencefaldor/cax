@@ -1,10 +1,10 @@
 """Kernel functions for cellular automata perception."""
 
-import jax
 import jax.numpy as jnp
+from jax import Array
 
 
-def identity_kernel(ndim: int) -> jax.Array:
+def identity_kernel(ndim: int) -> Array:
 	"""Create an identity kernel for the given number of dimensions.
 
 	Args:
@@ -20,7 +20,7 @@ def identity_kernel(ndim: int) -> jax.Array:
 	return jnp.expand_dims(kernel, axis=-1)
 
 
-def neighbors_kernel(ndim: int) -> jax.Array:
+def neighbors_kernel(ndim: int) -> Array:
 	"""Create a neighbors kernel for the given number of dimensions.
 
 	Args:
@@ -34,7 +34,7 @@ def neighbors_kernel(ndim: int) -> jax.Array:
 	return 1.0 - kernel
 
 
-def grad_kernel(ndim: int, *, normalize: bool = True) -> jax.Array:
+def grad_kernel(ndim: int, *, normalize: bool = True) -> Array:
 	"""Create a gradient kernel for the given number of dimensions.
 
 	Args:
@@ -64,7 +64,7 @@ def grad_kernel(ndim: int, *, normalize: bool = True) -> jax.Array:
 	return jnp.stack(kernels, axis=-1)
 
 
-def grad2_kernel(ndim: int, normalize: bool = True) -> jax.Array:
+def grad2_kernel(ndim: int, normalize: bool = True) -> Array:
 	"""Create a second-order gradient kernel for the given number of dimensions.
 
 	Args:

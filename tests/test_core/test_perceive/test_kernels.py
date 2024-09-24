@@ -5,7 +5,7 @@ import pytest
 from cax.core.perceive.kernels import grad_kernel, identity_kernel, neighbors_kernel
 
 
-def test_identity_kernel():
+def test_identity_kernel() -> None:
 	"""Test the identity_kernel function for 1D, 2D, and 3D cases."""
 	# Test 1D identity kernel
 	kernel_1d = identity_kernel(1)
@@ -24,7 +24,7 @@ def test_identity_kernel():
 	assert jnp.allclose(kernel_3d, expected_3d)
 
 
-def test_neighbors_kernel():
+def test_neighbors_kernel() -> None:
 	"""Test the neighbors_kernel function for 1D, 2D, and 3D cases."""
 	# Test 1D neighbors kernel
 	kernel_1d = neighbors_kernel(1)
@@ -43,7 +43,7 @@ def test_neighbors_kernel():
 	assert jnp.allclose(kernel_3d, expected_3d)
 
 
-def test_grad_kernel():
+def test_grad_kernel() -> None:
 	"""Test the grad_kernel function for 1D, 2D, and 3D cases."""
 	# Test 1D gradient kernel
 	kernel_1d = grad_kernel(1)
@@ -66,7 +66,7 @@ def test_grad_kernel():
 	assert kernel_3d.shape == (3, 3, 3, 3)
 
 
-def test_grad_kernel_not_normalized():
+def test_grad_kernel_not_normalized() -> None:
 	"""Test the grad_kernel function without normalization."""
 	# Test 2D gradient kernel without normalization
 	kernel_2d = grad_kernel(2, normalize=False)
@@ -81,14 +81,14 @@ def test_grad_kernel_not_normalized():
 
 
 @pytest.mark.parametrize("ndim", [1, 2, 3, 4])
-def test_kernel_shapes(ndim):
+def test_kernel_shapes(ndim: int) -> None:
 	"""Test the shapes of kernels for different dimensions."""
 	assert identity_kernel(ndim).shape == (3,) * ndim + (1,)
 	assert neighbors_kernel(ndim).shape == (3,) * ndim + (1,)
 	assert grad_kernel(ndim).shape == (3,) * ndim + (ndim,)
 
 
-def test_grad_kernel_normalization():
+def test_grad_kernel_normalization() -> None:
 	"""Test the normalization of grad_kernel for different dimensions."""
 	for ndim in [1, 2, 3]:
 		kernel = grad_kernel(ndim)

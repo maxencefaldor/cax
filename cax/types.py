@@ -2,8 +2,8 @@
 
 from typing import TypeAlias
 
-import jax
+from jax import Array
 
-State: TypeAlias = jax.Array
-Perception: TypeAlias = jax.Array
-Input: TypeAlias = jax.Array | None
+State: TypeAlias = Array
+Perception: TypeAlias = Array
+Input: TypeAlias = Array

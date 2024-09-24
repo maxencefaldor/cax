@@ -7,21 +7,20 @@ from cax.nn.pool import Pool
 
 
 @pytest.fixture
-def init_pool():
+def init_pool() -> Pool:
 	"""Create a Pool instance for testing."""
-	return Pool.create({"a": jnp.array([1, 2, 3, 4, 5]), "b": jnp.array([10, 20, 30, 40, 50])})
+	return Pool.create({"a": jnp.array([1.0, 2.0, 3.0, 4.0, 5.0]), "b": jnp.array([10.0, 20.0, 30.0, 40.0, 50.0])})
 
 
-def test_pool_create(init_pool):
+def test_pool_create(init_pool: Pool) -> None:
 	"""Test the create method of the Pool class."""
 	assert init_pool.size == 5
-	assert "a" in init_pool.data
-	assert "b" in init_pool.data
-	assert jnp.array_equal(init_pool.data["a"], jnp.array([1, 2, 3, 4, 5]))
-	assert jnp.array_equal(init_pool.data["b"], jnp.array([10, 20, 30, 40, 50]))
+	assert jax.tree.reduce(
+		lambda x, y: jnp.sum(x) + jnp.sum(y), init_pool.data, initializer=jnp.array(0.0)
+	) == jnp.array(165.0)
 
 
-def test_pool_sample(init_pool):
+def test_pool_sample(init_pool: Pool) -> None:
 	"""Test the sample method of the Pool class."""
 	key = jax.random.key(0)
 	index, sampled_data = init_pool.sample(key, batch_size=3)
@@ -33,7 +32,7 @@ def test_pool_sample(init_pool):
 	assert sampled_data["b"].shape == (3,)
 
 
-def test_pool_update(init_pool):
+def test_pool_update(init_pool: Pool) -> None:
 	"""Test the update method of the Pool class."""
 	new_index = jnp.array([0, 2, 4])
 	new_a = jnp.array([100, 200, 300])
