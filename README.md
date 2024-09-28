@@ -24,6 +24,7 @@ The library works with discrete or continuous cellular automata of any spatial d
 | Self-classifying MNIST Digits | [Randazzo, et al. (2020)](https://distill.pub/2020/selforg/mnist/) |[![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/maxencefaldor/cax/blob/main/examples/self_classifying_mnist.ipynb) |
 | Self-autoencoding MNIST Digits | Faldor, et al. (2024) | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/maxencefaldor/cax/blob/main/examples/self_autoencoding_mnist.ipynb) |
 | Diffusing Neural Cellular Automata | Faldor, et al. (2024) | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/maxencefaldor/cax/blob/main/examples/diffusing_nca.ipynb) |
+| 1D-ARC Neural Cellular Automata | Faldor, et al. (2024) | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/maxencefaldor/cax/blob/main/examples/arc_nca.ipynb) |
 
 ## Installation 🛠️
 
