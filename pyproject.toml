@@ -45,8 +45,9 @@ examples = [
 [project.urls]
 Homepage = "https://github.com/maxencefaldor/cax"
 
-[tool.setuptools]
-packages = ["cax"]
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["cax*"]
 
 [tool.ruff]
 src = ["cax", "tests"]
