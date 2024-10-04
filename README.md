@@ -75,8 +75,6 @@ state = ca(state, num_steps=128)
 
 ## Citing CAX 📝
 
-To cite this repository:
-
 ```
 @misc{cax2024,
 	title = {{CAX}: {Cellular} {Automata} {Accelerated} in {JAX}},
