@@ -78,11 +78,11 @@ state = ca(state, num_steps=128)
 To cite this repository:
 
 ```
-@software{cax2024,
+@misc{cax2024,
+	title = {{CAX}: {Cellular} {Automata} {Accelerated} in {JAX}},
+	url = {https://arxiv.org/abs/2410.02651},
+	journal = {arXiv.org},
 	author = {Faldor, Maxence and Cully, Antoine},
-	title = {{CAX}: Cellular Automata Accelerated in {JAX}},
-	url = {http://github.com/maxencefaldor/cax},
-	version = {0.1.5},
 	year = {2024},
 }
 ```
