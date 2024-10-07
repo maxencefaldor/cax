@@ -1,5 +1,7 @@
 # CAX: Cellular Automata Accelerated
-[![Pyversions](https://img.shields.io/pypi/pyversions/cax.svg?style=flat-square)](https://pypi.python.org/pypi/cax) [![PyPI version](https://badge.fury.io/py/cax.svg)](https://badge.fury.io/py/cax)
+[![Pyversions](https://img.shields.io/pypi/pyversions/cax.svg?style=flat-square)](https://pypi.python.org/pypi/cax)
+[![PyPI version](https://badge.fury.io/py/cax.svg)](https://badge.fury.io/py/cax)
+[![Paper](http://img.shields.io/badge/paper-arxiv.2410.02651-B31B1B.svg)](https://arxiv.org/abs/2410.02651)
 
 CAX is a high-performance cellular automata library built on top of JAX/Flax that is **designed for flexiblity**.
 
@@ -22,9 +24,9 @@ The library works with discrete or continuous cellular automata of any spatial d
 | Growing Conditional Neural Cellular Automata | [Sudhakaran et al. (2020)](http://arxiv.org/abs/2205.06806) | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/maxencefaldor/cax/blob/main/examples/growing_conditional_nca.ipynb) |
 | Growing Unsupervised Neural Cellular Automata | [Palm et al. (2021)](https://arxiv.org/abs/2201.12360) | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/maxencefaldor/cax/blob/main/examples/growing_unsupervised_nca.ipynb) |
 | Self-classifying MNIST Digits | [Randazzo, et al. (2020)](https://distill.pub/2020/selforg/mnist/) |[![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/maxencefaldor/cax/blob/main/examples/self_classifying_mnist.ipynb) |
-| Diffusing Neural Cellular Automata | Faldor, et al. (2024) | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/maxencefaldor/cax/blob/main/examples/diffusing_nca.ipynb) |
-| Self-autoencoding MNIST Digits | Faldor, et al. (2024) | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/maxencefaldor/cax/blob/main/examples/self_autoencoding_mnist.ipynb) |
-| 1D-ARC Neural Cellular Automata | Faldor, et al. (2024) | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/maxencefaldor/cax/blob/main/examples/1d_arc_nca.ipynb) |
+| Diffusing Neural Cellular Automata | [Faldor, et al. (2024)](https://arxiv.org/abs/2410.02651) | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/maxencefaldor/cax/blob/main/examples/diffusing_nca.ipynb) |
+| Self-autoencoding MNIST Digits | [Faldor, et al. (2024)](https://arxiv.org/abs/2410.02651) | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/maxencefaldor/cax/blob/main/examples/self_autoencoding_mnist.ipynb) |
+| 1D-ARC Neural Cellular Automata | [Faldor, et al. (2024)](https://arxiv.org/abs/2410.02651) | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/maxencefaldor/cax/blob/main/examples/1d_arc_nca.ipynb) |
 
 ## Installation 🛠️
 
