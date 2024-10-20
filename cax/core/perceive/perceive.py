@@ -26,7 +26,7 @@ class Perceive(nnx.Module):
 		This method should be implemented by subclasses to define specific perception logic.
 
 		Args:
-			state: The current state of the environment or system.
+			state: State of the cellular automaton.
 
 		Returns:
 			The resulting perception based on the input state.

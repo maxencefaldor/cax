@@ -4,8 +4,8 @@ from collections.abc import Callable
 
 import jax.numpy as jnp
 from flax import nnx
-from flax.nnx.nnx.nn import initializers
-from flax.nnx.nnx.nn.linear import default_kernel_init
+from flax.nnx.nn import initializers
+from flax.nnx.nn.linear import default_kernel_init
 
 from cax.core.update.update import Update
 from cax.types import Input, Perception, State
