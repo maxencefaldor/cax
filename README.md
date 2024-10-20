@@ -11,7 +11,7 @@ CAX is a cutting-edge library designed to implement and accelerate various types
 
 Despite their conceptual simplicity, cellular automata often demand significant computational resources. The parallel update of numerous cells, coupled with the need for backpropagation through time in neural cellular automata training, can render these models computationally intensive. CAX leverages hardware accelerators and massive parallelization to run cellular automata experiments in minutes. 🚀
 
-The library works with discrete or continuous cellular automata of any spatial dimension, offering exceptional flexibility. From simulating one-dimensional [elementary cellular automata](https://github.com/maxencefaldor/cax/blob/main/examples/elementary_ca.ipynb) to training three-dimensional [self-autoencoding neural cellular automata](https://github.com/maxencefaldor/cax/blob/main/examples/self_autoencoding_mnist.ipynb), and even creating beautiful [Lenia simulations](https://github.com/maxencefaldor/cax/blob/main/examples/lenia.ipynb), CAX provides a versatile platform for exploring the rich world of self-organizing systems. ✨
+The library works with discrete or continuous cellular automata of any spatial dimension, offering exceptional flexibility. From simulating one-dimensional [elementary cellular automata](https://github.com/maxencefaldor/cax/blob/main/examples/elementary_ca.ipynb) to training three-dimensional [self-autoencoding neural cellular automata](https://github.com/maxencefaldor/cax/blob/main/examples/self_autoencoding_mnist.ipynb), and even creating beautiful [Lenia simulations](https://github.com/maxencefaldor/cax/blob/main/examples/lenia.ipynb), CAX provides a versatile platform for exploring the rich world of self-organizing systems.
 
 ## Implemented Cellular Automata 🦎
 
@@ -61,12 +61,12 @@ cell_dropout_rate = 0.5
 key = jax.random.key(seed)
 rngs = nnx.Rngs(seed)
 
-perceive = DepthwiseConvPerceive(channel_size, rngs)
+perceive = DepthwiseConvPerceive(channel_size=channel_size, rngs=rngs)
 update = NCAUpdate(
-	channel_size,
-	num_kernels*channel_size,
-	(hidden_size,),
-	rngs,
+	channel_size=channel_size,
+	perception_size=num_kernels*channel_size,
+	hidden_layer_sizes=(hidden_size,),
+	rngs=rngs,
 	cell_dropout_rate=cell_dropout_rate
 )
 ca = CA(perceive, update)

@@ -45,7 +45,7 @@ class DepthwiseConvPerceive(Perceive):
 		"""Apply depthwise convolution to the input state.
 
 		Args:
-			state: Input state to be processed.
+			state: State of the cellular automaton.
 
 		Returns:
 			The processed perception.

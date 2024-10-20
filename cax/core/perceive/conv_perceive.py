@@ -49,7 +49,7 @@ class ConvPerceive(Perceive):
 		"""Apply perception to the input state.
 
 		Args:
-			state: Input state of the cellular automaton.
+			state: State of the cellular automaton.
 
 		Returns:
 			The perceived state after applying convolutional layers.
