@@ -2,6 +2,7 @@
 
 import jax.numpy as jnp
 from chex import Numeric
+from flax import nnx
 from jax import Array
 
 from cax.core.perceive.perceive import Perceive
@@ -30,8 +31,8 @@ class LeniaPerceive(Perceive):
 	"""
 
 	_config: dict
-	kernel_fft: Array
-	reshape_c_k: Array
+	kernel_fft: nnx.Param
+	reshape_c_k: nnx.Param
 
 	def __init__(self, config: dict):
 		"""Initialize the LeniaPerceive layer.
@@ -49,11 +50,10 @@ class LeniaPerceive(Perceive):
 		kernel_params = self._config["kernel_params"]
 		r = self._config["R"] * self._config["state_scale"]
 
-		self.reshape_c_k = jnp.zeros(
-			shape=(self._config["channel_size"], len(self._config["kernel_params"]))
-		)  # (c, k,)
+		reshape_c_k = jnp.zeros(shape=(self._config["channel_size"], len(self._config["kernel_params"])))  # (c, k,)
 		for i, kernel in enumerate(kernel_params):
-			self.reshape_c_k = self.reshape_c_k.at[kernel["c0"], i].set(1.0)
+			reshape_c_k = reshape_c_k.at[kernel["c0"], i].set(1.0)
+		self.reshape_c_k = nnx.Param(reshape_c_k)
 
 		# Compute kernel
 		mid = self._config["state_size"] // 2
@@ -68,19 +68,21 @@ class LeniaPerceive(Perceive):
 		]  # (x, y,)*k
 		kernel = jnp.dstack(ks)  # (y, x, k,)
 		kernel_normalized = kernel / jnp.sum(kernel, axis=(0, 1), keepdims=True)  # (y, x, k,)
-		self.kernel_fft = jnp.fft.fft2(jnp.fft.fftshift(kernel_normalized, axes=(0, 1)), axes=(0, 1))  # (y, x, k,)
+		self.kernel_fft = nnx.Param(
+			jnp.fft.fft2(jnp.fft.fftshift(kernel_normalized, axes=(0, 1)), axes=(0, 1))
+		)  # (y, x, k,)
 
 	def __call__(self, state: State) -> Perception:
 		"""Apply Lenia perception to the input state.
 
 		Args:
-			state: Input state of the cellular automaton.
+			state: State of the cellular automaton.
 
 		Returns:
 			The perceived state after applying Lenia convolution.
 
 		"""
 		state_fft = jnp.fft.fft2(state, axes=(-3, -2))  # (y, x, c,)
-		state_fft_k = jnp.dot(state_fft, self.reshape_c_k)  # (y, x, k,)
+		state_fft_k = jnp.dot(state_fft, self.reshape_c_k.value)  # (y, x, k,)
 		u_k = jnp.real(jnp.fft.ifft2(self.kernel_fft * state_fft_k, axes=(-3, -2)))  # (y, x, k,)
 		return u_k
