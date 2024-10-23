@@ -44,4 +44,4 @@ def state_from_rgba_to_rgb(state: State) -> State:
 	rgba = state_to_rgba(state)
 	rgb, alive = rgba[..., :-1], rgba[..., -1:]
 	alpha = jnp.clip(alive, min=0.0, max=1.0)
-	return 1.0 - alpha + rgb  # (1.0 - alpha) * 1.0 + alpha * rgb, assume rgb has been multiplied by alpha
+	return (1.0 - alpha) * 1.0 + alpha * rgb

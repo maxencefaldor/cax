@@ -51,7 +51,12 @@ def test_life_update():
 	glider = jnp.array([[0, 1, 0], [0, 0, 1], [1, 1, 1]])
 	state = state.at[1:4, 1:4, 0].set(glider)
 
-	perceive = DepthwiseConvPerceive(channel_size, rngs, num_kernels=2, kernel_size=(3, 3))
+	perceive = DepthwiseConvPerceive(
+		channel_size=channel_size,
+		rngs=rngs,
+		num_kernels=2,
+		kernel_size=(3, 3),
+	)
 	update = LifeUpdate()
 
 	# Set up perception kernels

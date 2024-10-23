@@ -7,7 +7,7 @@ from unittest.mock import MagicMock, patch
 import jax.numpy as jnp
 import PIL.Image
 import pytest
-from cax.utils.image import get_emoji, get_image_from_url
+from cax.utils.emoji import get_emoji, get_image_from_url
 
 
 @pytest.fixture
