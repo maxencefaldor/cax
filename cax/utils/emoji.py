@@ -45,7 +45,4 @@ def get_emoji(emoji: str, *, size: int, padding: int) -> jax.Array:
 	image_pil.thumbnail((size, size), resample=PIL.Image.Resampling.LANCZOS)
 	image = jnp.array(image_pil, dtype=jnp.float32) / 255.0
 	image = jnp.pad(image, ((padding, padding), (padding, padding), (0, 0)))
-
-	# Multiply the RGB values by the alpha channel
-	image = image.at[..., :3].set(image[..., :3] * image[..., 3:])
 	return image

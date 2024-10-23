@@ -16,7 +16,13 @@ def residual_update_no_input():
 	perception_size = 5
 	hidden_layer_sizes = (32, 16)
 	rngs = nnx.Rngs(0)
-	return ResidualUpdate(num_spatial_dims, channel_size, perception_size, hidden_layer_sizes, rngs)
+	return ResidualUpdate(
+		num_spatial_dims,
+		channel_size,
+		perception_size,
+		hidden_layer_sizes,
+		rngs=rngs,
+	)
 
 
 @pytest.fixture
@@ -28,7 +34,13 @@ def residual_update_with_input():
 	hidden_layer_sizes = (32, 16)
 	input_size = 2
 	rngs = nnx.Rngs(0)
-	return ResidualUpdate(num_spatial_dims, channel_size, perception_size + input_size, hidden_layer_sizes, rngs)
+	return ResidualUpdate(
+		num_spatial_dims,
+		channel_size,
+		perception_size + input_size,
+		hidden_layer_sizes,
+		rngs=rngs,
+	)
 
 
 def test_residual_update_initialization(residual_update_no_input, residual_update_with_input):
@@ -54,7 +66,7 @@ def test_residual_update_call_with_input(residual_update_with_input):
 	"""Test the __call__ method of ResidualUpdate with input."""
 	state = jnp.ones((8, 8, 3))
 	perception = jnp.ones((8, 8, 5))
-	input_data = jnp.ones((2,))
+	input_data = jnp.ones((8, 8, 2))
 	updated_state = residual_update_with_input(state, perception, input_data)
 	assert updated_state.shape == (8, 8, 3)
 	assert jnp.all(jnp.isfinite(updated_state))
@@ -75,14 +87,21 @@ def test_residual_update_in_ca():
 	state = jnp.zeros((*spatial_dims, channel_size))
 	state = state.at[8:11, 8:11, :].set(1.0)
 
-	perceive = DepthwiseConvPerceive(channel_size, rngs)
+	perceive = DepthwiseConvPerceive(
+		channel_size=channel_size,
+		rngs=rngs,
+	)
 	update = ResidualUpdate(
-		len(spatial_dims), channel_size, input_size + num_kernels * channel_size, hidden_layer_sizes, rngs
+		num_spatial_dims=len(spatial_dims),
+		channel_size=channel_size,
+		perception_size=input_size + num_kernels * channel_size,
+		hidden_layer_sizes=hidden_layer_sizes,
+		rngs=rngs,
 	)
 
 	ca = CA(perceive, update)
 
-	input_data = jnp.ones((num_steps, input_size))
+	input_data = jnp.ones((num_steps, *spatial_dims, input_size))
 	final_state = ca(state, input_data, num_steps=num_steps, input_in_axis=0)
 
 	assert final_state.shape == state.shape
@@ -102,13 +121,19 @@ def test_residual_update_different_configs(
 ):
 	"""Test ResidualUpdate with different configurations."""
 	rngs = nnx.Rngs(0)
-	update = ResidualUpdate(num_spatial_dims, channel_size, perception_size + input_size, hidden_layer_sizes, rngs)
+	update = ResidualUpdate(
+		num_spatial_dims=num_spatial_dims,
+		channel_size=channel_size,
+		perception_size=perception_size + input_size,
+		hidden_layer_sizes=hidden_layer_sizes,
+		rngs=rngs,
+	)
 	assert isinstance(update, ResidualUpdate)
 
 	spatial_dims = (8,) * num_spatial_dims
 	state = jnp.ones((*spatial_dims, channel_size))
 	perception = jnp.ones((*spatial_dims, perception_size))
-	input_data = jnp.ones((input_size,))
+	input_data = jnp.ones((*spatial_dims, input_size))
 	updated_state = update(state, perception, input_data)
 
 	assert updated_state.shape == state.shape

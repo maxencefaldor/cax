@@ -16,7 +16,12 @@ def rngs():
 @pytest.fixture
 def conv_perceive(rngs):
 	"""Fixture to provide a ConvPerceive instance."""
-	return ConvPerceive(channel_size=4, perception_size=8, hidden_layer_sizes=(16,), rngs=rngs)
+	return ConvPerceive(
+		channel_size=4,
+		perception_size=8,
+		hidden_layer_sizes=(16,),
+		rngs=rngs,
+	)
 
 
 def test_conv_perceive_initialization(conv_perceive):
@@ -65,7 +70,10 @@ def test_conv_perceive_forward_pass(conv_perceive):
 def test_conv_perceive_different_sizes(rngs, channel_size, perception_size, hidden_sizes):
 	"""Test ConvPerceive with different sizes."""
 	perceive = ConvPerceive(
-		channel_size=channel_size, perception_size=perception_size, hidden_layer_sizes=hidden_sizes, rngs=rngs
+		channel_size=channel_size,
+		perception_size=perception_size,
+		hidden_layer_sizes=hidden_sizes,
+		rngs=rngs,
 	)
 	state = jnp.zeros((5, 5, channel_size))
 	perception = perceive(state)

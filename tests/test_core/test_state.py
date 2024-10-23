@@ -29,13 +29,13 @@ def test_state_to_rgba(init_state: Array) -> None:
 def test_state_from_rgba_to_rgb(init_state: Array) -> None:
 	"""Test the state_from_rgba_to_rgb function."""
 	rgb = state_from_rgba_to_rgb(init_state)
-	expected = jnp.array([[[0.7, 0.8, 0.9]], [[0.7, 0.8, 0.9]]])
+	expected = jnp.array([[[0.6, 0.65, 0.7]], [[0.7, 0.8, 0.9]]])
 	assert jnp.allclose(rgb, expected)
 
 
-def test_state_from_rgba_to_rgb_clipping(init_state: Array) -> None:
+def test_state_from_rgba_to_rgb_clipping() -> None:
 	"""Test the state_from_rgba_to_rgb function with clipping."""
 	state = jnp.array([[[0.1, 0.2, 0.3, 0.4, 1.5]], [[0.6, 0.7, 0.8, 0.9, -0.5]]])
 	rgb = state_from_rgba_to_rgb(state)
-	expected = jnp.array([[[0.2, 0.3, 0.4]], [[1.7, 1.8, 1.9]]])
+	expected = jnp.array([[[0.2, 0.3, 0.4]], [[1.0, 1.0, 1.0]]])
 	assert jnp.allclose(rgb, expected)

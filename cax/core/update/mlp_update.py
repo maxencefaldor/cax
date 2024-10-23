@@ -1,4 +1,4 @@
-"""MLP-based update module for cellular automata."""
+"""Multi-Layer Perceptron update module."""
 
 from collections.abc import Callable
 
@@ -12,7 +12,7 @@ from cax.types import Input, Perception, State
 
 
 class MLPUpdate(Update):
-	"""Multi-Layer Perceptron (MLP) based update for cellular automata."""
+	"""Multi-Layer Perceptron update class."""
 
 	layers: list[nnx.Conv]
 	activation_fn: Callable
@@ -50,6 +50,9 @@ class MLPUpdate(Update):
 	def __call__(self, state: State, perception: Perception, input: Input | None = None) -> State:
 		"""Apply the MLP update to the given state and perception.
 
+		If an input is provided, it is concatenated to the perception
+		before being passed through the layers of the MLP.
+
 		Args:
 			state: Current state of the cellular automaton.
 			perception: Perceived state from the previous step.
@@ -60,10 +63,7 @@ class MLPUpdate(Update):
 
 		"""
 		if input is not None:
-			spatial_dims = state.shape[:-1]
-			x_reshaped = jnp.reshape(input, (*([1] * len(spatial_dims)), input.shape[-1]))
-			x_broadcasted = jnp.broadcast_to(x_reshaped, (*spatial_dims, input.shape[-1]))
-			perception = jnp.concatenate([perception, x_broadcasted], axis=-1)
+			perception = jnp.concatenate([perception, input], axis=-1)
 
 		for layer in self.layers[:-1]:
 			perception = self.activation_fn(layer(perception))

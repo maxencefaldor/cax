@@ -22,18 +22,20 @@ class ElementaryUpdate(Update):
 			wolfram_code: A string of 8 bits representing the Wolfram code for the automaton.
 
 		"""
-		self.patterns = nnx.Param(jnp.array(
-			[
-				[1.0, 1.0, 1.0],
-				[1.0, 1.0, 0.0],
-				[1.0, 0.0, 1.0],
-				[1.0, 0.0, 0.0],
-				[0.0, 1.0, 1.0],
-				[0.0, 1.0, 0.0],
-				[0.0, 0.0, 1.0],
-				[0.0, 0.0, 0.0],
-			]
-		))
+		self.patterns = nnx.Param(
+			jnp.array(
+				[
+					[1.0, 1.0, 1.0],
+					[1.0, 1.0, 0.0],
+					[1.0, 0.0, 1.0],
+					[1.0, 0.0, 0.0],
+					[0.0, 1.0, 1.0],
+					[0.0, 1.0, 0.0],
+					[0.0, 0.0, 1.0],
+					[0.0, 0.0, 0.0],
+				]
+			)
+		)
 		self.values = nnx.Param(jnp.array([int(bit) for bit in wolfram_code]))
 
 	def __call__(self, state: State, perception: Perception, input: Input | None = None) -> State:

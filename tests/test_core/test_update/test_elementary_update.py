@@ -49,7 +49,12 @@ def test_elementary_update():
 	state = jnp.zeros((*spatial_dims, channel_size))
 	state = state.at[spatial_dims[0] // 2].set(1.0)
 
-	perceive = DepthwiseConvPerceive(channel_size, rngs, num_kernels=3, kernel_size=(3,))
+	perceive = DepthwiseConvPerceive(
+		channel_size=channel_size,
+		rngs=rngs,
+		num_kernels=3,
+		kernel_size=(3,),
+	)
 	update = ElementaryUpdate(wolfram_code)
 
 	left_kernel = jnp.array([[1.0], [0.0], [0.0]])

@@ -45,13 +45,13 @@ class LeniaUpdate(Update):
 
 	def init(self) -> None:
 		"""Initialize Lenia parameters from the configuration."""
-		self.m = jnp.array([k["m"] for k in self._config["kernel_params"]])  # (k,)
-		self.s = jnp.array([k["s"] for k in self._config["kernel_params"]])  # (k,)
-		self.h = jnp.array([k["h"] for k in self._config["kernel_params"]])  # (k,)
+		m = jnp.array([k["m"] for k in self._config["kernel_params"]])  # (k,)
+		s = jnp.array([k["s"] for k in self._config["kernel_params"]])  # (k,)
+		h = jnp.array([k["h"] for k in self._config["kernel_params"]])  # (k,)
 
-		self.m = nnx.Param(self.m[None, None, ...])  # (1, 1, k,)
-		self.s = nnx.Param(self.s[None, None, ...])  # (1, 1, k,)
-		self.h = nnx.Param(self.h[None, None, ...])  # (1, 1, k,)
+		self.m = nnx.Param(m[None, None, ...])  # (1, 1, k,)
+		self.s = nnx.Param(s[None, None, ...])  # (1, 1, k,)
+		self.h = nnx.Param(h[None, None, ...])  # (1, 1, k,)
 
 		reshape_k_c = jnp.zeros(shape=(len(self._config["kernel_params"]), self._config["channel_size"]))  # (k, c,)
 		for i, k in enumerate(self._config["kernel_params"]):
@@ -70,7 +70,7 @@ class LeniaUpdate(Update):
 			Updated state after applying the Lenia rule.
 
 		"""
-		g_k = growth(perception, self.m, self.s) * self.h  # (y, x, k,)
+		g_k = growth(perception, self.m.value, self.s.value) * self.h.value  # (y, x, k,)
 		g = jnp.dot(g_k, self.reshape_k_c.value)  # (y, x, c,)
 		state = jnp.clip(state + 1 / self._config["T"] * g, 0.0, 1.0)  # (y, x, c,)
 		return state
