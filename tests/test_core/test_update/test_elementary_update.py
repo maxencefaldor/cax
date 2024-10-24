@@ -3,7 +3,7 @@
 import jax.numpy as jnp
 import pytest
 from cax.core.ca import CA
-from cax.core.perceive.depthwise_conv_perceive import DepthwiseConvPerceive
+from cax.core.perceive.conv_perceive import ConvPerceive
 from cax.core.update.elementary_update import ElementaryUpdate
 from flax import nnx
 
@@ -49,11 +49,12 @@ def test_elementary_update():
 	state = jnp.zeros((*spatial_dims, channel_size))
 	state = state.at[spatial_dims[0] // 2].set(1.0)
 
-	perceive = DepthwiseConvPerceive(
+	perceive = ConvPerceive(
 		channel_size=channel_size,
+		perception_size=3 * channel_size,
 		rngs=rngs,
-		num_kernels=3,
 		kernel_size=(3,),
+		feature_group_count=channel_size,
 	)
 	update = ElementaryUpdate(wolfram_code)
 
@@ -63,7 +64,7 @@ def test_elementary_update():
 
 	kernel = jnp.concatenate([left_kernel, identity_kernel, right_kernel], axis=-1)
 	kernel = jnp.expand_dims(kernel, axis=-2)
-	perceive.depthwise_conv.kernel = nnx.Param(kernel)
+	perceive.conv.kernel = nnx.Param(kernel)
 
 	ca = CA(perceive, update)
 
