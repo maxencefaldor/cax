@@ -19,7 +19,6 @@ def conv_perceive(rngs):
 	return ConvPerceive(
 		channel_size=4,
 		perception_size=8,
-		hidden_layer_sizes=(16,),
 		rngs=rngs,
 	)
 
@@ -27,8 +26,7 @@ def conv_perceive(rngs):
 def test_conv_perceive_initialization(conv_perceive):
 	"""Test the initialization of ConvPerceive."""
 	assert isinstance(conv_perceive, ConvPerceive)
-	assert len(conv_perceive.layers) == 2
-	assert all(isinstance(layer, nnx.Conv) for layer in conv_perceive.layers)
+	assert isinstance(conv_perceive.conv, nnx.Conv)
 
 
 def test_conv_perceive_output_shape(conv_perceive):
@@ -44,15 +42,13 @@ def test_conv_perceive_custom_params(rngs):
 	custom_perceive = ConvPerceive(
 		channel_size=8,
 		perception_size=16,
-		hidden_layer_sizes=(32, 64),
 		rngs=rngs,
 		kernel_size=(5, 5),
 		use_bias=True,
 		activation_fn=jax.nn.tanh,
 	)
-	assert len(custom_perceive.layers) == 3
-	assert custom_perceive.layers[0].kernel_size == (5, 5)
-	assert custom_perceive.layers[0].use_bias
+	assert custom_perceive.conv.kernel_size == (5, 5)
+	assert custom_perceive.conv.use_bias
 	assert custom_perceive.activation_fn == jax.nn.tanh
 
 
@@ -72,7 +68,6 @@ def test_conv_perceive_different_sizes(rngs, channel_size, perception_size, hidd
 	perceive = ConvPerceive(
 		channel_size=channel_size,
 		perception_size=perception_size,
-		hidden_layer_sizes=hidden_sizes,
 		rngs=rngs,
 	)
 	state = jnp.zeros((5, 5, channel_size))

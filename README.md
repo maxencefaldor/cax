@@ -47,7 +47,7 @@ pip install --upgrade git+https://github.com/maxencefaldor/cax.git
 ```python
 import jax
 from cax.core.ca import CA
-from cax.core.perceive.depthwise_conv_perceive import DepthwiseConvPerceive
+from cax.core.perceive.conv_perceive import ConvPerceive
 from cax.core.update.nca_update import NCAUpdate
 from flax import nnx
 
@@ -55,17 +55,22 @@ seed = 0
 
 channel_size = 16
 num_kernels = 3
-hidden_size = 128
+hidden_layer_sizes = (128,)
 cell_dropout_rate = 0.5
 
 key = jax.random.key(seed)
 rngs = nnx.Rngs(seed)
 
-perceive = DepthwiseConvPerceive(channel_size=channel_size, rngs=rngs)
+perceive = ConvPerceive(
+	channel_size=channel_size,
+	perception_size=num_kernels * channel_size,
+	rngs=rngs,
+	feature_group_count=channel_size,
+)
 update = NCAUpdate(
 	channel_size=channel_size,
 	perception_size=num_kernels*channel_size,
-	hidden_layer_sizes=(hidden_size,),
+	hidden_layer_sizes=hidden_layer_sizes,
 	rngs=rngs,
 	cell_dropout_rate=cell_dropout_rate
 )
