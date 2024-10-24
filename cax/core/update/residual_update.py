@@ -40,12 +40,12 @@ class ResidualUpdate(MLPUpdate):
 
 		"""
 		super().__init__(
+			num_spatial_dims=num_spatial_dims,
 			channel_size=channel_size,
 			perception_size=perception_size,
 			hidden_layer_sizes=hidden_layer_sizes,
 			rngs=rngs,
 			activation_fn=activation_fn,
-			num_spatial_dims=num_spatial_dims,
 		)
 		self.dropout = nnx.Dropout(rate=cell_dropout_rate, broadcast_dims=(-1,), rngs=rngs)
 		self.step_size = step_size
