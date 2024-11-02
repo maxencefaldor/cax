@@ -69,10 +69,10 @@ perceive = ConvPerceive(
 )
 update = NCAUpdate(
 	channel_size=channel_size,
-	perception_size=num_kernels*channel_size,
+	perception_size=num_kernels * channel_size,
 	hidden_layer_sizes=hidden_layer_sizes,
 	rngs=rngs,
-	cell_dropout_rate=cell_dropout_rate
+	cell_dropout_rate=cell_dropout_rate,
 )
 ca = CA(perceive, update)
 
