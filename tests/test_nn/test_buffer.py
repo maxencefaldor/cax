@@ -22,7 +22,7 @@ def test_buffer_create(init_buffer: Buffer, sample_datum: dict[str, jnp.ndarray]
 	"""Test the creation of a Buffer instance."""
 	assert init_buffer.size == 5
 	assert init_buffer.index == 0
-	assert jnp.all(init_buffer.is_full == False)
+	assert jnp.all(~init_buffer.is_full)
 
 
 def test_buffer_add(init_buffer: Buffer) -> None:
@@ -45,7 +45,7 @@ def test_buffer_add_wraparound(init_buffer: Buffer) -> None:
 	buffer = buffer.add(batch2)
 
 	assert buffer.index == 1
-	assert jnp.all(buffer.is_full == True)
+	assert jnp.all(buffer.is_full)
 	assert jnp.array_equal(buffer.data["a"], jnp.array([[6.0], [2.0], [3.0], [4.0], [5.0]]))
 	assert jnp.array_equal(buffer.data["b"], jnp.array([[11, 12], [3, 4], [5, 6], [7, 8], [9, 10]]))
 
