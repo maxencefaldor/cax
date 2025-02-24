@@ -69,7 +69,7 @@ class CA(nnx.Module):
 		def step(carry: tuple[CA, State], input: Input | None) -> tuple[tuple[CA, State], State]:
 			ca, state = carry
 			state = ca.step(state, input)
-			return (ca, state), state if all_steps else None  # type: ignore
+			return (ca, state), state if all_steps else None
 
 		(_, state), states = nnx.scan(
 			step,
