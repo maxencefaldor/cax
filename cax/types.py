@@ -1,9 +1,8 @@
 """Type definitions for CAX."""
 
-from typing import TypeAlias
+from typing import Any, TypeAlias
 
-from jax import Array
-
-State: TypeAlias = Array
-Perception: TypeAlias = Array
-Input: TypeAlias = Array
+PyTree: TypeAlias = Any
+State: TypeAlias = PyTree
+Perception: TypeAlias = PyTree
+Input: TypeAlias = PyTree
