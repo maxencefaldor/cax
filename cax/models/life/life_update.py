@@ -1,7 +1,6 @@
 """Life update module."""
 
 import jax.numpy as jnp
-
 from cax.core.update.update import Update
 from cax.types import Input, Perception, State
 

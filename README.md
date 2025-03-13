@@ -1,6 +1,8 @@
-# CAX: Cellular Automata Accelerated
+# CAX: Cellular Automata Accelerated in JAX
+
 [![Pyversions](https://img.shields.io/pypi/pyversions/cax.svg?style=flat-square)](https://pypi.python.org/pypi/cax)
 [![PyPI version](https://badge.fury.io/py/cax.svg)](https://badge.fury.io/py/cax)
+[![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 [![Paper](http://img.shields.io/badge/paper-arxiv.2410.02651-B31B1B.svg)](https://arxiv.org/abs/2410.02651)
 
 CAX is a high-performance cellular automata library built on top of JAX/Flax that is **designed for flexiblity**.
@@ -20,7 +22,10 @@ The library works with discrete or continuous cellular automata of any spatial d
 | Elementary Cellular Automata | [Wolfram, Stephen (2002)](https://www.wolframscience.com/nks/) | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/maxencefaldor/cax/blob/main/examples/elementary_ca.ipynb) |
 | Conway's Game of Life | [Gardner, Martin (1970)](https://web.stanford.edu/class/sts145/Library/life.pdf) | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/maxencefaldor/cax/blob/main/examples/life.ipynb) |
 | Lenia | [Chan, Bert Wang-Chak (2020)](https://arxiv.org/pdf/2005.03742) | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/maxencefaldor/cax/blob/main/examples/lenia.ipynb) |
-| Particle Life | [Tom Mohr (2018)](https://particle-life.com/) | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/maxencefaldor/cax/blob/main/examples/particle_life.ipynb) |
+| Flow Lenia | [Plantec, et al. (2023)](https://arxiv.org/abs/2212.07906) | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/maxencefaldor/cax/blob/main/examples/flow_lenia.ipynb) |
+| Particle Lenia | [Mordvintsev, et al. (2022)](https://google-research.github.io/self-organising-systems/particle-lenia/) | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/maxencefaldor/cax/blob/main/examples/particle_lenia.ipynb) |
+| Particle Life | [Mohr, Tom (2018)](https://particle-life.com/) | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/maxencefaldor/cax/blob/main/examples/particle_life.ipynb) |
+| Boids | [Reynolds, Craig (1987)](https://www.red3d.com/cwr/boids/) | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/maxencefaldor/cax/blob/main/examples/boids.ipynb) |
 | Growing Neural Cellular Automata | [Mordvintsev, et al. (2020)](https://distill.pub/2020/growing-ca/) |[![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/maxencefaldor/cax/blob/main/examples/growing_nca.ipynb) |
 | Growing Conditional Neural Cellular Automata | [Sudhakaran et al. (2020)](http://arxiv.org/abs/2205.06806) | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/maxencefaldor/cax/blob/main/examples/growing_conditional_nca.ipynb) |
 | Growing Unsupervised Neural Cellular Automata | [Palm et al. (2021)](https://arxiv.org/abs/2201.12360) | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/maxencefaldor/cax/blob/main/examples/growing_unsupervised_nca.ipynb) |
@@ -83,12 +88,19 @@ state = ca(state, num_steps=128)
 
 ## Citing CAX 📝
 
-```
-@misc{cax2024,
-	title = {{CAX}: {Cellular} {Automata} {Accelerated} in {JAX}},
-	url = {https://arxiv.org/abs/2410.02651},
-	journal = {arXiv.org},
-	author = {Faldor, Maxence and Cully, Antoine},
-	year = {2024},
+If you use CAX in your research, please cite the following paper:
+
+```bibtex
+@inproceedings{cax,
+	title		= {{CAX}: Cellular Automata Accelerated in {JAX}},
+	author		= {Maxence Faldor and Antoine Cully},
+	booktitle	= {The Thirteenth International Conference on Learning Representations},
+	year		= {2025},
+	url			= {https://openreview.net/forum?id=o2Igqm95SJ},
+	keywords	= {cellular automata, emergence, self-organization, neural cellular automata},
 }
 ```
+
+## Contributing 👷
+
+Contributions are welcome! If you find a bug or are missing your favorite self-organizing system, please open an issue or submit a pull request following our contribution guidelines 🤗.

@@ -64,7 +64,9 @@ def test_lenia_update_in_ca(lenia_config):
 	"""Test the LeniaUpdate in a CA simulation."""
 	num_steps = 10
 
-	state = jnp.zeros((lenia_config["state_size"], lenia_config["state_size"], lenia_config["channel_size"]))
+	state = jnp.zeros(
+		(lenia_config["state_size"], lenia_config["state_size"], lenia_config["channel_size"])
+	)
 	state = state.at[32:34, 32:34].set(1.0)
 
 	perceive = LeniaPerceive(lenia_config)
@@ -100,7 +102,11 @@ def test_lenia_update_different_configs(lenia_config, config_update):
 	update = LeniaUpdate(updated_config)
 	assert isinstance(update, LeniaUpdate)
 
-	state_shape = (updated_config["state_size"], updated_config["state_size"], updated_config["channel_size"])
+	state_shape = (
+		updated_config["state_size"],
+		updated_config["state_size"],
+		updated_config["channel_size"],
+	)
 	state = jnp.ones(state_shape) * 0.5
 	perception = jnp.ones(state_shape) * 0.5
 	updated_state = update(state, perception, None)

@@ -3,19 +3,20 @@
 from functools import partial
 
 import jax
-from chex import ArrayTree
 from flax import struct
 from jax import Array
+
+from cax.types import PyTree
 
 
 class Pool(struct.PyTreeNode):
 	"""Pool class."""
 
 	size: int = struct.field(pytree_node=False)
-	data: ArrayTree
+	data: PyTree
 
 	@classmethod
-	def create(cls, data: ArrayTree) -> "Pool":
+	def create(cls, data: PyTree) -> "Pool":
 		"""Create a new Pool instance.
 
 		Args:
@@ -29,7 +30,7 @@ class Pool(struct.PyTreeNode):
 		return cls(size=size, data=data)
 
 	@jax.jit
-	def update(self, indices: Array, batch: ArrayTree) -> "Pool":
+	def update(self, indices: Array, batch: PyTree) -> "Pool":
 		"""Update batch in the pool at the specified indices.
 
 		Args:
@@ -40,11 +41,13 @@ class Pool(struct.PyTreeNode):
 			A new Pool instance with the updated batch.
 
 		"""
-		data = jax.tree.map(lambda data_leaf, batch_leaf: data_leaf.at[indices].set(batch_leaf), self.data, batch)
+		data = jax.tree.map(
+			lambda data_leaf, batch_leaf: data_leaf.at[indices].set(batch_leaf), self.data, batch
+		)
 		return self.replace(data=data)
 
 	@partial(jax.jit, static_argnames=("batch_size",))
-	def sample(self, key: Array, *, batch_size: int) -> tuple[Array, ArrayTree]:
+	def sample(self, key: Array, *, batch_size: int) -> tuple[Array, PyTree]:
 		"""Sample a batch from the pool.
 
 		Args:

@@ -61,7 +61,8 @@ def test_conv_perceive_forward_pass(conv_perceive):
 
 
 @pytest.mark.parametrize(
-	"channel_size,perception_size,hidden_sizes", [(2, 4, (8,)), (4, 8, (16, 32)), (8, 16, (32, 64, 128))]
+	"channel_size,perception_size,hidden_sizes",
+	[(2, 4, (8,)), (4, 8, (16, 32)), (8, 16, (32, 64, 128))],
 )
 def test_conv_perceive_different_sizes(rngs, channel_size, perception_size, hidden_sizes):
 	"""Test ConvPerceive with different sizes."""
