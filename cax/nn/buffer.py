@@ -4,21 +4,22 @@ from functools import partial
 
 import jax
 import jax.numpy as jnp
-from chex import ArrayTree
 from flax import struct
 from jax import Array
+
+from cax.types import PyTree
 
 
 class Buffer(struct.PyTreeNode):
 	"""Buffer class."""
 
 	size: int = struct.field(pytree_node=False)
-	data: ArrayTree
+	data: PyTree
 	is_full: Array
 	index: Array
 
 	@classmethod
-	def create(cls, size: int, datum: ArrayTree) -> "Buffer":
+	def create(cls, size: int, datum: PyTree) -> "Buffer":
 		"""Create a new Buffer instance.
 
 		Args:
@@ -30,7 +31,9 @@ class Buffer(struct.PyTreeNode):
 
 		"""
 		data = jax.tree.map(jnp.empty_like, datum)
-		data = jax.tree.map(lambda leaf: jnp.broadcast_to(leaf[None, ...], (size, *leaf.shape)), data)
+		data = jax.tree.map(
+			lambda leaf: jnp.broadcast_to(leaf[None, ...], (size, *leaf.shape)), data
+		)
 		return cls(
 			size=size,
 			data=data,
@@ -39,7 +42,7 @@ class Buffer(struct.PyTreeNode):
 		)
 
 	@jax.jit
-	def add(self, batch: ArrayTree) -> "Buffer":
+	def add(self, batch: PyTree) -> "Buffer":
 		"""Add a batch to the buffer.
 
 		Args:
@@ -63,7 +66,7 @@ class Buffer(struct.PyTreeNode):
 		return self.replace(data=data, is_full=is_full, index=new_index)
 
 	@partial(jax.jit, static_argnames=("batch_size",))
-	def sample(self, key: Array, *, batch_size: int) -> ArrayTree:
+	def sample(self, key: Array, *, batch_size: int) -> PyTree:
 		"""Sample a batch from the buffer.
 
 		Args:
@@ -75,5 +78,5 @@ class Buffer(struct.PyTreeNode):
 
 		"""
 		indices = jax.random.choice(key, self.size, shape=(batch_size,), p=self.is_full)
-		batch: ArrayTree = jax.tree.map(lambda leaf: leaf[indices], self.data)
+		batch: PyTree = jax.tree.map(lambda leaf: leaf[indices], self.data)
 		return batch

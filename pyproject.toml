@@ -25,6 +25,7 @@ classifiers = [
 	"Programming Language :: Python :: 3.10",
 	"Programming Language :: Python :: 3.11",
 	"Programming Language :: Python :: 3.12",
+	"Programming Language :: Python :: 3.13",
 	"License :: OSI Approved :: MIT License",
 	"Operating System :: OS Independent",
 ]
@@ -38,8 +39,9 @@ dev = [
 ]
 examples = [
 	"numpy<2.0.0",
-	"datasets>=2.21.0",
-	"mediapy>=1.2.2",
+	"torch",
+	"torchvision",
+	"mediapy",
 ]
 
 [project.urls]
@@ -52,7 +54,7 @@ include = ["cax*"]
 [tool.ruff]
 src = ["cax", "tests"]
 target-version = "py311"
-line-length = 120
+line-length = 100
 
 [tool.ruff.lint]
 select = ["E", "D", "F", "I", "N", "SIM", "UP", "W"]

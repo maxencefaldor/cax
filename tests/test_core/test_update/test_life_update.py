@@ -24,11 +24,31 @@ def test_life_update_initialization():
 @pytest.mark.parametrize(
 	"state, perception, expected",
 	[
-		(jnp.array([[[0]]]), jnp.array([[[0, 3]]]), jnp.array([[[1]]])),  # Dead cell with 3 neighbors becomes alive
-		(jnp.array([[[1]]]), jnp.array([[[1, 2]]]), jnp.array([[[1]]])),  # Live cell with 2 neighbors survives
-		(jnp.array([[[1]]]), jnp.array([[[1, 1]]]), jnp.array([[[0]]])),  # Live cell with 1 neighbor dies
-		(jnp.array([[[1]]]), jnp.array([[[1, 4]]]), jnp.array([[[0]]])),  # Live cell with 4 neighbors dies
-		(jnp.array([[[0]]]), jnp.array([[[0, 2]]]), jnp.array([[[0]]])),  # Dead cell with 2 neighbors stays dead
+		(
+			jnp.array([[[0]]]),
+			jnp.array([[[0, 3]]]),
+			jnp.array([[[1]]]),
+		),  # Dead cell with 3 neighbors becomes alive
+		(
+			jnp.array([[[1]]]),
+			jnp.array([[[1, 2]]]),
+			jnp.array([[[1]]]),
+		),  # Live cell with 2 neighbors survives
+		(
+			jnp.array([[[1]]]),
+			jnp.array([[[1, 1]]]),
+			jnp.array([[[0]]]),
+		),  # Live cell with 1 neighbor dies
+		(
+			jnp.array([[[1]]]),
+			jnp.array([[[1, 4]]]),
+			jnp.array([[[0]]]),
+		),  # Live cell with 4 neighbors dies
+		(
+			jnp.array([[[0]]]),
+			jnp.array([[[0, 2]]]),
+			jnp.array([[[0]]]),
+		),  # Dead cell with 2 neighbors stays dead
 	],
 )
 def test_life_update_rules(life_update, state, perception, expected):

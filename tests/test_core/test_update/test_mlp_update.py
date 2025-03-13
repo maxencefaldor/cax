@@ -119,7 +119,9 @@ def test_mlp_update_in_ca():
 		(3, 5, 7, (64, 32, 16), 3),
 	],
 )
-def test_mlp_update_different_configs(num_spatial_dims, channel_size, perception_size, hidden_layer_sizes, input_size):
+def test_mlp_update_different_configs(
+	num_spatial_dims, channel_size, perception_size, hidden_layer_sizes, input_size
+):
 	"""Test MLPUpdate with different configurations."""
 	rngs = nnx.Rngs(0)
 	update = MLPUpdate(

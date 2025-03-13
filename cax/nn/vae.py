@@ -1,4 +1,4 @@
-"""Variational Autoencoder implementation using JAX and Flax."""
+"""Variational Autoencoder implementation."""
 
 from collections.abc import Sequence
 
@@ -19,7 +19,9 @@ class Encoder(nnx.Module):
 	logvar: nnx.Linear
 	rngs: nnx.Rngs
 
-	def __init__(self, spatial_dims: Sequence[int], features: Sequence[int], latent_size: int, rngs: nnx.Rngs):
+	def __init__(
+		self, spatial_dims: Sequence[int], features: Sequence[int], latent_size: int, rngs: nnx.Rngs
+	):
 		"""Initialize the Encoder module.
 
 		Args:
@@ -52,7 +54,9 @@ class Encoder(nnx.Module):
 
 		self.linear = nnx.Linear(in_features=flattened_size, out_features=flattened_size, rngs=rngs)
 		self.mean = nnx.Linear(in_features=flattened_size, out_features=self.latent_size, rngs=rngs)
-		self.logvar = nnx.Linear(in_features=flattened_size, out_features=self.latent_size, rngs=rngs)
+		self.logvar = nnx.Linear(
+			in_features=flattened_size, out_features=self.latent_size, rngs=rngs
+		)
 		self.rngs = rngs
 
 	def __call__(self, x: Array) -> tuple[Array, Array]:
@@ -96,7 +100,9 @@ class Decoder(nnx.Module):
 	linear: nnx.Linear
 	_spatial_dims: tuple[int, int]
 
-	def __init__(self, spatial_dims: Sequence[int], features: Sequence[int], latent_size: int, rngs: nnx.Rngs):
+	def __init__(
+		self, spatial_dims: Sequence[int], features: Sequence[int], latent_size: int, rngs: nnx.Rngs
+	):
 		"""Initialize the Decoder module.
 
 		Args:
@@ -110,11 +116,15 @@ class Decoder(nnx.Module):
 		self.features = features
 		self.latent_size = latent_size
 
-		self._spatial_dims = tuple(dim // (2 ** (len(self.features) - 1)) for dim in spatial_dims[:2])
+		self._spatial_dims = tuple(
+			dim // (2 ** (len(self.features) - 1)) for dim in spatial_dims[:2]
+		)
 
 		flattened_size = self._spatial_dims[0] * self._spatial_dims[1] * self.features[0]
 
-		self.linear = nnx.Linear(in_features=self.latent_size, out_features=flattened_size, rngs=rngs)
+		self.linear = nnx.Linear(
+			in_features=self.latent_size, out_features=flattened_size, rngs=rngs
+		)
 
 		self.convs = []
 		for in_features, out_features in zip(self.features[:-1], self.features[1:]):
@@ -153,7 +163,13 @@ class VAE(nnx.Module):
 	encoder: Encoder
 	decoder: Decoder
 
-	def __init__(self, spatial_dims: tuple[int, int], features: Sequence[int], latent_size: int, rngs: nnx.Rngs):
+	def __init__(
+		self,
+		spatial_dims: tuple[int, int],
+		features: Sequence[int],
+		latent_size: int,
+		rngs: nnx.Rngs,
+	):
 		"""Initialize the VAE module.
 
 		Args:
@@ -164,8 +180,12 @@ class VAE(nnx.Module):
 
 		"""
 		super().__init__()
-		self.encoder = Encoder(spatial_dims=spatial_dims, features=features, latent_size=latent_size, rngs=rngs)
-		self.decoder = Decoder(spatial_dims=spatial_dims, features=features[::-1], latent_size=latent_size, rngs=rngs)
+		self.encoder = Encoder(
+			spatial_dims=spatial_dims, features=features, latent_size=latent_size, rngs=rngs
+		)
+		self.decoder = Decoder(
+			spatial_dims=spatial_dims, features=features[::-1], latent_size=latent_size, rngs=rngs
+		)
 
 	def encode(self, x: Array) -> tuple[Array, Array, Array]:
 		"""Encode input to latent space.
