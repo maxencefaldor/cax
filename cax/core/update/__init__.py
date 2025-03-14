@@ -14,3 +14,8 @@ These modules are designed to work with the CAX library, providing flexible
 and efficient update options for different types of cellular automata
 models.
 """
+
+from .mlp_update import MLPUpdate
+from .nca_update import NCAUpdate
+from .residual_update import ResidualUpdate
+from .update import Update

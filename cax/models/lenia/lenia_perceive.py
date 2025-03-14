@@ -63,10 +63,11 @@ class LeniaPerceive(Perceive):
 	def __init__(
 		self,
 		num_dims: int,
-		state_size: int,
+		channel_size: int,
 		R: int,
-		state_scale: float,
 		rules_params: RuleParams,
+		state_size: int,
+		state_scale: float,
 		kernel_fn: Callable = original_kernel_fn,
 	):
 		"""Initialize the LeniaPerceive layer.
@@ -99,7 +100,7 @@ class LeniaPerceive(Perceive):
 
 		# Reshape channel to kernel
 		self.reshape_channel_to_kernel = nnx.Param(
-			jax.vmap(lambda x: jax.nn.one_hot(x, num_classes=3), out_axes=1)(
+			jax.vmap(lambda x: jax.nn.one_hot(x, num_classes=channel_size), out_axes=1)(
 				rules_params.channel_source
 			)
 		)
