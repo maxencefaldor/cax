@@ -15,17 +15,30 @@ class Lenia(CA):
 	def __init__(
 		self,
 		num_dims: int,
-		state_size: int,
+		channel_size: int,
 		R: int,
 		T: int,
 		rules_params: RuleParams,
+		state_size: int,
 		state_scale: float = 1,
 		kernel_fn: Callable = original_kernel_fn,
 		growth_fn: Callable = growth_exponential,
-		flow: bool = False,
 	):
 		"""Initialize Lenia."""
-		perceive = LeniaPerceive(num_dims, state_size, R, state_scale, rules_params, kernel_fn)
-		update = LeniaUpdate(T, state_scale, rules_params, growth_fn, flow)
+		perceive = LeniaPerceive(
+			num_dims=num_dims,
+			channel_size=channel_size,
+			R=R,
+			rules_params=rules_params,
+			state_size=state_size,
+			state_scale=state_scale,
+			kernel_fn=kernel_fn,
+		)
+		update = LeniaUpdate(
+			channel_size=channel_size,
+			T=T,
+			rules_params=rules_params,
+			growth_fn=growth_fn,
+		)
 
 		super().__init__(perceive, update)

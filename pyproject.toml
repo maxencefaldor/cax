@@ -6,12 +6,11 @@ build-backend = "setuptools.build_meta"
 name = "cax"
 version = "0.1.6"
 dependencies = [
-	"numpy>=1.26.4",
-	"jax>=0.4.31",
-	"flax>=0.10.0",
-	"optax>=0.2.3",
-	"pillow>=10.4.0",
-	"requests>=2.32.3",
+	"jax",
+	"flax",
+	"optax",
+	"pillow",
+	"requests",
 ]
 requires-python = ">=3.10"
 authors = [
@@ -38,9 +37,9 @@ dev = [
 	"mypy>=1.11.2",
 ]
 examples = [
-	"numpy<2.0.0",
 	"torch",
 	"torchvision",
+	"ipykernel",
 	"mediapy",
 ]
 

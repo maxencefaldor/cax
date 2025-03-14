@@ -26,35 +26,32 @@ class LeniaUpdate(Update):
 
 	def __init__(
 		self,
+		channel_size: int,
 		T: int,
-		state_scale: float,
 		rules_params: RuleParams,
 		growth_fn: Callable = growth_exponential,
-		flow: bool = False,
 	):
 		"""Initialize the LeniaUpdate.
 
 		Args:
 			T: Time resolution.
-			state_scale: Integer to scale the state.
 			rules_params: Parameters for the rules.
 			growth_fn: Growth function.
-			flow: Whether to use flow or not.
 
 		"""
 		super().__init__()
 		self.T = T
-		self.state_scale = state_scale
 		self.rules_params = jax.tree.map(nnx.Variable, rules_params)
 		self.growth_fn = growth_fn
-		self.flow = flow
 
 		self.reshape_kernel_to_channel = nnx.Param(
-			jax.vmap(lambda x: jax.nn.one_hot(x, num_classes=3))(rules_params.channel_target)
+			jax.vmap(lambda x: jax.nn.one_hot(x, num_classes=channel_size))(
+				rules_params.channel_target
+			)
 		)
 
 	def __call__(self, state: State, perception: Perception, input: Input | None = None) -> State:
-		"""Apply the Lenia update rule with flow.
+		"""Apply the Lenia update rule.
 
 		Args:
 			state: Current state of the cellular automaton.
@@ -62,7 +59,7 @@ class LeniaUpdate(Update):
 			input: External input (unused in this implementation).
 
 		Returns:
-			Updated state after applying the Lenia rule with flow.
+			Updated state after applying the Lenia.
 
 		"""
 		# Original Lenia update

@@ -9,3 +9,9 @@ These modules are designed to work with the CAX library, providing flexible
 and efficient perception options for different types of cellular automata
 models.
 """
+
+from .conv_perceive import ConvPerceive
+from .kernels import grad2_kernel, grad_kernel, identity_kernel, neighbors_kernel
+from .moore_perceive import MoorePerceive
+from .perceive import Perceive
+from .von_neumann_perceive import VonNeumannPerceive
