@@ -116,7 +116,9 @@ def test_nca_update_in_ca():
 		(5, 7, (64, 32, 16), 0.2),
 	],
 )
-def test_nca_update_different_configs(channel_size, perception_size, hidden_layer_sizes, alive_threshold):
+def test_nca_update_different_configs(
+	channel_size, perception_size, hidden_layer_sizes, alive_threshold
+):
 	"""Test NCAUpdate with different configurations."""
 	rngs = nnx.Rngs(0)
 	update = NCAUpdate(
@@ -152,7 +154,9 @@ def test_nca_update_get_alive_mask():
 		alive_threshold=0.1,
 	)
 
-	state = jnp.array([[[0.05, 0.05, 0.05], [0.15, 0.15, 0.15]], [[0.25, 0.25, 0.25], [0.35, 0.35, 0.35]]])
+	state = jnp.array(
+		[[[0.05, 0.05, 0.05], [0.15, 0.15, 0.15]], [[0.25, 0.25, 0.25], [0.35, 0.35, 0.35]]]
+	)
 
 	alive_mask = update.get_alive_mask(state)
 	expected_mask = jnp.array([[[True], [True]], [[True], [True]]])

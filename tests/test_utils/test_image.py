@@ -68,9 +68,7 @@ def test_get_emoji(
 		mock_jnp_array.return_value = jnp.ones((size, size, 4))
 		result = get_emoji(emoji, size=size, padding=padding)
 
-	expected_url = (
-		f"https://github.com/googlefonts/noto-emoji/blob/main/png/128/emoji_u{hex(ord(emoji))[2:].lower()}.png?raw=true"
-	)
+	expected_url = f"https://github.com/googlefonts/noto-emoji/blob/main/png/128/emoji_u{hex(ord(emoji))[2:].lower()}.png?raw=true"
 	mock_requests_get.assert_called_once_with(expected_url)
 
 	# Update this assertion
@@ -79,6 +77,8 @@ def test_get_emoji(
 	assert isinstance(call_arg, io.BytesIO)
 	assert call_arg.getvalue() == b"fake image content"
 
-	mock_image.thumbnail.assert_called_once_with((size, size), resample=PIL.Image.Resampling.LANCZOS)
+	mock_image.thumbnail.assert_called_once_with(
+		(size, size), resample=PIL.Image.Resampling.LANCZOS
+	)
 
 	assert result.shape == (size + 2 * padding, size + 2 * padding, 4)

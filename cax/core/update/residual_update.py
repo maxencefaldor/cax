@@ -25,6 +25,7 @@ class ResidualUpdate(MLPUpdate):
 		activation_fn: Callable = nnx.relu,
 		step_size: float = 1.0,
 		cell_dropout_rate: float = 0.0,
+		zeros_init: bool = False,
 	):
 		"""Initialize the ResidualUpdate module.
 
@@ -37,6 +38,7 @@ class ResidualUpdate(MLPUpdate):
 			activation_fn: Activation function to use.
 			step_size: Step size for the residual update.
 			cell_dropout_rate: Dropout rate for cell updates.
+			zeros_init: Whether to use zeros initialization for the weights of the last layer.
 
 		"""
 		super().__init__(
@@ -46,6 +48,7 @@ class ResidualUpdate(MLPUpdate):
 			hidden_layer_sizes=hidden_layer_sizes,
 			rngs=rngs,
 			activation_fn=activation_fn,
+			zeros_init=zeros_init,
 		)
 		self.dropout = nnx.Dropout(rate=cell_dropout_rate, broadcast_dims=(-1,), rngs=rngs)
 		self.step_size = step_size

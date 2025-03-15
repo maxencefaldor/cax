@@ -9,7 +9,9 @@ from cax.nn.pool import Pool
 @pytest.fixture
 def init_pool() -> Pool:
 	"""Create a Pool instance for testing."""
-	return Pool.create({"a": jnp.array([1.0, 2.0, 3.0, 4.0, 5.0]), "b": jnp.array([10.0, 20.0, 30.0, 40.0, 50.0])})
+	return Pool.create(
+		{"a": jnp.array([1.0, 2.0, 3.0, 4.0, 5.0]), "b": jnp.array([10.0, 20.0, 30.0, 40.0, 50.0])}
+	)
 
 
 def test_pool_create(init_pool: Pool) -> None:

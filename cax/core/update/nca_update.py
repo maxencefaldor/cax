@@ -28,6 +28,7 @@ class NCAUpdate(ResidualUpdate):
 		cell_dropout_rate: float = 0.0,
 		kernel_size: Sequence[int] = (3, 3),
 		alive_threshold: float = 0.1,
+		zeros_init: bool = False,
 	):
 		"""Initialize the NCAUpdate layer.
 
@@ -41,6 +42,7 @@ class NCAUpdate(ResidualUpdate):
 			cell_dropout_rate: Dropout rate for cells.
 			kernel_size: Size of the convolutional kernel.
 			alive_threshold: Threshold for determining if a cell is alive.
+			zeros_init: Whether to use zeros initialization for the weights of the last layer.
 
 		"""
 		super().__init__(
@@ -52,6 +54,7 @@ class NCAUpdate(ResidualUpdate):
 			activation_fn=activation_fn,
 			step_size=step_size,
 			cell_dropout_rate=cell_dropout_rate,
+			zeros_init=zeros_init,
 		)
 		self.pool = partial(nnx.max_pool, window_shape=kernel_size, padding="SAME")
 		self.alive_threshold = alive_threshold
