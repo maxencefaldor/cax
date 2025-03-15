@@ -15,6 +15,8 @@ Despite their conceptual simplicity, cellular automata often demand significant 
 
 The library works with discrete or continuous cellular automata of any spatial dimension, offering exceptional flexibility. From simulating one-dimensional [elementary cellular automata](https://github.com/maxencefaldor/cax/blob/main/examples/elementary_ca.ipynb) to training three-dimensional [self-autoencoding neural cellular automata](https://github.com/maxencefaldor/cax/blob/main/examples/self_autoencoding_mnist.ipynb), and even creating beautiful [Lenia simulations](https://github.com/maxencefaldor/cax/blob/main/examples/lenia.ipynb), CAX provides a versatile platform for exploring the rich world of self-organizing systems.
 
+**Get started here** [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/maxencefaldor/cax/blob/main/examples/00_getting_started.ipynb)
+
 ## Implemented Cellular Automata 🦎
 
 | Cellular Automata | Reference | Example |
@@ -37,11 +39,11 @@ The library works with discrete or continuous cellular automata of any spatial d
 
 ## Key Features 💎
 
-- Comprehensive Algorithm Collection: 30+ classic and modern evolution strategies with a unified API
+- Comprehensive Collection: 15+ classic and modern models with a unified API
+- Flexible: In addition to existing pre-implemented models, we can easily extend and create new ones to accelerate research
 - JAX Acceleration: Fully compatible with JAX transformations for speed and scalability
 - Vectorization & Parallelization: Fast execution on CPUs, GPUs, and TPUs
 - Production Ready: Well-tested, documented, and used in research environments
-- Batteries Included: Comes with optimizers like ClipUp, fitness shaping, and restart strategies
 
 ## Installation 🛠️
 
