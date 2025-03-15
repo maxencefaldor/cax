@@ -1,6 +1,10 @@
 """Elementary Cellular Automata model."""
 
+import jax
+import jax.numpy as jnp
 from cax.core.ca import CA
+from cax.types import State
+from cax.utils.render import clip_and_uint8
 from flax import nnx
 
 from .elementary_ca_perceive import ElementaryCAPerceive
@@ -16,3 +20,19 @@ class ElementaryCA(CA):
 		update = ElementaryCAUpdate(wolfram_code)
 
 		super().__init__(perceive, update)
+
+	@nnx.jit
+	def render(self, state: State) -> jax.Array:
+		"""Render states as a space-time diagram.
+
+		Args:
+			state: An array of successive states.
+
+		Returns:
+			Rendered states as a space-time diagram.
+
+		"""
+		frame = jnp.repeat(state, 3, axis=-1)
+
+		# Clip values to valid range and convert to uint8
+		return clip_and_uint8(frame)

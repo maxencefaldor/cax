@@ -2,7 +2,12 @@
 
 from collections.abc import Callable
 
+import jax
+import jax.numpy as jnp
 from cax.core.ca import CA
+from cax.types import State
+from cax.utils.render import clip_and_uint8
+from flax import nnx
 
 from ..lenia.lenia_perceive import LeniaPerceive, original_kernel_fn
 from ..lenia.types import RuleParams
@@ -48,6 +53,7 @@ class FlowLenia(CA):
 			boundary: Boundary condition.
 
 		"""
+		self.num_dims = num_dims
 		perceive = LeniaPerceive(
 			num_dims=num_dims,
 			channel_size=channel_size,
@@ -70,3 +76,29 @@ class FlowLenia(CA):
 		)
 
 		super().__init__(perceive, update)
+
+	@nnx.jit
+	def render(self, state: State) -> jax.Array:
+		"""Render state.
+
+		Args:
+			state: An array of states.
+
+		Returns:
+			Rendered states.
+
+		"""
+		assert self.num_dims == 2, "Flow Lenia only supports 2D visualization."
+
+		if state.shape[-1] == 1:
+			frame = jnp.repeat(state, 3, axis=-1)
+		elif state.shape[-1] == 2:
+			red = state[..., 0:1]
+			green = state[..., 1:2]
+			blue = jnp.zeros_like(red)
+			frame = jnp.concatenate([red, green, blue], axis=-1)
+		else:
+			frame = state[..., :3]
+
+		# Clip values to valid range and convert to uint8
+		return clip_and_uint8(frame)

@@ -19,7 +19,7 @@ class BoidPolicy(nnx.Module):
 	alignment_weight: float = 0.65
 	cohesion_weight: float = 0.75
 	perception: float = 0.1
-	separation_distance: float = 0.02
+	separation_distance: float = 0.05
 	acceleration_scale: float = 1.0
 	noise_scale: float = 0.0
 	acceleration_max: float = jnp.inf

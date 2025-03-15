@@ -2,7 +2,11 @@
 
 from collections.abc import Callable
 
+import jax
+import jax.numpy as jnp
 from cax.core.ca import CA
+from cax.types import State
+from cax.utils.render import clip_and_uint8
 from flax import nnx
 
 from .lenia_perceive import LeniaPerceive, original_kernel_fn
@@ -26,6 +30,7 @@ class Lenia(CA):
 		growth_fn: Callable = growth_exponential,
 	):
 		"""Initialize Lenia."""
+		self.num_dims = num_dims
 		perceive = LeniaPerceive(
 			num_dims=num_dims,
 			channel_size=channel_size,
@@ -49,3 +54,29 @@ class Lenia(CA):
 		"""Update the rule parameters."""
 		self.perceive.update_rule_params(rule_params)
 		self.update.update_rule_params(rule_params)
+
+	@nnx.jit
+	def render(self, state: State) -> jax.Array:
+		"""Render state.
+
+		Args:
+			state: An array of states.
+
+		Returns:
+			Rendered states.
+
+		"""
+		assert self.num_dims == 2, "Lenia only supports 2D visualization."
+
+		if state.shape[-1] == 1:
+			frame = jnp.repeat(state, 3, axis=-1)
+		elif state.shape[-1] == 2:
+			red = state[..., 0:1]
+			green = state[..., 1:2]
+			blue = jnp.zeros_like(red)
+			frame = jnp.concatenate([red, green, blue], axis=-1)
+		else:
+			frame = state[..., :3]
+
+		# Clip values to valid range and convert to uint8
+		return clip_and_uint8(frame)
