@@ -71,6 +71,23 @@ def test_elementary_update():
 	state = ca(state, num_steps=num_steps)
 
 	expected_state = jnp.array(
-		[[1.0], [1.0], [1.0], [1.0], [1.0], [1.0], [1.0], [0.0], [1.0], [0.0], [0.0], [0.0], [0.0], [0.0], [0.0], [0.0]]
+		[
+			[1.0],
+			[1.0],
+			[1.0],
+			[1.0],
+			[1.0],
+			[1.0],
+			[1.0],
+			[0.0],
+			[1.0],
+			[0.0],
+			[0.0],
+			[0.0],
+			[0.0],
+			[0.0],
+			[0.0],
+			[0.0],
+		]
 	)
 	assert jnp.array_equal(state, expected_state)

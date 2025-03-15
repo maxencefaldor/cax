@@ -49,6 +49,8 @@ class MoorePerceive(Perceive):
 
 		# Compute the neighbors
 		for shift in moore_shifts:
-			neighbors.append(jnp.roll(state, shift, axis=tuple(range(-self.num_spatial_dims - 1, -1))))
+			neighbors.append(
+				jnp.roll(state, shift, axis=tuple(range(-self.num_spatial_dims - 1, -1)))
+			)
 
 		return jnp.concatenate(neighbors, axis=-1)

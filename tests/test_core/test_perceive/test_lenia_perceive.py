@@ -96,7 +96,9 @@ def test_lenia_perceive_different_config():
 def test_lenia_perceive_different_sizes(state_size, channel_size):
 	"""Test LeniaPerceive with different state and channel sizes."""
 	config = {
-		"kernel_params": [{"b": [1], "m": 0.5, "s": 0.1, "r": 1.0, "c0": i, "c1": i} for i in range(channel_size)],
+		"kernel_params": [
+			{"b": [1], "m": 0.5, "s": 0.1, "r": 1.0, "c0": i, "c1": i} for i in range(channel_size)
+		],
 		"R": 10,
 		"state_scale": 1,
 		"state_size": state_size,

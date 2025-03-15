@@ -6,12 +6,11 @@ build-backend = "setuptools.build_meta"
 name = "cax"
 version = "0.1.6"
 dependencies = [
-	"numpy>=1.26.4",
-	"jax>=0.4.31",
-	"flax>=0.10.0",
-	"optax>=0.2.3",
-	"pillow>=10.4.0",
-	"requests>=2.32.3",
+	"jax",
+	"flax",
+	"optax",
+	"pillow",
+	"requests",
 ]
 requires-python = ">=3.10"
 authors = [
@@ -25,6 +24,7 @@ classifiers = [
 	"Programming Language :: Python :: 3.10",
 	"Programming Language :: Python :: 3.11",
 	"Programming Language :: Python :: 3.12",
+	"Programming Language :: Python :: 3.13",
 	"License :: OSI Approved :: MIT License",
 	"Operating System :: OS Independent",
 ]
@@ -37,9 +37,10 @@ dev = [
 	"mypy>=1.11.2",
 ]
 examples = [
-	"numpy<2.0.0",
-	"datasets>=2.21.0",
-	"mediapy>=1.2.2",
+	"torch",
+	"torchvision",
+	"ipykernel",
+	"mediapy",
 ]
 
 [project.urls]
@@ -52,7 +53,7 @@ include = ["cax*"]
 [tool.ruff]
 src = ["cax", "tests"]
 target-version = "py311"
-line-length = 120
+line-length = 100
 
 [tool.ruff.lint]
 select = ["E", "D", "F", "I", "N", "SIM", "UP", "W"]
