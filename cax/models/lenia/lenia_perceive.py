@@ -23,8 +23,6 @@ def bell(x: Array, mean: Array, std: Array) -> Array:
 
 def original_kernel_fn(radius: Array, kernel_params: OriginalKernelParams) -> Array:
 	"""Original kernel function introduced in [1]."""
-	std = 0.15
-
 	# Compute kernel mask to avoid out of bounds interactions
 	mask = radius < kernel_params.r
 
@@ -35,12 +33,15 @@ def original_kernel_fn(radius: Array, kernel_params: OriginalKernelParams) -> Ar
 	segment_index = jnp.minimum(segment_position.astype(int), number_of_segments - 1)
 	position_in_segment = segment_position % 1
 
-	return mask * kernel_params.b[segment_index] * bell(position_in_segment, 0.5, std)
+	return mask * kernel_params.b[segment_index] * bell(position_in_segment, 0.5, 0.15)
 
 
 def free_kernel_fn(radius: Array, kernel_params: FreeKernelParams) -> Array:
 	"""Free kernel function introduced in [2]."""
-	mask = radius < kernel_params.r
+	# Compute soft kernel mask to avoid out of bounds interactions
+	# mask = radius < kernel_params.r
+	mask = nnx.sigmoid(-10 * (radius - 1))
+
 	return mask * jnp.sum(
 		kernel_params.b
 		* jax.vmap(bell, in_axes=(None, 0, 0), out_axes=-1)(
@@ -51,12 +52,8 @@ def free_kernel_fn(radius: Array, kernel_params: FreeKernelParams) -> Array:
 
 
 class LeniaPerceive(Perceive):
-	"""Lenia perception layer for cellular automata.
+	"""Lenia perception class."""
 
-	This class implements a perception mechanism using for Lenia.
-	"""
-
-	rules_params: RuleParams
 	kernel_fft: nnx.Param
 	reshape_channel_to_kernel: nnx.Param
 
@@ -65,44 +62,37 @@ class LeniaPerceive(Perceive):
 		num_dims: int,
 		channel_size: int,
 		R: int,
-		rules_params: RuleParams,
+		rule_params: RuleParams,
 		state_size: int,
 		state_scale: float,
 		kernel_fn: Callable = original_kernel_fn,
 	):
-		"""Initialize the LeniaPerceive layer.
+		"""Initialize LeniaPerceive.
 
 		Args:
+			num_dims: Number of spatial dimensions.
+			channel_size: Number of channels.
 			R: Space resolution.
-			state_scale: Integer to scale the state.
-			rules_params: Parameters for the rules.
+			rule_params: Parameters for the rules.
+			state_size: State size.
+			state_scale: Scaling factor for the state.
 			kernel_fn: Kernel function.
 
 		"""
 		super().__init__()
-		self.state_size = state_size
+		self.num_dims = num_dims
+		self.channel_size = channel_size
 		self.R = R
+		self.state_size = state_size
 		self.state_scale = state_scale
-		self.rules_params = jax.tree.map(nnx.Variable, rules_params)
 		self.kernel_fn = kernel_fn
 
-		# Compute kernel
-		mid = self.state_size // 2
-		x = jnp.mgrid[*[slice(-mid, mid) for _ in range(num_dims)]] / (state_scale * R)
-		d = jnp.linalg.norm(x, axis=0)
-		kernel = jax.vmap(self.kernel_fn, in_axes=(None, 0), out_axes=-1)(
-			d, rules_params.kernel_params
-		)
-		kernel_normalized = kernel / jnp.sum(kernel, axis=(0, 1), keepdims=True)  # (y, x, k,)
-		self.kernel_fft = nnx.Param(
-			jnp.fft.fft2(jnp.fft.fftshift(kernel_normalized, axes=(0, 1)), axes=(0, 1))
-		)  # (y, x, k,)
+		# Compute kernel fft
+		self.kernel_fft = nnx.Param(self.compute_kernel_fft(rule_params))
 
 		# Reshape channel to kernel
 		self.reshape_channel_to_kernel = nnx.Param(
-			jax.vmap(lambda x: jax.nn.one_hot(x, num_classes=channel_size), out_axes=1)(
-				rules_params.channel_source
-			)
+			self.compute_reshape_channel_to_kernel(rule_params)
 		)
 
 	def __call__(self, state: State) -> Perception:
@@ -115,7 +105,53 @@ class LeniaPerceive(Perceive):
 			The perceived state after applying Lenia convolution.
 
 		"""
+		# Compute state fft
 		state_fft = jnp.fft.fft2(state, axes=(-3, -2))  # (y, x, c,)
+
+		# Deaggregate channels for kernel convolution
 		state_fft_k = jnp.dot(state_fft, self.reshape_channel_to_kernel.value)  # (y, x, k,)
-		u_k = jnp.real(jnp.fft.ifft2(self.kernel_fft * state_fft_k, axes=(-3, -2)))  # (y, x, k,)
-		return u_k
+
+		# Compute kernel convolution
+		U_k = jnp.real(jnp.fft.ifft2(self.kernel_fft * state_fft_k, axes=(-3, -2)))  # (y, x, k,)
+
+		return U_k
+
+	@nnx.jit
+	def update_rule_params(self, rule_params: RuleParams):
+		"""Update the rule parameters."""
+		# Compute kernel fft
+		self.kernel_fft.value = self.compute_kernel_fft(rule_params)
+
+		# Compute reshape channel to kernel
+		self.reshape_channel_to_kernel.value = self.compute_reshape_channel_to_kernel(rule_params)
+
+	@nnx.jit
+	def compute_kernel_fft(self, rule_params: RuleParams) -> Array:
+		"""Compute the kernel fft based on the kernel function and rules parameters."""
+		mid = self.state_size // 2
+		x = jnp.mgrid[*[slice(-mid, mid) for _ in range(self.num_dims)]] / (
+			self.state_scale * self.R
+		)
+		d = jnp.linalg.norm(x, axis=0)
+
+		# Compute kernel
+		kernel = nnx.vmap(self.kernel_fn, in_axes=(None, 0), out_axes=-1)(
+			d, rule_params.kernel_params
+		)
+
+		# Normalize kernel
+		kernel_normalized = kernel / jnp.sum(kernel, axis=(0, 1), keepdims=True)  # (y, x, k,)
+
+		# Compute kernel fft
+		kernel_fft = jnp.fft.fft2(
+			jnp.fft.fftshift(kernel_normalized, axes=(0, 1)), axes=(0, 1)
+		)  # (y, x, k,)
+
+		return kernel_fft
+
+	@nnx.jit
+	def compute_reshape_channel_to_kernel(self, rule_params: RuleParams) -> Array:
+		"""Compute array to reshape from channel to kernel."""
+		return nnx.vmap(lambda x: jax.nn.one_hot(x, num_classes=self.channel_size), out_axes=1)(
+			rule_params.channel_source
+		)
