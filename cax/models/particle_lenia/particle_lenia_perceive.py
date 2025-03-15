@@ -20,9 +20,14 @@ def bell(x: Array, mean: Array, std: Array) -> Array:
 	return jnp.exp(-0.5 * ((x - mean) / std) ** 2)
 
 
+def bell_(x: Array, mean: Array, std: Array) -> Array:
+	"""Gaussian function."""
+	return jnp.exp(-(((x - mean) / std) ** 2))
+
+
 def peak_kernel_fn(radius: Array, kernel_params: KernelParams) -> Array:
 	"""Peak kernel function introduced in [1]."""
-	return jnp.exp(-(((radius - kernel_params.mean) / kernel_params.std) ** 2))
+	return bell_(radius, kernel_params.mean, kernel_params.std)
 
 
 class ParticleLeniaPerceive(Perceive):
@@ -44,6 +49,7 @@ class ParticleLeniaPerceive(Perceive):
 			num_dims: Number of spatial dimensions.
 			rule_params: Parameters for the rules.
 			kernel_fn: Kernel function.
+			growth_fn: Growth mapping function.
 
 		"""
 		super().__init__()
@@ -67,7 +73,7 @@ class ParticleLeniaPerceive(Perceive):
 		grad_E = jax.grad(lambda x: self.energy_field(state, x))
 		return -jax.vmap(grad_E)(state)
 
-	def energy_field(self, state: State, x: State) -> Array:
+	def compute_fields(self, state: State, x: State) -> Array:
 		"""Compute energy field."""
 		r = jnp.sqrt(jnp.clip(jnp.sum(jnp.square(x - state), axis=-1), min=1e-10))
 
@@ -83,4 +89,9 @@ class ParticleLeniaPerceive(Perceive):
 		R = 0.5 * self.rule_params.c_rep * jnp.sum(jnp.maximum(1.0 - r, 0.0) ** 2)
 
 		# Return energy field
+		return U, G, R
+
+	def energy_field(self, state: State, x: State) -> Array:
+		"""Compute energy field."""
+		_, G, R = self.compute_fields(state, x)
 		return R - G
