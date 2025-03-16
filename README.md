@@ -5,19 +5,37 @@
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 [![Paper](http://img.shields.io/badge/paper-arxiv.2410.02651-B31B1B.svg)](https://arxiv.org/abs/2410.02651)
 
-CAX is a high-performance and flexible open-source library designed to **accelerate cellular automata research**.
+CAX is a high-performance and flexible open-source library designed to **accelerate artificial life research**. 🧬
 
 ## Overview 🔎
 
-CAX is a cutting-edge library designed to implement and accelerate various types of cellular automata using the JAX framework. Whether you're a researcher, a hobbyist, or just curious about the fascinating world of emergent and self-organizing systems, CAX has got you covered! 🧬
+Are you interested in emergence, self-organization, or open-endedness? Whether you're a researcher or just curious about the fascinating world of artificial life, CAX is your digital lab! 🔬
 
-Despite their conceptual simplicity, cellular automata often demand significant computational resources. The parallel update of numerous cells, coupled with the need for backpropagation through time in neural cellular automata training, can render these models computationally intensive. CAX leverages hardware accelerators and massive parallelization to run cellular automata experiments in minutes. 🚀
+Designed for speed and flexibility, CAX allows you to easily experiment with self-organizing behaviors and emergent phenomena. 🧑‍🔬
 
-The library works with discrete or continuous cellular automata of any spatial dimension, offering exceptional flexibility. From simulating one-dimensional [elementary cellular automata](https://github.com/maxencefaldor/cax/blob/main/examples/elementary_ca.ipynb) to training three-dimensional [self-autoencoding neural cellular automata](https://github.com/maxencefaldor/cax/blob/main/examples/self_autoencoding_mnist.ipynb), and even creating beautiful [Lenia simulations](https://github.com/maxencefaldor/cax/blob/main/examples/lenia.ipynb), CAX provides a versatile platform for exploring the rich world of self-organizing systems.
+**Get started here** [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/maxencefaldor/cax/blob/main/examples/00_getting_started.ipynb)
 
-**Get started here**  [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/maxencefaldor/cax/blob/main/examples/00_getting_started.ipynb)
+## Why CAX? 💡
 
-## Implemented Cellular Automata 🦎
+CAX supports discrete and continuous models, including neural cellular automata, across any number of dimensions. Beyond traditional cellular automata, it also handles particle systems and more, all unified under a single, intuitive API.
+
+### Rich 🎨
+
+CAX provides a comprehensive collection of 15+ ready-to-use systems. From simulating one-dimensional [elementary cellular automata](examples/10_elementary_ca.ipynb) to training three-dimensional [self-autoencoding neural cellular automata](examples/45_self_autoencoding_mnist.ipynb), or even creating beautiful [Lenia](examples/20_lenia.ipynb) simulations, CAX provides a versatile platform for exploring the rich world of self-organizing systems.
+
+### Flexible 🧩
+
+CAX makes it easy to extend existing models or build custom ones from scratch for endless experimentation and discovery. Design your own experiments to probe the boundaries of artificial open-ended evolution and emergent complexity.
+
+### Fast 🚀
+
+CAX is built on top of the JAX/Flax ecosystem for speed and scalability. The library benefits from vectorization and parallelization on various hardware accelerators such as CPU, GPU, and TPU. This allows you to scale your experiments from small prototypes to massive simulations with minimal code changes.
+
+### Tested & Documented 📚
+
+The library is thoroughly tested and documented with numerous examples to get you started! Our comprehensive guides walk you through everything from basic cellular automata to advanced neural implementations.
+
+## Implemented Systems 🦎
 
 | Cellular Automata | Reference | Example |
 | --- | --- | --- |
@@ -37,15 +55,7 @@ The library works with discrete or continuous cellular automata of any spatial d
 | 1D-ARC Neural Cellular Automata | [Faldor et al. (2024)](https://arxiv.org/abs/2410.02651) | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/maxencefaldor/cax/blob/main/examples/46_1d_arc_nca.ipynb) |
 | Attention-based Neural Cellular Automata | [Tesfaldet et al. (2022)](https://arxiv.org/abs/2211.01233) | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/maxencefaldor/cax/blob/main/examples/47_attention_nca.ipynb) |
 
-## Key Features 💎
-
-- **Comprehensive Collection**: 15+ classic and modern models with a unified API.
-- **Flexible**: Easily extend or build custom models for endless experimentation and discovery.
-- **JAX Acceleration**: Fully compatible with JAX transformations for speed and scalability.
-- **Vectorization & Parallelization**: Fast execution on CPUs, GPUs, and TPUs.
-- **Production Ready**: Robust, well-tested, and documented.
-
-## Installation 🛠️
+## Installation ⚙️
 
 You will need Python 3.10 or later, and a working JAX installation.
 
@@ -115,4 +125,4 @@ If you use CAX in your research, please cite the following paper:
 
 ## Contributing 👷
 
-Contributions are welcome! If you find a bug or are missing your favorite self-organizing system, please open an issue or submit a pull request following our contribution guidelines 🤗.
+Contributions are welcome! If you find a bug or are missing your favorite self-organizing system, please open an issue or submit a pull request following our [contribution guidelines](CONTRIBUTING.md) 🤗.
