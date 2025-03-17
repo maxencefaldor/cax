@@ -55,20 +55,6 @@ The library is thoroughly tested and documented with numerous examples to get yo
 | 1D-ARC Neural Cellular Automata | [Faldor et al. (2024)](https://arxiv.org/abs/2410.02651) | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/maxencefaldor/cax/blob/main/examples/46_1d_arc_nca.ipynb) |
 | Attention-based Neural Cellular Automata | [Tesfaldet et al. (2022)](https://arxiv.org/abs/2211.01233) | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/maxencefaldor/cax/blob/main/examples/47_attention_nca.ipynb) |
 
-## Installation ⚙️
-
-You will need Python 3.10 or later, and a working JAX installation.
-
-Then, install CAX from PyPi:
-```
-pip install cax
-```
-
-To upgrade to the latest version of CAX, you can use:
-```
-pip install --upgrade git+https://github.com/maxencefaldor/cax.git
-```
-
 ## Getting Started 🚦
 
 ```python
@@ -106,6 +92,20 @@ ca = CA(perceive, update)
 
 state = jax.random.normal(key, (64, 64, channel_size))
 state = ca(state, num_steps=128)
+```
+
+## Installation ⚙️
+
+You will need Python 3.10 or later, and a working JAX installation.
+
+Then, install CAX from PyPi:
+```
+pip install cax
+```
+
+To upgrade to the latest version of CAX, you can use:
+```
+pip install --upgrade git+https://github.com/maxencefaldor/cax.git
 ```
 
 ## Citing CAX 📝
