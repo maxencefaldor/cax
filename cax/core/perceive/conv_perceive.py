@@ -11,9 +11,6 @@ from cax.types import Perception, State
 class ConvPerceive(Perceive):
 	"""Convolution Perceive class."""
 
-	conv: nnx.Conv
-	activation_fn: Callable | None
-
 	def __init__(
 		self,
 		channel_size: int,

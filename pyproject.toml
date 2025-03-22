@@ -57,7 +57,7 @@ line-length = 100
 
 [tool.ruff.lint]
 select = ["E", "D", "F", "I", "N", "SIM", "UP", "W"]
-ignore = ["D203", "D206", "D213", "W191"]
+ignore = ["N803", "N806", "D203", "D206", "D213", "W191"]
 
 [tool.ruff.format]
 indent-style = "tab"

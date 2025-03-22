@@ -12,22 +12,9 @@ from cax.types import Perception, State
 from flax import nnx
 from jax import Array
 
-from .types import KernelParams, RuleParams
-
-
-def bell(x: Array, mean: Array, std: Array) -> Array:
-	"""Gaussian function."""
-	return jnp.exp(-0.5 * ((x - mean) / std) ** 2)
-
-
-def bell_(x: Array, mean: Array, std: Array) -> Array:
-	"""Gaussian function."""
-	return jnp.exp(-(((x - mean) / std) ** 2))
-
-
-def peak_kernel_fn(radius: Array, kernel_params: KernelParams) -> Array:
-	"""Peak kernel function introduced in [1]."""
-	return bell_(radius, kernel_params.mean, kernel_params.std)
+from ..lenia.growth import exponential_growth_fn
+from .kernel import peak_kernel_fn
+from .rule import RuleParams
 
 
 class ParticleLeniaPerceive(Perceive):
@@ -38,22 +25,23 @@ class ParticleLeniaPerceive(Perceive):
 
 	def __init__(
 		self,
-		num_dims: int,
+		num_spatial_dims: int,
 		rule_params: RuleParams,
+		*,
 		kernel_fn: Callable = peak_kernel_fn,
-		growth_fn: Callable = peak_kernel_fn,
+		growth_fn: Callable = exponential_growth_fn,
 	):
 		"""Initialize the LeniaPerceive layer.
 
 		Args:
-			num_dims: Number of spatial dimensions.
+			num_spatial_dims: Number of spatial dimensions.
 			rule_params: Parameters for the rules.
 			kernel_fn: Kernel function.
 			growth_fn: Growth mapping function.
 
 		"""
 		super().__init__()
-		self.num_dims = num_dims
+		self.num_spatial_dims = num_spatial_dims
 		self.kernel_fn = kernel_fn
 		self.growth_fn = growth_fn
 
@@ -78,9 +66,7 @@ class ParticleLeniaPerceive(Perceive):
 		r = jnp.sqrt(jnp.clip(jnp.sum(jnp.square(x - state), axis=-1), min=1e-10))
 
 		# Compute Lenia field
-		U = self.rule_params.kernel_params.weight * jnp.sum(
-			self.kernel_fn(r, self.rule_params.kernel_params)
-		)
+		U = jnp.sum(self.kernel_fn(r, self.rule_params.kernel_params))
 
 		# Compute growth field
 		G = self.growth_fn(U, self.rule_params.growth_params)

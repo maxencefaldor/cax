@@ -2,16 +2,12 @@
 
 from collections.abc import Callable
 
-import jax
-import jax.numpy as jnp
-from cax.core.ca import CA
-from cax.types import State
-from cax.utils.render import clip_and_uint8
+from cax.core.ca import CA, metrics_fn
 from flax import nnx
 
-from .lenia_perceive import LeniaPerceive, original_kernel_fn
-from .lenia_update import LeniaUpdate, growth_exponential
-from .types import RuleParams
+from .lenia_perceive import LeniaPerceive, gaussian_kernel_fn
+from .lenia_update import LeniaUpdate, exponential_growth_fn
+from .rule import RuleParams
 
 
 class Lenia(CA):
@@ -19,24 +15,23 @@ class Lenia(CA):
 
 	def __init__(
 		self,
-		num_dims: int,
+		spatial_dims: tuple[int, ...],
 		channel_size: int,
 		R: int,
 		T: int,
 		rule_params: RuleParams,
-		state_size: int,
+		*,
 		state_scale: float = 1,
-		kernel_fn: Callable = original_kernel_fn,
-		growth_fn: Callable = growth_exponential,
+		kernel_fn: Callable = gaussian_kernel_fn,
+		growth_fn: Callable = exponential_growth_fn,
+		metrics_fn: Callable = metrics_fn,
 	):
 		"""Initialize Lenia."""
-		self.num_dims = num_dims
 		perceive = LeniaPerceive(
-			num_dims=num_dims,
+			spatial_dims=spatial_dims,
 			channel_size=channel_size,
 			R=R,
 			rule_params=rule_params,
-			state_size=state_size,
 			state_scale=state_scale,
 			kernel_fn=kernel_fn,
 		)
@@ -46,37 +41,10 @@ class Lenia(CA):
 			rule_params=rule_params,
 			growth_fn=growth_fn,
 		)
-
-		super().__init__(perceive, update)
+		super().__init__(perceive, update, metrics_fn=metrics_fn)
 
 	@nnx.jit
 	def update_rule_params(self, rule_params: RuleParams):
 		"""Update the rule parameters."""
 		self.perceive.update_rule_params(rule_params)
 		self.update.update_rule_params(rule_params)
-
-	@nnx.jit
-	def render(self, state: State) -> jax.Array:
-		"""Render state.
-
-		Args:
-			state: An array of states.
-
-		Returns:
-			Rendered states.
-
-		"""
-		assert self.num_dims == 2, "Lenia only supports 2D visualization."
-
-		if state.shape[-1] == 1:
-			frame = jnp.repeat(state, 3, axis=-1)
-		elif state.shape[-1] == 2:
-			red = state[..., 0:1]
-			green = state[..., 1:2]
-			blue = jnp.zeros_like(red)
-			frame = jnp.concatenate([red, green, blue], axis=-1)
-		else:
-			frame = state[..., :3]
-
-		# Clip values to valid range and convert to uint8
-		return clip_and_uint8(frame)

@@ -1,6 +1,7 @@
 """Rendering utilities."""
 
 import jax.numpy as jnp
+from jax import Array
 
 
 def clip_and_uint8(frame):
@@ -62,3 +63,21 @@ def rgb_to_hsv(rgb):
 
 	hsv = jnp.stack([h, s, v], axis=-1)
 	return hsv.reshape(input_shape)
+
+
+def render_array(array: Array) -> Array:
+	"""Render an array as an image."""
+	if array.shape[-1] == 1:
+		# 1 channel
+		frame = jnp.repeat(array, 3, axis=-1)
+	elif array.shape[-1] == 2:
+		# 2 channels
+		red = array[..., 0:1]
+		green = array[..., 1:2]
+		blue = jnp.zeros_like(red)
+		frame = jnp.concatenate([red, green, blue], axis=-1)
+	else:
+		frame = array[..., :3]
+
+	# Clip values to valid range and convert to uint8
+	return clip_and_uint8(frame)

@@ -1,8 +1,11 @@
 """Boids model."""
 
+from collections.abc import Callable
+from functools import partial
+
 import jax
 import jax.numpy as jnp
-from cax.core.ca import CA
+from cax.core.ca import CA, metrics_fn
 from cax.types import State
 from cax.utils.render import clip_and_uint8
 from flax import nnx
@@ -21,6 +24,7 @@ class Boids(CA):
 		dt: float = 0.01,
 		velocity_half_life: float = jnp.inf,
 		boundary: str = "CIRCULAR",
+		metrics_fn: Callable = metrics_fn,
 	):
 		"""Initialize Boids."""
 		perceive = BoidsPerceive(
@@ -32,10 +36,9 @@ class Boids(CA):
 			velocity_half_life=velocity_half_life,
 			boundary=boundary,
 		)
+		super().__init__(perceive, update, metrics_fn=metrics_fn)
 
-		super().__init__(perceive, update)
-
-	@nnx.jit
+	@partial(nnx.jit, static_argnames=("resolution", "boids_size"))
 	def render(
 		self,
 		state: State,

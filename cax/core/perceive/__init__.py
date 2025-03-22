@@ -15,3 +15,14 @@ from .kernels import grad2_kernel, grad_kernel, identity_kernel, neighbors_kerne
 from .moore_perceive import MoorePerceive
 from .perceive import Perceive
 from .von_neumann_perceive import VonNeumannPerceive
+
+__all__ = [
+	"ConvPerceive",
+	"MoorePerceive",
+	"Perceive",
+	"VonNeumannPerceive",
+	"identity_kernel",
+	"neighbors_kernel",
+	"grad_kernel",
+	"grad2_kernel",
+]

@@ -10,6 +10,7 @@ class ParticleLifeUpdate(Update):
 
 	def __init__(
 		self,
+		*,
 		dt: float = 0.01,
 		velocity_half_life: float = 0.01,
 		boundary: str = "CIRCULAR",

@@ -1,14 +1,17 @@
 """Particle Life model."""
 
+from functools import partial
+
 import jax
 import jax.numpy as jnp
-from cax.core.ca import CA
+from cax.core.ca import CA, metrics_fn
 from cax.utils.render import clip_and_uint8, hsv_to_rgb
 from flax import nnx
+from collections.abc import Callable
 
 from .particle_life_perceive import ParticleLifePerceive
 from .particle_life_update import ParticleLifeUpdate
-from .types import State
+from .state import State
 
 
 class ParticleLife(CA):
@@ -25,6 +28,7 @@ class ParticleLife(CA):
 		velocity_half_life: float = 0.01,
 		force_factor: float = 1.0,
 		boundary: str = "CIRCULAR",
+		metrics_fn: Callable = metrics_fn,
 	):
 		"""Initialize Particle Life."""
 		self.num_classes = num_classes
@@ -39,16 +43,14 @@ class ParticleLife(CA):
 			force_factor=force_factor,
 			boundary=boundary,
 		)
-
 		update = ParticleLifeUpdate(
 			dt=dt,
 			velocity_half_life=velocity_half_life,
 			boundary=boundary,
 		)
+		super().__init__(perceive, update, metrics_fn=metrics_fn)
 
-		super().__init__(perceive, update)
-
-	@nnx.jit
+	@partial(nnx.jit, static_argnames=("resolution", "particle_radius"))
 	def render(
 		self,
 		state: State,

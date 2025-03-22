@@ -8,25 +8,16 @@ import jax
 import jax.numpy as jnp
 from flax import nnx
 
-from .types import State
+from .state import State
 
 
 class BoidPolicy(nnx.Module):
 	"""Boid policy according to Craig Reynolds' paper."""
 
-	rngs: nnx.Rngs
-	separation_weight: float = 4.5
-	alignment_weight: float = 0.65
-	cohesion_weight: float = 0.75
-	perception: float = 0.1
-	separation_distance: float = 0.05
-	acceleration_scale: float = 1.0
-	noise_scale: float = 0.0
-	acceleration_max: float = jnp.inf
-
 	def __init__(
 		self,
 		rngs: nnx.Rngs,
+		*,
 		separation_weight: float = 4.5,
 		alignment_weight: float = 0.65,
 		cohesion_weight: float = 0.75,
