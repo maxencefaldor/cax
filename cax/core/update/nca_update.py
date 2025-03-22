@@ -14,8 +14,6 @@ from cax.types import Input, Perception, State
 class NCAUpdate(ResidualUpdate):
 	"""Neural Cellular Automata Update class."""
 
-	alive_threshold: float
-
 	def __init__(
 		self,
 		channel_size: int,

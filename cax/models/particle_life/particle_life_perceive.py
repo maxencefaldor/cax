@@ -6,7 +6,7 @@ from cax.types import Perception, State
 from flax import nnx
 from jax import Array
 
-from .types import Perception as ParticleLifePerception
+from .perception import Perception as ParticleLifePerception
 
 
 class ParticleLifePerceive(Perceive):
@@ -18,6 +18,7 @@ class ParticleLifePerceive(Perceive):
 	def __init__(
 		self,
 		A: Array,
+		*,
 		r_max: float = 0.15,
 		beta: float = 0.3,
 		force_factor: float = 1.0,

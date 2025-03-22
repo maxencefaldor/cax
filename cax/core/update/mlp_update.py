@@ -14,9 +14,6 @@ from cax.types import Input, Perception, State
 class MLPUpdate(Update):
 	"""Multi-Layer Perceptron update class."""
 
-	layers: list[nnx.Conv]
-	activation_fn: Callable
-
 	def __init__(
 		self,
 		num_spatial_dims: int,

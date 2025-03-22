@@ -1,12 +1,32 @@
 """Flow Lenia module."""
 
-from ..lenia.lenia_perceive import LeniaPerceive, bell, free_kernel_fn, original_kernel_fn
-from ..lenia.types import (
+from ..lenia.growth import GrowthParams, exponential_growth_fn
+from ..lenia.kernel import (
 	FreeKernelParams,
-	GrowthParams,
 	KernelParams,
-	OriginalKernelParams,
-	RuleParams,
+	exponential_kernel_fn,
+	free_kernel_fn,
+	gaussian_kernel_fn,
+	polynomial_kernel_fn,
+	rectangular_kernel_fn,
 )
+from ..lenia.lenia_perceive import LeniaPerceive as FlowLeniaPerceive
+from ..lenia.rule import RuleParams
 from .flow_lenia import FlowLenia
-from .flow_lenia_update import FlowLeniaUpdate, growth_exponential
+from .flow_lenia_update import FlowLeniaUpdate
+
+__all__ = [
+	"FlowLenia",
+	"FlowLeniaPerceive",
+	"FlowLeniaUpdate",
+	"KernelParams",
+	"FreeKernelParams",
+	"exponential_kernel_fn",
+	"gaussian_kernel_fn",
+	"polynomial_kernel_fn",
+	"rectangular_kernel_fn",
+	"free_kernel_fn",
+	"GrowthParams",
+	"exponential_growth_fn",
+	"RuleParams",
+]

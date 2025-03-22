@@ -11,9 +11,6 @@ from cax.types import Input, Perception, State
 class ResidualUpdate(MLPUpdate):
 	"""Residual update module with cell dropout."""
 
-	step_size: float
-	cell_dropout_rate: float
-
 	def __init__(
 		self,
 		num_spatial_dims: int,

@@ -6,7 +6,7 @@ from cax.core.perceive.perceive import Perceive
 from cax.types import State
 from flax import nnx
 
-from .types import Perception
+from .perception import Perception
 
 
 class BoidsPerceive(Perceive):
@@ -14,8 +14,6 @@ class BoidsPerceive(Perceive):
 
 	This class implements perception based on the Boids.
 	"""
-
-	boid_policy: nnx.Module
 
 	def __init__(self, boid_policy: nnx.Module):
 		"""Initialize the Boids Perceive.

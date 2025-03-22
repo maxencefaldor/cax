@@ -5,18 +5,13 @@ from collections.abc import Callable
 import jax
 import jax.numpy as jnp
 from cax.core.update.update import Update
-from cax.models.lenia.lenia_perceive import bell
 from cax.types import Input, Perception, State
 from flax import nnx
 from jax import Array
 from jax.scipy.signal import convolve2d
 
-from ..lenia.types import GrowthParams, RuleParams
-
-
-def growth_exponential(u: Array, growth_params: GrowthParams) -> Array:
-	"""Growth mapping function introduced in [1]."""
-	return 2 * bell(u, growth_params.mean, growth_params.std) - 1
+from ..lenia.growth import exponential_growth_fn
+from ..lenia.rule import RuleParams
 
 
 class FlowLeniaUpdate(Update):
@@ -27,41 +22,42 @@ class FlowLeniaUpdate(Update):
 		channel_size: int,
 		T: int,
 		rule_params: RuleParams,
-		growth_fn: Callable = growth_exponential,
+		*,
+		growth_fn: Callable = exponential_growth_fn,
 		# Flow Lenia parameters
-		flow: bool = False,
 		theta_A: float = 1.0,
 		n: int = 2,
 		dd: int = 5,
 		sigma: float = 0.65,
-		boundary: str = "CIRCULAR",
 	):
 		"""Initialize the FlowLeniaUpdate.
 
 		Args:
+			channel_size: Number of channels.
 			T: Time resolution.
 			rule_params: Parameters for the rules.
 			growth_fn: Growth function.
-			flow: Whether to use Flow Lenia (True) or vanilla Lenia (False).
 			theta_A: Threshold for alpha computation in Flow Lenia.
 			n: Exponent for alpha computation in Flow Lenia.
 			dt: Time step for flow displacement.
 			dd: Maximum displacement distance.
 			sigma: Spread parameter for reintegration tracking.
-			boundary: Boundary condition.
 
 		"""
 		super().__init__()
+		self.channel_size = channel_size
 		self.T = T
-		self.rule_params = jax.tree.map(nnx.Variable, rule_params)
 		self.growth_fn = growth_fn
-		self.flow = flow
+
+		# Flow Lenia parameters
 		self.theta_A = theta_A
 		self.n = n
 		self.dt = 1 / self.T
 		self.dd = dd
 		self.sigma = sigma
-		self.boundary = boundary
+
+		# Set rule parameters
+		self.rule_params = jax.tree.map(nnx.Param, rule_params)
 
 		# Reshape kernel to channel
 		self.reshape_kernel_to_channel = nnx.Param(
@@ -83,32 +79,34 @@ class FlowLeniaUpdate(Update):
 
 		"""
 		# Compute growth
-		G_k = self.rule_params.weight[None, None, ...] * self.growth_fn(
+		G_k = self.rule_params.weight * self.growth_fn(
 			perception, self.rule_params.growth_params
-		)  # (y, x, k,)
+		)  # (*spatial_dims, num_rules,)
 
 		# Aggregate growth to channels
-		# Affinity map, previously called growth in Lenia
-		U = jnp.dot(G_k, self.reshape_kernel_to_channel.value)  # (y, x, c,)
+		# Affinity map U, previously called growth in Lenia
+		U = jnp.dot(G_k, self.reshape_kernel_to_channel.value)  # (*spatial_dims, channel_size,)
 
 		# Affinity gradient
-		nabla_U = sobel(U)  # (y, x, 2, c)
+		nabla_U = sobel(U)  # (*spatial_dims, 2, c)
 
 		# Concentration gradient - diffusion term
-		nabla_A = sobel(jnp.sum(state, axis=-1, keepdims=True))  # (y, x, 2, 1)
+		nabla_A = sobel(jnp.sum(state, axis=-1, keepdims=True))  # (*spatial_dims, 2, 1)
 
 		# Weight
-		alpha = jnp.clip((state[:, :, None, :] / self.theta_A) ** self.n, 0.0, 1.0)  # (y, x, 1, c)
+		alpha = jnp.clip(
+			(state[:, :, None, :] / self.theta_A) ** self.n, 0.0, 1.0
+		)  # (*spatial_dims, 1, channel_size)
 
 		# Flow - instantaneous speed of matter
-		F = nabla_U * (1 - alpha) - nabla_A * alpha  # (y, x, 2, c)
+		F = nabla_U * (1 - alpha) - nabla_A * alpha  # (*spatial_dims, 2, channel_size)
 
 		# Reintegration tracking
 		state = self.apply_reintegration_tracking(state, F)
 
 		return state
 
-	def apply_reintegration_tracking(self, state, F):
+	def apply_reintegration_tracking(self, state: State, F: Array) -> State:
 		"""Apply reintegration tracking to update the state based on the flow field.
 
 		Args:
@@ -138,33 +136,24 @@ class FlowLeniaUpdate(Update):
 		F_clipped = jnp.clip(self.dt * F, -ma, ma)  # (SY, SX, 2, C)
 		mu = pos[..., None] + F_clipped  # (SY, SX, 2, C)
 
-		if self.boundary == "wall":
-			mu = mu.at[:, :, 0, :].set(jnp.clip(mu[:, :, 0, :], self.sigma, SY - self.sigma))
-			mu = mu.at[:, :, 1, :].set(jnp.clip(mu[:, :, 1, :], self.sigma, SX - self.sigma))
-
 		# Define step function for each displacement
 		def step(dy, dx):
 			Xr = jnp.roll(state, (dy, dx), axis=(0, 1))  # (SY, SX, C)
 			mur = jnp.roll(mu, (dy, dx), axis=(0, 1))  # (SY, SX, 2, C)
 
-			if self.boundary == "CIRCULAR":
-				shifts_y = [-SY, 0, SY]
-				shifts_x = [-SX, 0, SX]
-				dpmu = jnp.min(
-					jnp.stack(
-						[
-							jnp.abs(
-								pos[..., None] - (mur + jnp.array([di, dj])[None, None, :, None])
-							)
-							for di in shifts_y
-							for dj in shifts_x
-						],
-						axis=0,
-					),
+			shifts_y = [-SY, 0, SY]
+			shifts_x = [-SX, 0, SX]
+			dpmu = jnp.min(
+				jnp.stack(
+					[
+						jnp.abs(pos[..., None] - (mur + jnp.array([di, dj])[None, None, :, None]))
+						for di in shifts_y
+						for dj in shifts_x
+					],
 					axis=0,
-				)  # (SY, SX, 2, C)
-			else:
-				dpmu = jnp.abs(pos[..., None] - mur)  # (SY, SX, 2, C)
+				),
+				axis=0,
+			)  # (SY, SX, 2, C)
 
 			sz = 0.5 - dpmu + self.sigma  # (SY, SX, 2, C)
 			clipped_sz = jnp.clip(sz, 0, min(1, 2 * self.sigma))  # (SY, SX, 2, C)

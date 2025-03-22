@@ -8,7 +8,7 @@ from flax import nnx
 class ElementaryCAPerceive(ConvPerceive):
 	"""Elementary Cellular Automata perceive class."""
 
-	def __init__(self, rngs: nnx.Rngs, padding: str = "CIRCULAR"):
+	def __init__(self, rngs: nnx.Rngs, *, padding: str = "CIRCULAR"):
 		"""Initialize ElementaryCAPerceive."""
 		channel_size = 1
 		super().__init__(

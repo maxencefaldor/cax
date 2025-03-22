@@ -11,10 +11,7 @@ from jax import Array
 class ElementaryCAUpdate(Update):
 	"""Elementary Cellular Automata update class."""
 
-	patterns: nnx.Param
-	values: nnx.Param
-
-	def __init__(self, wolfram_code: str = "01101110"):
+	def __init__(self, *, wolfram_code: str = "01101110"):
 		"""Initialize the ElementaryUpdate.
 
 		Args:

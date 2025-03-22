@@ -11,14 +11,6 @@ from jax import Array
 class Encoder(nnx.Module):
 	"""Encoder module for the VAE."""
 
-	features: Sequence[int]
-	latent_size: int
-	convs: Sequence[nnx.Conv]
-	linear: nnx.Linear
-	mean: nnx.Linear
-	logvar: nnx.Linear
-	rngs: nnx.Rngs
-
 	def __init__(
 		self, spatial_dims: Sequence[int], features: Sequence[int], latent_size: int, rngs: nnx.Rngs
 	):
@@ -94,12 +86,6 @@ class Encoder(nnx.Module):
 class Decoder(nnx.Module):
 	"""Decoder module for the VAE."""
 
-	features: Sequence[int]
-	latent_size: int
-	convs: Sequence[nnx.ConvTranspose]
-	linear: nnx.Linear
-	_spatial_dims: tuple[int, int]
-
 	def __init__(
 		self, spatial_dims: Sequence[int], features: Sequence[int], latent_size: int, rngs: nnx.Rngs
 	):
@@ -159,9 +145,6 @@ class Decoder(nnx.Module):
 
 class VAE(nnx.Module):
 	"""Variational Autoencoder module."""
-
-	encoder: Encoder
-	decoder: Decoder
 
 	def __init__(
 		self,

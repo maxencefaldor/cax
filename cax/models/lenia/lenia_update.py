@@ -5,31 +5,24 @@ from collections.abc import Callable
 import jax
 import jax.numpy as jnp
 from cax.core.update.update import Update
-from cax.models.lenia.lenia_perceive import bell
 from cax.types import Input, Perception, State
 from flax import nnx
 from jax import Array
 
-from .types import GrowthParams, RuleParams
-
-
-def growth_exponential(u: Array, growth_params: GrowthParams) -> Array:
-	"""Growth mapping function introduced in [1]."""
-	return 2 * bell(u, growth_params.mean, growth_params.std) - 1
+from .growth import exponential_growth_fn
+from .rule import RuleParams
 
 
 class LeniaUpdate(Update):
 	"""Lenia update class."""
-
-	rule_params: RuleParams
-	reshape_kernel_to_channel: nnx.Variable
 
 	def __init__(
 		self,
 		channel_size: int,
 		T: int,
 		rule_params: RuleParams,
-		growth_fn: Callable = growth_exponential,
+		*,
+		growth_fn: Callable = exponential_growth_fn,
 	):
 		"""Initialize the LeniaUpdate.
 
@@ -66,15 +59,13 @@ class LeniaUpdate(Update):
 
 		"""
 		# Compute growth
-		G_k = self.rule_params.weight[None, None, ...] * self.growth_fn(
-			perception, self.rule_params.growth_params
-		)  # (y, x, k,)
+		G_k = self.rule_params.weight * self.growth_fn(perception, self.rule_params.growth_params)
 
 		# Aggregate growth to channels
-		G = jnp.dot(G_k, self.reshape_kernel_to_channel.value)  # (y, x, c,)
+		G = jnp.dot(G_k, self.reshape_kernel_to_channel.value)
 
 		# Update state and clip
-		state = jnp.clip(state + 1 / self.T * G, 0.0, 1.0)  # (y, x, c,)
+		state = jnp.clip(state + G / self.T, 0.0, 1.0)
 
 		return state
 

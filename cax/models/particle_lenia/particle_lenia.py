@@ -8,14 +8,16 @@ from functools import partial
 
 import jax
 import jax.numpy as jnp
-from cax.core.ca import CA
+from cax.core.ca import CA, metrics_fn
 from cax.types import State
 from cax.utils.render import clip_and_uint8
 from flax import nnx
 
-from .particle_lenia_perceive import ParticleLeniaPerceive, peak_kernel_fn
+from ..lenia.growth import exponential_growth_fn
+from .kernel import peak_kernel_fn
+from .particle_lenia_perceive import ParticleLeniaPerceive
 from .particle_lenia_update import ParticleLeniaUpdate
-from .types import RuleParams
+from .rule import RuleParams
 
 
 class ParticleLenia(CA):
@@ -23,16 +25,18 @@ class ParticleLenia(CA):
 
 	def __init__(
 		self,
-		num_dims: int,
+		num_spatial_dims: int,
 		T: int,
 		rule_params: RuleParams,
+		*,
 		kernel_fn: Callable = peak_kernel_fn,
-		growth_fn: Callable = peak_kernel_fn,
+		growth_fn: Callable = exponential_growth_fn,
+		metrics_fn: Callable = metrics_fn,
 	):
 		"""Initialize Particle Lenia."""
-		self.num_dims = num_dims
+		self.num_spatial_dims = num_spatial_dims
 		perceive = ParticleLeniaPerceive(
-			num_dims=num_dims,
+			num_spatial_dims=num_spatial_dims,
 			rule_params=rule_params,
 			kernel_fn=kernel_fn,
 			growth_fn=growth_fn,
@@ -40,28 +44,25 @@ class ParticleLenia(CA):
 		update = ParticleLeniaUpdate(
 			T=T,
 		)
+		super().__init__(perceive, update, metrics_fn=metrics_fn)
 
-		super().__init__(perceive, update)
-
-	@partial(
-		nnx.jit, static_argnames=("resolution", "extent", "particle_radius", "visualization_type")
-	)
+	@partial(nnx.jit, static_argnames=("resolution", "extent", "particle_radius", "type"))
 	def render(
 		self,
 		state: State,
-		resolution: int = 100,
+		resolution: int = 512,
 		extent: float = 15.0,
 		particle_radius: float = 0.3,
-		visualization_type: str = "UG",  # Options: "particles", "UG", "E"
+		type: str = "UG",  # Options: "particles", "UG", "E"
 	) -> jax.Array:
 		"""Render the particle positions and fields as a pixel array.
 
 		Args:
-			state: Array of shape (num_particles, num_dims) containing particle positions.
+			state: Array of shape (num_particles, num_spatial_dims) containing particle positions.
 			resolution: Resolution of the output image.
 			extent: Extent of the viewing area.
 			particle_radius: Radius of particles.
-			visualization_type: Type of visualization to show:
+			type: Type of visualization to show:
 				"particles": Only show particles (default)
 				"ug": Show kernel and growth fields with particles
 				"e": Show energy field with particles
@@ -70,7 +71,7 @@ class ParticleLenia(CA):
 			An array of pixels representing the particle positions and fields.
 
 		"""
-		assert self.num_dims == 2, "Particle Lenia only supports 2D visualization."
+		assert self.num_spatial_dims == 2, "Particle Lenia only supports 2D visualization."
 
 		# Create a grid of coordinates
 		x = jnp.linspace(-extent, extent, resolution)
@@ -109,7 +110,7 @@ class ParticleLenia(CA):
 		particle_mask = jnp.clip(1.0 - distance_sq_min / (particle_radius**2), 0.0, 1.0)
 
 		# Normalize fields for visualization
-		E_norm = (E_field - jnp.min(E_field)) / (jnp.max(E_field) - jnp.min(E_field) + 1e-8)
+		_ = (E_field - jnp.min(E_field)) / (jnp.max(E_field) - jnp.min(E_field) + 1e-8)  # E_norm
 		U_norm = (U_field - jnp.min(U_field)) / (jnp.max(U_field) - jnp.min(U_field) + 1e-8)
 		G_norm = (G_field - jnp.min(G_field)) / (jnp.max(G_field) - jnp.min(G_field) + 1e-8)
 
@@ -127,10 +128,10 @@ class ParticleLenia(CA):
 		)
 
 		# Choose visualization based on type
-		if visualization_type == "UG":
+		if type == "UG":
 			# Blend particles with UG field
 			frame = vis_ug * (1.0 - particle_mask * 0.7) + vis_particle * (particle_mask * 0.7)
-		elif visualization_type == "E":
+		elif type == "E":
 			# Blend particles with E field
 			frame = vis_e * (1.0 - particle_mask * 0.7) + vis_particle * (particle_mask * 0.7)
 		else:  # "particles" (default)

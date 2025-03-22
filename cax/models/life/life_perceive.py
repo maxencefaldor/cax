@@ -9,7 +9,7 @@ from flax import nnx
 class LifePerceive(ConvPerceive):
 	"""Life perceive class."""
 
-	def __init__(self, rngs: nnx.Rngs, padding: str = "CIRCULAR"):
+	def __init__(self, rngs: nnx.Rngs, *, padding: str = "CIRCULAR"):
 		"""Initialize LifePerceive."""
 		channel_size = 1
 		super().__init__(
