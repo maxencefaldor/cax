@@ -134,27 +134,6 @@ def step(self, state: State, input: Input | None = None) -> State:
 
 and a full forward pass will correspond to a simple jax.lax.scan of this function.
 
-### Training Loop
-
-For neural cellular automata training, a typical training loop follows this structure:
-
-```python
-@nnx.jit
-def train_step(ca, optimizer, state, target, key):
-	# Forward pass with value and gradient computation
-	(loss, state), grad = nnx.value_and_grad(loss_fn, has_aux=True)(
-		ca, state, target
-	)
-	# Update model parameters
-	optimizer.update(grad)
-	return loss, state
-
-# Main training loop
-for i in range(num_train_steps):
-	key, subkey = jax.random.split(key)
-	loss, state = train_step(ca, optimizer, state, target, subkey)
-```
-
 ### Common Pitfalls
 
 - Avoid Python loops over cells - use vectorized operations

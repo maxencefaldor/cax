@@ -10,7 +10,6 @@ dependencies = [
 	"flax",
 	"optax",
 	"pillow",
-	"requests",
 ]
 requires-python = ">=3.10"
 authors = [
@@ -39,6 +38,7 @@ dev = [
 examples = [
 	"torch",
 	"torchvision",
+	"tqdm",
 	"ipykernel",
 	"mediapy",
 ]
@@ -73,5 +73,4 @@ show_error_codes = "True"
 warn_unused_ignores = "True"
 
 [[tool.mypy.overrides]]
-module = ["requests.*"]
 ignore_missing_imports = true

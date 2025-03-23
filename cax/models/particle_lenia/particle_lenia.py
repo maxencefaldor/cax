@@ -55,7 +55,7 @@ class ParticleLenia(CA):
 		particle_radius: float = 0.3,
 		type: str = "UG",  # Options: "particles", "UG", "E"
 	) -> jax.Array:
-		"""Render the particle positions and fields as a pixel array.
+		"""Render state to RGB.
 
 		Args:
 			state: Array of shape (num_particles, num_spatial_dims) containing particle positions.
@@ -130,13 +130,13 @@ class ParticleLenia(CA):
 		# Choose visualization based on type
 		if type == "UG":
 			# Blend particles with UG field
-			frame = vis_ug * (1.0 - particle_mask * 0.7) + vis_particle * (particle_mask * 0.7)
+			rgb = vis_ug * (1.0 - particle_mask * 0.7) + vis_particle * (particle_mask * 0.7)
 		elif type == "E":
 			# Blend particles with E field
-			frame = vis_e * (1.0 - particle_mask * 0.7) + vis_particle * (particle_mask * 0.7)
+			rgb = vis_e * (1.0 - particle_mask * 0.7) + vis_particle * (particle_mask * 0.7)
 		else:  # "particles" (default)
 			# Just show particles
-			frame = vis_particle
+			rgb = vis_particle
 
 		# Clip values to valid range and convert to uint8
-		return clip_and_uint8(frame)
+		return clip_and_uint8(rgb)

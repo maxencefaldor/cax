@@ -3,8 +3,8 @@
 import jax.numpy as jnp
 import pytest
 from cax.core.ca import CA
-from cax.core.perceive.conv_perceive import ConvPerceive
-from cax.core.update.residual_update import ResidualUpdate
+from cax.core.perceive import ConvPerceive
+from cax.core.update import ResidualUpdate
 from flax import nnx
 
 

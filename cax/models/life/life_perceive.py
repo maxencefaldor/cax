@@ -1,8 +1,7 @@
 """Life perceive module."""
 
 import jax.numpy as jnp
-from cax.core.perceive.conv_perceive import ConvPerceive
-from cax.core.perceive.kernels import identity_kernel, neighbors_kernel
+from cax.core.perceive import ConvPerceive, identity_kernel, neighbors_kernel
 from flax import nnx
 
 

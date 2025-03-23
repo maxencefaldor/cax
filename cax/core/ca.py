@@ -6,10 +6,9 @@ from functools import partial
 from flax import nnx
 from jax import Array
 
-from cax.core.perceive.perceive import Perceive
-from cax.core.update.update import Update
+from cax.core.perceive import Perceive
+from cax.core.update import Update
 from cax.types import Input, Metrics, Perception, State
-from cax.utils.render import render_array
 
 
 def metrics_fn(next_state: State, state: State, perception: Perception, input: Input) -> Metrics:
@@ -46,7 +45,7 @@ class CA(nnx.Module):
 
 	@nnx.jit
 	def step(self, state: State, input: Input | None = None) -> tuple[State, Metrics]:
-		"""Perform a single step of the CA.
+		"""Perform a single step.
 
 		Args:
 			state: Current state.
@@ -97,13 +96,13 @@ class CA(nnx.Module):
 
 	@nnx.jit
 	def render(self, state: State) -> Array:
-		"""Render state.
+		"""Render state to RGB.
 
 		Args:
-			state: An array with two spatial dimensions.
+			state: An array with two spatial/time dimensions.
 
 		Returns:
-			Rendered states.
+			The rendered RGB image in uint8 format.
 
 		"""
-		return render_array(state)
+		raise NotImplementedError

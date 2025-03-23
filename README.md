@@ -60,8 +60,8 @@ The library is thoroughly tested and documented with numerous examples to get yo
 ```python
 import jax
 from cax.core.ca import CA
-from cax.core.perceive.conv_perceive import ConvPerceive
-from cax.core.update.nca_update import NCAUpdate
+from cax.core.perceive import ConvPerceive
+from cax.core.update import NCAUpdate
 from flax import nnx
 
 seed = 0
