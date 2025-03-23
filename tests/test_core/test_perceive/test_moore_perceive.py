@@ -2,7 +2,7 @@
 
 import jax.numpy as jnp
 import pytest
-from cax.core.perceive.moore_perceive import MoorePerceive
+from cax.core.perceive import MoorePerceive
 
 
 @pytest.fixture

@@ -1,11 +1,10 @@
-"""Utility functions for image processing."""
+"""Utilities for emojis."""
 
 import io
+from urllib.request import urlopen
 
 import jax
-import jax.numpy as jnp
 import PIL.Image
-import requests
 from PIL.Image import Image
 
 
@@ -19,12 +18,14 @@ def get_image_from_url(url: str) -> Image:
 		The fetched image as a PIL Image object.
 
 	"""
-	r = requests.get(url)
-	image_pil = PIL.Image.open(io.BytesIO(r.content))
+	with urlopen(url) as response:
+		image_data = response.read()
+
+	image_pil = PIL.Image.open(io.BytesIO(image_data))
 	return image_pil
 
 
-def get_emoji(emoji: str, *, size: int, padding: int) -> jax.Array:
+def get_emoji(emoji: str) -> jax.Array:
 	"""Fetch, process, and return an emoji as a JAX array.
 
 	Args:
@@ -40,9 +41,4 @@ def get_emoji(emoji: str, *, size: int, padding: int) -> jax.Array:
 	code = hex(ord(emoji))[2:].lower()
 	url = f"https://github.com/googlefonts/noto-emoji/blob/main/png/128/emoji_u{code}.png?raw=true"
 	image_pil = get_image_from_url(url)
-
-	# Resize and pad the image
-	image_pil.thumbnail((size, size), resample=PIL.Image.Resampling.LANCZOS)
-	image = jnp.array(image_pil, dtype=jnp.float32) / 255.0
-	image = jnp.pad(image, ((padding, padding), (padding, padding), (0, 0)))
-	return image
+	return image_pil

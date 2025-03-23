@@ -2,7 +2,7 @@
 
 import jax
 import jax.numpy as jnp
-from cax.core.perceive.perceive import Perceive
+from cax.core.perceive import Perceive
 from cax.types import State
 from flax import nnx
 

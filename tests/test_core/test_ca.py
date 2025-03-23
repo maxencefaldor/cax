@@ -3,8 +3,8 @@
 import jax.numpy as jnp
 import pytest
 from cax.core.ca import CA
-from cax.core.perceive.perceive import Perceive
-from cax.core.update.update import Update
+from cax.core.perceive import Perceive
+from cax.core.update import Update
 from flax import nnx
 
 

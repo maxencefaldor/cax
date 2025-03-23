@@ -1,7 +1,7 @@
 """Elementary Cellular Automata perceive module."""
 
 import jax.numpy as jnp
-from cax.core.perceive.conv_perceive import ConvPerceive
+from cax.core.perceive import ConvPerceive
 from flax import nnx
 
 

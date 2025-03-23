@@ -1,5 +1,6 @@
 """Particle Life model."""
 
+from collections.abc import Callable
 from functools import partial
 
 import jax
@@ -7,7 +8,6 @@ import jax.numpy as jnp
 from cax.core.ca import CA, metrics_fn
 from cax.utils.render import clip_and_uint8, hsv_to_rgb
 from flax import nnx
-from collections.abc import Callable
 
 from .particle_life_perceive import ParticleLifePerceive
 from .particle_life_update import ParticleLifeUpdate
@@ -57,7 +57,7 @@ class ParticleLife(CA):
 		resolution: int = 512,
 		particle_radius: float = 0.005,
 	) -> jax.Array:
-		"""Render state.
+		"""Render state to RGB.
 
 		Args:
 			state: An array of states containing class_, position, and velocity.
@@ -105,9 +105,9 @@ class ParticleLife(CA):
 		background = jnp.zeros((resolution, resolution, 3))  # Shape: (resolution, resolution, 3)
 
 		# Blend particle colors with background using the mask
-		frame = (
+		rgb = (
 			background * (1.0 - mask[..., None]) + particle_colors * mask[..., None]
 		)  # Shape: (resolution, resolution, 3)
 
 		# Clip values to valid range and convert to uint8
-		return clip_and_uint8(frame)
+		return clip_and_uint8(rgb)

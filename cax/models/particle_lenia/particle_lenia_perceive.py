@@ -7,7 +7,7 @@ from collections.abc import Callable
 
 import jax
 import jax.numpy as jnp
-from cax.core.perceive.perceive import Perceive
+from cax.core.perceive import Perceive
 from cax.types import Perception, State
 from flax import nnx
 from jax import Array

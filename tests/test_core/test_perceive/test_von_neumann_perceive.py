@@ -2,7 +2,7 @@
 
 import jax.numpy as jnp
 import pytest
-from cax.core.perceive.von_neumann_perceive import VonNeumannPerceive
+from cax.core.perceive import VonNeumannPerceive
 
 
 @pytest.fixture

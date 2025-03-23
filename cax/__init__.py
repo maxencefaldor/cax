@@ -1,1 +1,1 @@
-"""CAX: Cellular Automata Accelerated."""
+"""CAX: Cellular Automata Accelerated in JAX."""

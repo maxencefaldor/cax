@@ -7,7 +7,7 @@ import jax
 import jax.numpy as jnp
 from cax.core.ca import CA, metrics_fn
 from cax.types import State
-from cax.utils.render import clip_and_uint8
+from cax.utils import clip_and_uint8
 from flax import nnx
 
 from .boids_perceive import BoidsPerceive
@@ -45,7 +45,7 @@ class Boids(CA):
 		resolution: int = 512,
 		boids_size: float = 0.01,
 	) -> jax.Array:
-		"""Render state.
+		"""Render state to RGB.
 
 		Args:
 			state: An array of states containing position and velocity.
@@ -117,8 +117,8 @@ class Boids(CA):
 		# Determine if pixel is inside the triangle
 		inside = (cross0 > 0) & (cross1 > 0) & (cross2 > 0)  # Shape: (resolution, resolution)
 
-		# Create image frame
-		frame = inside[..., None].astype(jnp.float32)  # Shape: (resolution, resolution, 1)
-		frame = jnp.repeat(frame, 3, axis=-1)  # Shape: (resolution, resolution, 3)
+		# Create RGB image
+		gray = inside[..., None].astype(jnp.float32)  # Shape: (resolution, resolution, 1)
+		rgb = jnp.repeat(gray, 3, axis=-1)  # Shape: (resolution, resolution, 3)
 
-		return clip_and_uint8(frame)
+		return clip_and_uint8(rgb)

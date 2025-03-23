@@ -6,7 +6,6 @@ from functools import partial
 from flax import nnx
 from jax import Array
 
-from cax.core.state import state_to_alive
 from cax.core.update.residual_update import ResidualUpdate
 from cax.types import Input, Perception, State
 
@@ -87,3 +86,16 @@ class NCAUpdate(ResidualUpdate):
 		alive = state_to_alive(state)
 		alive_mask: Array = self.pool(alive) > self.alive_threshold
 		return alive_mask
+
+
+def state_to_alive(state: State) -> State:
+	"""Extract the 'alive' component from the state.
+
+	Args:
+		state: The input state.
+
+	Returns:
+		State: The 'alive' component of the state.
+
+	"""
+	return state[..., -1:]

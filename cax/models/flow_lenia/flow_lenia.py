@@ -3,6 +3,10 @@
 from collections.abc import Callable
 
 from cax.core.ca import CA, metrics_fn
+from cax.types import State
+from cax.utils import clip_and_uint8, render_array_with_channels_to_rgb
+from flax import nnx
+from jax import Array
 
 from ..lenia.lenia_perceive import LeniaPerceive, gaussian_kernel_fn
 from ..lenia.rule import RuleParams
@@ -45,6 +49,7 @@ class FlowLenia(CA):
 			n: Exponent for alpha in Flow Lenia.
 			dd: Maximum displacement distance.
 			sigma: Spread parameter.
+			metrics_fn: Metrics function.
 
 		"""
 		perceive = LeniaPerceive(
@@ -66,3 +71,19 @@ class FlowLenia(CA):
 			sigma=sigma,
 		)
 		super().__init__(perceive, update, metrics_fn=metrics_fn)
+
+	@nnx.jit
+	def render(self, state: State) -> Array:
+		"""Render state to RGB.
+
+		Args:
+			state: An array with two spatial/time dimensions.
+
+		Returns:
+			The rendered RGB image in uint8 format.
+
+		"""
+		rgb = render_array_with_channels_to_rgb(state)
+
+		# Clip values to valid range and convert to uint8
+		return clip_and_uint8(rgb)

@@ -1,4 +1,4 @@
-"""Variational Autoencoder implementation."""
+"""Variational Autoencoder module."""
 
 from collections.abc import Sequence
 
@@ -254,12 +254,12 @@ def binary_cross_entropy_with_logits(logits: Array, labels: Array) -> Array:
 
 
 @jax.jit
-def vae_loss(logits: Array, targets: Array, mean: Array, logvar: Array) -> Array:
+def vae_loss(logits: Array, y: Array, mean: Array, logvar: Array) -> Array:
 	"""Compute VAE loss.
 
 	Args:
 		logits: Predicted logits.
-		targets: True targets.
+		y: Label in one hot encoding.
 		mean: Mean of the latent distribution.
 		logvar: Log variance of the latent distribution.
 
@@ -267,6 +267,6 @@ def vae_loss(logits: Array, targets: Array, mean: Array, logvar: Array) -> Array
 		Total VAE loss.
 
 	"""
-	bce_loss = jnp.mean(binary_cross_entropy_with_logits(logits, targets))
+	bce_loss = jnp.mean(binary_cross_entropy_with_logits(logits, y))
 	kld_loss = jnp.mean(kl_divergence(mean, logvar))
 	return bce_loss + kld_loss

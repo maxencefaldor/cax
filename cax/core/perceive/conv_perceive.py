@@ -4,8 +4,9 @@ from collections.abc import Callable
 
 from flax import nnx
 
-from cax.core.perceive.perceive import Perceive
 from cax.types import Perception, State
+
+from .perceive import Perceive
 
 
 class ConvPerceive(Perceive):

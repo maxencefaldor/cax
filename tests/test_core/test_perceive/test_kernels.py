@@ -2,7 +2,7 @@
 
 import jax.numpy as jnp
 import pytest
-from cax.core.perceive.kernels import grad_kernel, identity_kernel, neighbors_kernel
+from cax.core.perceive import grad_kernel, identity_kernel, neighbors_kernel
 
 
 def test_identity_kernel() -> None:
