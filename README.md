@@ -1,9 +1,14 @@
 # CAX: Cellular Automata Accelerated in JAX
 
-[![Pyversions](https://img.shields.io/pypi/pyversions/cax.svg?style=flat-square)](https://pypi.python.org/pypi/cax)
+<div align="center">
+	<img src="docs/cax.png" alt="logo"></img>
+</div>
+
+[![Pyversions](https://img.shields.io/pypi/pyversions/cax.svg?style=flat)](https://pypi.python.org/pypi/cax)
 [![PyPI version](https://badge.fury.io/py/cax.svg)](https://badge.fury.io/py/cax)
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 [![Paper](http://img.shields.io/badge/paper-arxiv.2410.02651-B31B1B.svg)](https://arxiv.org/abs/2410.02651)
+[![X](https://img.shields.io/badge/X-%23000000.svg?style=for-the-badge&logo=X&logoColor=white&style=flat)](https://x.com/maxencefaldor/status/1842211478796918945)
 
 CAX is a high-performance and flexible open-source library designed to **accelerate artificial life research**. 🧬
 
@@ -57,6 +62,8 @@ The library is thoroughly tested and documented with numerous examples to get yo
 
 ## Getting Started 🚦
 
+Here, you can see the basic CAX API usage:
+
 ```python
 import jax
 from cax.core.ca import CA
@@ -91,8 +98,10 @@ update = NCAUpdate(
 ca = CA(perceive, update)
 
 state = jax.random.normal(key, (64, 64, channel_size))
-state = ca(state, num_steps=128)
+state, metrics = ca(state, num_steps=128)
 ```
+
+For a more detailed overview, get started with this notebook [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/maxencefaldor/cax/blob/main/examples/00_getting_started.ipynb)
 
 ## Installation ⚙️
 
