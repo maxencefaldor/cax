@@ -1,7 +1,7 @@
 # CAX: Cellular Automata Accelerated in JAX
 
 <div align="center">
-	<img src="docs/cax.png" alt="logo"></img>
+	<img src="docs/cax.png" alt="logo" width="512"></img>
 </div>
 
 [![Pyversions](https://img.shields.io/pypi/pyversions/cax.svg?style=flat)](https://pypi.python.org/pypi/cax)
@@ -40,7 +40,7 @@ CAX is built on top of the JAX/Flax ecosystem for speed and scalability. The lib
 
 The library is thoroughly tested and documented with numerous examples to get you started! Our comprehensive guides walk you through everything from basic cellular automata to advanced neural implementations.
 
-## Implemented Systems 🦎
+## Implemented Models 🦎
 
 | Cellular Automata | Reference | Example |
 | --- | --- | --- |
@@ -128,7 +128,7 @@ If you use CAX in your research, please cite the following paper:
 	booktitle   = {The Thirteenth International Conference on Learning Representations},
 	year        = {2025},
 	url         = {https://openreview.net/forum?id=o2Igqm95SJ},
-	keywords    = {cellular automata, emergence, self-organization, neural cellular automata},
+	keywords    = {artificial life, emergence, self-organization, open-endedness, cellular automata, neural cellular automata},
 }
 ```
 
