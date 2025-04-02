@@ -20,10 +20,11 @@ readme = "README.md"
 license = {file = "LICENSE"}
 keywords = [
 	"artificial life",
-	"cellular automata",
-	"self-organization",
 	"emergence",
+	"self-organization",
 	"open-endedness",
+	"cellular automata",
+	"neural cellular automata",
 ]
 classifiers = [
 	"Programming Language :: Python :: 3.10",
