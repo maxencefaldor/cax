@@ -2,6 +2,7 @@
 
 import jax.numpy as jnp
 import pytest
+
 from cax.core.perceive.particle_life_perceive import ParticleLifePerceive
 
 

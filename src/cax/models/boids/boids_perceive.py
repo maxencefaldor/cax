@@ -2,9 +2,10 @@
 
 import jax
 import jax.numpy as jnp
+from flax import nnx
+
 from cax.core.perceive import Perceive
 from cax.types import State
-from flax import nnx
 
 from .perception import Perception
 

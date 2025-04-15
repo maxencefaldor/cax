@@ -7,10 +7,11 @@ from collections.abc import Callable
 
 import jax
 import jax.numpy as jnp
-from cax.core.perceive import Perceive
-from cax.types import Perception, State
 from flax import nnx
 from jax import Array
+
+from cax.core.perceive import Perceive
+from cax.types import Perception, State
 
 from ..lenia.growth import exponential_growth_fn
 from .kernel import peak_kernel_fn

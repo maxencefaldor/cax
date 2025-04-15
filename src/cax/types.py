@@ -1,11 +1,9 @@
 """Type definitions for CAX."""
 
-from typing import Any, TypeAlias
+from typing import Any
 
-PyTree: TypeAlias = Any
-
-State: TypeAlias = PyTree
-Perception: TypeAlias = PyTree
-Input: TypeAlias = PyTree
-
-Metrics: TypeAlias = PyTree
+type PyTree = Any
+type State = PyTree
+type Perception = PyTree
+type Input = PyTree
+type Metrics = PyTree

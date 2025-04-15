@@ -2,10 +2,11 @@
 
 import jax.numpy as jnp
 import pytest
+from flax import nnx
+
 from cax.core.ca import CA
 from cax.core.perceive import Perceive
 from cax.core.update import Update
-from flax import nnx
 
 
 class DummyPerceive(Perceive):

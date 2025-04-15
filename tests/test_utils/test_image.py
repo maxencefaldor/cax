@@ -7,18 +7,19 @@ from unittest.mock import MagicMock, patch
 import jax.numpy as jnp
 import PIL.Image
 import pytest
+
 from cax.utils.emoji import get_emoji, get_image_from_url
 
 
 @pytest.fixture
-def mock_requests_get() -> Generator[MagicMock, None, None]:
+def mock_requests_get() -> Generator[MagicMock]:
 	"""Fixture to mock requests.get."""
 	with patch("requests.get") as mock_get:
 		yield mock_get
 
 
 @pytest.fixture
-def mock_pil_image() -> Generator[MagicMock, None, None]:
+def mock_pil_image() -> Generator[MagicMock]:
 	"""Fixture to mock PIL.Image.open."""
 	with patch("PIL.Image.open") as mock_open:
 		yield mock_open

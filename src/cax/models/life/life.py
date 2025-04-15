@@ -3,11 +3,12 @@
 from collections.abc import Callable
 
 import jax.numpy as jnp
+from flax import nnx
+from jax import Array
+
 from cax.core.ca import CA, metrics_fn
 from cax.types import State
 from cax.utils import clip_and_uint8
-from flax import nnx
-from jax import Array
 
 from .life_perceive import LifePerceive
 from .life_update import LifeUpdate
