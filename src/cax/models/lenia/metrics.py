@@ -9,6 +9,7 @@ for analyzing the state and dynamics of the Lenia system.
 """
 
 import jax.numpy as jnp
+
 from cax.types import Input, Metrics, Perception, State
 
 

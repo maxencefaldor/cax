@@ -3,6 +3,7 @@
 import jax
 import jax.numpy as jnp
 import pytest
+
 from cax.core.perceive.lenia_perceive import LeniaPerceive, bell
 
 

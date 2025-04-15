@@ -2,6 +2,7 @@
 
 import jax.numpy as jnp
 import pytest
+
 from cax.core.ca import CA
 from cax.core.perceive.lenia_perceive import LeniaPerceive
 from cax.core.update.lenia_update import LeniaUpdate, growth

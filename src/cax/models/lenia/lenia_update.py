@@ -4,10 +4,11 @@ from collections.abc import Callable
 
 import jax
 import jax.numpy as jnp
-from cax.core.update.update import Update
-from cax.types import Input, Perception, State
 from flax import nnx
 from jax import Array
+
+from cax.core.update.update import Update
+from cax.types import Input, Perception, State
 
 from .growth import exponential_growth_fn
 from .rule import RuleParams

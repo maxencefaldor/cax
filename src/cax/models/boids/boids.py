@@ -5,10 +5,11 @@ from functools import partial
 
 import jax
 import jax.numpy as jnp
+from flax import nnx
+
 from cax.core.ca import CA, metrics_fn
 from cax.types import State
 from cax.utils import clip_and_uint8
-from flax import nnx
 
 from .boids_perceive import BoidsPerceive
 from .boids_update import BoidsUpdate

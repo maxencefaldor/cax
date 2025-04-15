@@ -2,10 +2,11 @@
 
 import jax.numpy as jnp
 import pytest
+from flax import nnx
+
 from cax.core.ca import CA
 from cax.core.perceive import ConvPerceive
 from cax.core.update import ResidualUpdate
-from flax import nnx
 
 
 @pytest.fixture

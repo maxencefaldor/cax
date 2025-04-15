@@ -2,8 +2,9 @@
 
 import jax.numpy as jnp
 import pytest
-from cax.core.state import state_from_rgba_to_rgb, state_to_alive, state_to_rgba
 from jax import Array
+
+from cax.core.state import state_from_rgba_to_rgb, state_to_alive, state_to_rgba
 
 
 @pytest.fixture

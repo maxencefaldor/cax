@@ -8,10 +8,11 @@ from functools import partial
 
 import jax
 import jax.numpy as jnp
+from flax import nnx
+
 from cax.core.ca import CA, metrics_fn
 from cax.types import State
 from cax.utils.render import clip_and_uint8
-from flax import nnx
 
 from ..lenia.growth import exponential_growth_fn
 from .kernel import peak_kernel_fn

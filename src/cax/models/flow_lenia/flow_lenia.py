@@ -2,11 +2,12 @@
 
 from collections.abc import Callable
 
+from flax import nnx
+from jax import Array
+
 from cax.core.ca import CA, metrics_fn
 from cax.types import State
 from cax.utils import clip_and_uint8, render_array_with_channels_to_rgb
-from flax import nnx
-from jax import Array
 
 from ..lenia.lenia_perceive import LeniaPerceive, gaussian_kernel_fn
 from ..lenia.rule import RuleParams

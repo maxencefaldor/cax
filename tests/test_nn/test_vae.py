@@ -3,8 +3,9 @@
 import jax
 import jax.numpy as jnp
 import pytest
-from cax.nn.vae import VAE, binary_cross_entropy_with_logits, kl_divergence, vae_loss
 from flax import nnx
+
+from cax.nn.vae import VAE, binary_cross_entropy_with_logits, kl_divergence, vae_loss
 
 
 @pytest.fixture

@@ -2,11 +2,12 @@
 
 import jax.numpy as jnp
 import pytest
+from flax import nnx
+
 from cax.core.ca import CA
 from cax.core.perceive.conv_perceive import ConvPerceive
 from cax.core.perceive.kernels import identity_kernel, neighbors_kernel
 from cax.core.update.life_update import LifeUpdate
-from flax import nnx
 
 
 @pytest.fixture
