@@ -15,8 +15,8 @@ def identity_kernel(ndim: int) -> Array:
 
 	"""
 	kernel = jnp.zeros((3,) * ndim)
-	center_index = (1,) * ndim
-	kernel = kernel.at[center_index].set(1.0)
+	center_idx = (1,) * ndim
+	kernel = kernel.at[center_idx].set(1.0)
 	return jnp.expand_dims(kernel, axis=-1)
 
 

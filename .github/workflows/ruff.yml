@@ -1,4 +1,5 @@
 name: Ruff
+
 on:
   push:
     paths:
@@ -10,6 +11,7 @@ on:
       - "**.py"
       - "pyproject.toml"
       - ".github/workflows/ruff.yml"
+
 jobs:
   ruff:
     runs-on: ubuntu-latest

@@ -66,10 +66,11 @@ Here, you can see the basic CAX API usage:
 
 ```python
 import jax
+from flax import nnx
+
 from cax.core.ca import CA
 from cax.core.perceive import ConvPerceive
 from cax.core.update import NCAUpdate
-from flax import nnx
 
 seed = 0
 

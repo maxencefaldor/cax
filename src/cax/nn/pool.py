@@ -30,11 +30,11 @@ class Pool(struct.PyTreeNode):
 		return cls(size=size, data=data)
 
 	@jax.jit
-	def update(self, indices: Array, batch: PyTree) -> "Pool":
+	def update(self, idxs: Array, batch: PyTree) -> "Pool":
 		"""Update batch in the pool at the specified indices.
 
 		Args:
-			indices: The indices at which to update the batch.
+			idxs: The indices at which to update the batch.
 			batch: The batch to update at the specified indices.
 
 		Returns:
@@ -42,7 +42,7 @@ class Pool(struct.PyTreeNode):
 
 		"""
 		data = jax.tree.map(
-			lambda data_leaf, batch_leaf: data_leaf.at[indices].set(batch_leaf), self.data, batch
+			lambda data_leaf, batch_leaf: data_leaf.at[idxs].set(batch_leaf), self.data, batch
 		)
 		return self.replace(data=data)
 
@@ -58,6 +58,6 @@ class Pool(struct.PyTreeNode):
 			A tuple containing the batch indices in the pool and the batch.
 
 		"""
-		indices = jax.random.choice(key, self.size, shape=(batch_size,))
-		batch = jax.tree.map(lambda leaf: leaf[indices], self.data)
-		return indices, batch
+		idxs = jax.random.choice(key, self.size, shape=(batch_size,))
+		batch = jax.tree.map(lambda leaf: leaf[idxs], self.data)
+		return idxs, batch
