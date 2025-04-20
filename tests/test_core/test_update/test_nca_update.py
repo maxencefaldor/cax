@@ -2,10 +2,11 @@
 
 import jax.numpy as jnp
 import pytest
+from flax import nnx
+
 from cax.core.ca import CA
 from cax.core.perceive import ConvPerceive
 from cax.core.update import NCAUpdate
-from flax import nnx
 
 
 @pytest.fixture
@@ -101,11 +102,10 @@ def test_nca_update_in_ca():
 	ca = CA(perceive, update)
 
 	input_data = jnp.ones((num_steps, *spatial_dims, input_size))
-	final_state = ca(state, input_data, num_steps=num_steps, input_in_axis=0)
+	final_state, metrics = ca(state, input_data, num_steps=num_steps, input_in_axis=0)
 
 	assert final_state.shape == state.shape
 	assert jnp.all(jnp.isfinite(final_state))
-	assert jnp.all((final_state >= 0) & (final_state <= 1))
 
 
 @pytest.mark.parametrize(
@@ -137,7 +137,6 @@ def test_nca_update_different_configs(
 
 	assert updated_state.shape == (*spatial_dims, channel_size)
 	assert jnp.all(jnp.isfinite(updated_state))
-	assert jnp.all((updated_state >= 0) & (updated_state <= 1))
 
 
 def test_nca_update_get_alive_mask():

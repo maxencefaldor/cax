@@ -1,0 +1,56 @@
+name: "Deploy Package"
+
+on:
+  push:
+    tags:
+      # Publish on any tag starting with a `v`, e.g. v1.2.3
+      - v*
+
+jobs:
+  run:
+    name: "Deploy Package"
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write  # IMPORTANT: mandatory for making GitHub Releases
+      id-token: write  # IMPORTANT: mandatory for sigstore
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - name: Build
+        run: uv build
+
+      - name: "Publish to PyPI"
+        run: uv publish -t ${{ secrets.PYPI_API_TOKEN }}
+
+      - name: Sign the dists with Sigstore
+        uses: sigstore/gh-action-sigstore-python@v3.0.0
+        with:
+          inputs: >-
+            ./dist/*.tar.gz
+            ./dist/*.whl
+      - name: Create GitHub Release
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        # Repo clone is required for --notes-from-tag to work
+        run: |
+          gh repo clone '${{ github.repository }}'
+          cd ${{ github.event.repository.name }}
+          gh release create '${{ github.ref_name }}' --verify-tag --notes-from-tag --title '${{ github.ref_name }}' ${{ contains(github.ref_name, 'dev') && '--prerelease --latest=false' || '--latest=true' }}
+          cd ..
+      - name: Upload artifact signatures to GitHub Release
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        # Upload to GitHub Release using the `gh` CLI.
+        # `dist/` contains the built packages, and the
+        # sigstore-produced signatures and certificates.
+        run: >-
+          gh release upload
+          '${{ github.ref_name }}' dist/**
+          --repo '${{ github.repository }}'

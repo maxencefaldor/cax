@@ -66,10 +66,11 @@ Here, you can see the basic CAX API usage:
 
 ```python
 import jax
+from flax import nnx
+
 from cax.core.ca import CA
 from cax.core.perceive import ConvPerceive
 from cax.core.update import NCAUpdate
-from flax import nnx
 
 seed = 0
 
@@ -105,16 +106,16 @@ For a more detailed overview, get started with this notebook [![Colab](https://c
 
 ## Installation ⚙️
 
-You will need Python 3.10 or later, and a working JAX installation.
+You will need Python 3.10 or later, and a working JAX installation installed in a virtual environment.
 
-Then, install CAX from PyPi:
+Then, install CAX from PyPi with `uv`:
+```
+uv pip install cax
+```
+
+or with `pip`:
 ```
 pip install cax
-```
-
-To upgrade to the latest version of CAX, you can use:
-```
-pip install --upgrade git+https://github.com/maxencefaldor/cax.git
 ```
 
 ## Citing CAX 📝
