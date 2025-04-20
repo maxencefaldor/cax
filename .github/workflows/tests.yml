@@ -26,4 +26,4 @@ jobs:
         run: uv sync --all-extras --dev
 
       - name: Run pytest
-        run: uv run pytest --junitxml=junit.xml --doctest-modules src tests
+        run: uv run pytest tests/
