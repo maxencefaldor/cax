@@ -60,13 +60,25 @@ line-length = 100
 
 [tool.ruff.lint]
 select = ["E", "D", "F", "I", "N", "SIM", "UP", "W"]
-ignore = ["N803", "N806", "D203", "D206", "D213", "W191"]
+ignore = [
+	"D203",
+	"D206",
+	"D213",
+	"N803",  # Argument name `A` should be lowercase
+	"N806",  # Variable `A` in function should be lowercase
+	"W191",  # Indentation contains tabs
+]
+
+[tool.ruff.lint.per-file-ignores]
+"**/*.ipynb" = [
+	"F811",  # Checks for variable definitions that redefine (or "shadow") unused variables.
+]
 
 [tool.ruff.format]
 indent-style = "tab"
 
 [tool.mypy]
-python_version = "3.11"
+python_version = "3.13"
 disallow_untyped_defs = "True"
 disallow_any_unimported = "True"
 no_implicit_optional = "True"

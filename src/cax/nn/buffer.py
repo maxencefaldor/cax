@@ -16,7 +16,7 @@ class Buffer(struct.PyTreeNode):
 	size: int = struct.field(pytree_node=False)
 	data: PyTree
 	is_full: Array
-	index: Array
+	idx: Array
 
 	@classmethod
 	def create(cls, size: int, datum: PyTree) -> "Buffer":
@@ -38,7 +38,7 @@ class Buffer(struct.PyTreeNode):
 			size=size,
 			data=data,
 			is_full=jnp.full((size,), False, dtype=jnp.bool),
-			index=jnp.array(0, dtype=jnp.int32),
+			idx=jnp.array(0, dtype=jnp.int32),
 		)
 
 	@jax.jit
@@ -53,17 +53,17 @@ class Buffer(struct.PyTreeNode):
 
 		"""
 		batch_size = jax.tree.leaves(batch)[0].shape[0]
-		indices = self.index + jnp.arange(batch_size)
-		indices = indices % self.size
+		idxs = self.idx + jnp.arange(batch_size)
+		idxs = idxs % self.size
 
 		# Update data
-		data = jax.tree.map(lambda data, batch: data.at[indices].set(batch), self.data, batch)
+		data = jax.tree.map(lambda data, batch: data.at[idxs].set(batch), self.data, batch)
 
-		# Update is_full and index
-		is_full = self.is_full.at[indices].set(True)
-		new_index = (self.index + batch_size) % self.size
+		# Update is_full and idx
+		is_full = self.is_full.at[idxs].set(True)
+		new_idx = (self.idx + batch_size) % self.size
 
-		return self.replace(data=data, is_full=is_full, index=new_index)
+		return self.replace(data=data, is_full=is_full, idx=new_idx)
 
 	@partial(jax.jit, static_argnames=("batch_size",))
 	def sample(self, key: Array, *, batch_size: int) -> PyTree:
@@ -77,6 +77,6 @@ class Buffer(struct.PyTreeNode):
 			A batch sampled from the buffer.
 
 		"""
-		indices = jax.random.choice(key, self.size, shape=(batch_size,), p=self.is_full)
-		batch: PyTree = jax.tree.map(lambda leaf: leaf[indices], self.data)
+		idxs = jax.random.choice(key, self.size, shape=(batch_size,), p=self.is_full)
+		batch: PyTree = jax.tree.map(lambda leaf: leaf[idxs], self.data)
 		return batch

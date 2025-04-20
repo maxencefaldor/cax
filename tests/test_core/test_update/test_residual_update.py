@@ -105,7 +105,7 @@ def test_residual_update_in_ca():
 	ca = CA(perceive, update)
 
 	input_data = jnp.ones((num_steps, *spatial_dims, input_size))
-	final_state = ca(state, input_data, num_steps=num_steps, input_in_axis=0)
+	final_state, metrics = ca(state, input_data, num_steps=num_steps, input_in_axis=0)
 
 	assert final_state.shape == state.shape
 	assert jnp.all(jnp.isfinite(final_state))
