@@ -1,0 +1,29 @@
+name: Tests
+
+on:
+  push:
+    paths:
+      - "**.py"
+      - "pyproject.toml"
+      - ".github/workflows/tests.yml"
+  pull_request:
+    paths:
+      - "**.py"
+      - "pyproject.toml"
+      - ".github/workflows/tests.yml"
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Install the project
+        run: uv sync --all-extras --dev
+
+      - name: Run pytest
+        run: uv run pytest tests/

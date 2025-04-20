@@ -12,14 +12,12 @@ Follow these steps to contribute code:
 
 1. Fork the CAX repository by clicking the Fork button on the repository page. This creates a copy of the CAX repository in your own account.
 
-2. Install Python >= 3.10 locally in order to run tests.
+2. Clone your fork and go at the root of the repository.
 
-3. `pip` installing your fork from source. This allows you to modify the code and immediately test it out:
+3. Install your fork from source using [https://docs.astral.sh/uv/](`uv`).
 
 ```bash
-git clone https://github.com/maxencefaldor/cax
-cd cax
-pip install -e ".[dev]"  # Installs CAX from the current directory in editable mode.
+uv run python -c "import cax; print(cax.__doc__)"
 ```
 
 4. Add the CAX repository as an upstream remote, so you can use it to sync your changes.
@@ -39,8 +37,8 @@ And implement your changes using your favorite editor.
 6. Make sure your code passes CAX’s lint and type checks, by running the following from the top of the repository:
 
 ```bash
-ruff format .
-ruff check .
+uv ruff check .   # Linting
+uv ruff format .  # Formatting
 ```
 
 7. Make sure the tests pass by running the following command from the top of the repository:

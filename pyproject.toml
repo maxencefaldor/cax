@@ -1,23 +1,17 @@
-[build-system]
-requires = ["setuptools>=74.0"]
-build-backend = "setuptools.build_meta"
-
 [project]
 name = "cax"
 version = "0.2.0"
+description = "Cellular Automata Accelerated in JAX"
+authors = [{ name="Maxence Faldor", email="maxencefaldor@gmail.com" }]
+readme = "README.md"
+license_files = ["LICENSE"]
+requires-python = ">=3.10"
 dependencies = [
 	"jax>=0.5.0",
 	"flax>=0.10.0",
 	"optax>=0.2.0",
 	"pillow>=11.1.0",
 ]
-requires-python = ">=3.10"
-authors = [
-	{ name="Maxence Faldor", email="maxencefaldor@gmail.com" },
-]
-description = "Cellular Automata Accelerated in JAX"
-readme = "README.md"
-license = {file = "LICENSE"}
 keywords = [
 	"artificial life",
 	"emergence",
@@ -31,11 +25,19 @@ classifiers = [
 	"Programming Language :: Python :: 3.11",
 	"Programming Language :: Python :: 3.12",
 	"Programming Language :: Python :: 3.13",
+	"Programming Language :: Python :: 3.14",
 	"License :: OSI Approved :: MIT License",
 	"Operating System :: OS Independent",
 ]
 
-[project.optional-dependencies]
+[project.urls]
+Homepage = "https://github.com/maxencefaldor/cax"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[dependency-groups]
 dev = [
 	"pytest>=8.3.0",
 	"pytest-cov>=5.0.0",
@@ -51,27 +53,32 @@ examples = [
 	"mediapy>=1.2.0",
 ]
 
-[project.urls]
-Homepage = "https://github.com/maxencefaldor/cax"
-
-[tool.setuptools.packages.find]
-where = ["."]
-include = ["cax*"]
-
 [tool.ruff]
-src = ["cax", "tests"]
-target-version = "py311"
+src = ["src", "tests"]
+target-version = "py313"
 line-length = 100
 
 [tool.ruff.lint]
 select = ["E", "D", "F", "I", "N", "SIM", "UP", "W"]
-ignore = ["N803", "N806", "D203", "D206", "D213", "W191"]
+ignore = [
+	"D203",
+	"D206",
+	"D213",
+	"N803",  # Argument name `A` should be lowercase
+	"N806",  # Variable `A` in function should be lowercase
+	"W191",  # Indentation contains tabs
+]
+
+[tool.ruff.lint.per-file-ignores]
+"**/*.ipynb" = [
+	"F811",  # Checks for variable definitions that redefine (or "shadow") unused variables.
+]
 
 [tool.ruff.format]
 indent-style = "tab"
 
 [tool.mypy]
-python_version = "3.11"
+python_version = "3.13"
 disallow_untyped_defs = "True"
 disallow_any_unimported = "True"
 no_implicit_optional = "True"

@@ -2,6 +2,7 @@
 
 import jax.numpy as jnp
 import pytest
+
 from cax.core.perceive import MoorePerceive
 
 
