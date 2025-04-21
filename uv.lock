@@ -46,7 +46,7 @@ dependencies = [
     { name = "pillow" },
 ]
 
-[package.dev-dependencies]
+[package.optional-dependencies]
 dev = [
     { name = "mypy" },
     { name = "pytest" },
@@ -65,26 +65,21 @@ examples = [
 [package.metadata]
 requires-dist = [
     { name = "flax", specifier = ">=0.10.0" },
+    { name = "ipykernel", marker = "extra == 'examples'", specifier = ">=6.29.0" },
+    { name = "ipywidgets", marker = "extra == 'examples'", specifier = ">=8.1.0" },
     { name = "jax", specifier = ">=0.5.0" },
+    { name = "mediapy", marker = "extra == 'examples'", specifier = ">=1.2.0" },
+    { name = "mypy", marker = "extra == 'dev'", specifier = ">=1.11.0" },
     { name = "optax", specifier = ">=0.2.0" },
     { name = "pillow", specifier = ">=11.1.0" },
+    { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.3.0" },
+    { name = "pytest-cov", marker = "extra == 'dev'", specifier = ">=5.0.0" },
+    { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.6.0" },
+    { name = "torch", marker = "extra == 'examples'", specifier = ">=2.6.0" },
+    { name = "torchvision", marker = "extra == 'examples'", specifier = ">=0.21.0" },
+    { name = "tqdm", marker = "extra == 'examples'", specifier = ">=4.67.0" },
 ]
-
-[package.metadata.requires-dev]
-dev = [
-    { name = "mypy", specifier = ">=1.11.0" },
-    { name = "pytest", specifier = ">=8.3.0" },
-    { name = "pytest-cov", specifier = ">=5.0.0" },
-    { name = "ruff", specifier = ">=0.6.0" },
-]
-examples = [
-    { name = "ipykernel", specifier = ">=6.29.0" },
-    { name = "ipywidgets", specifier = ">=8.1.0" },
-    { name = "mediapy", specifier = ">=1.2.0" },
-    { name = "torch", specifier = ">=2.6.0" },
-    { name = "torchvision", specifier = ">=0.21.0" },
-    { name = "tqdm", specifier = ">=4.67.0" },
-]
+provides-extras = ["dev", "examples"]
 
 [[package]]
 name = "cffi"
