@@ -17,12 +17,10 @@ from .elementary_ca_update import ElementaryCAUpdate
 class ElementaryCA(CA):
 	"""Elementary Cellular Automata model."""
 
-	def __init__(
-		self, rngs: nnx.Rngs, *, wolfram_code: str = "01101110", metrics_fn: Callable = metrics_fn
-	):
+	def __init__(self, rngs: nnx.Rngs, *, metrics_fn: Callable = metrics_fn):
 		"""Initialize Elementary CA."""
 		perceive = ElementaryCAPerceive(rngs=rngs)
-		update = ElementaryCAUpdate(wolfram_code=wolfram_code)
+		update = ElementaryCAUpdate(rngs=rngs)
 		super().__init__(perceive, update, metrics_fn=metrics_fn)
 
 	@nnx.jit
