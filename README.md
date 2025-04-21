@@ -22,7 +22,7 @@ Designed for speed and flexibility, CAX allows you to easily experiment with sel
 
 ## Why CAX? 💡
 
-CAX supports discrete and continuous models, including neural cellular automata, across any number of dimensions. Beyond traditional cellular automata, it also handles particle systems and more, all unified under a single, intuitive API.
+CAX supports discrete and continuous systems, including neural cellular automata, across any number of dimensions. Beyond traditional cellular automata, it also handles particle systems and more, all unified under a single, intuitive API.
 
 ### Rich 🎨
 
@@ -30,7 +30,7 @@ CAX provides a comprehensive collection of 15+ ready-to-use systems. From simula
 
 ### Flexible 🧩
 
-CAX makes it easy to extend existing models or build custom ones from scratch for endless experimentation and discovery. Design your own experiments to probe the boundaries of artificial open-ended evolution and emergent complexity.
+CAX makes it easy to extend existing systems or build custom ones from scratch for endless experimentation and discovery. Design your own experiments to probe the boundaries of artificial open-ended evolution and emergent complexity.
 
 ### Fast 🚀
 
@@ -40,7 +40,7 @@ CAX is built on top of the JAX/Flax ecosystem for speed and scalability. The lib
 
 The library is thoroughly tested and documented with numerous examples to get you started! Our comprehensive guides walk you through everything from basic cellular automata to advanced neural implementations.
 
-## Implemented Models 🦎
+## Implemented Systems 🦎
 
 | Cellular Automata | Reference | Example |
 | --- | --- | --- |
