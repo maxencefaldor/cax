@@ -20,7 +20,7 @@ class Life(CA):
 	def __init__(self, rngs: nnx.Rngs, *, metrics_fn: Callable = metrics_fn):
 		"""Initialize Life."""
 		perceive = LifePerceive(rngs=rngs)
-		update = LifeUpdate()
+		update = LifeUpdate(rngs=rngs)
 		super().__init__(perceive, update, metrics_fn=metrics_fn)
 
 	@nnx.jit
