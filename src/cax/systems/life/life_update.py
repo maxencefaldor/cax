@@ -14,9 +14,8 @@ class LifeUpdate(Update):
 
 	def __init__(self, rngs: nnx.Rngs):
 		"""Initialize LifeUpdate."""
-		self.rngs = rngs
-		self.birth = Rule(jax.random.bernoulli(self.rngs(), shape=(9,)).astype(jnp.float32))
-		self.survival = Rule(jax.random.bernoulli(self.rngs(), shape=(9,)).astype(jnp.float32))
+		self.birth = Rule(jax.random.bernoulli(rngs(), shape=(9,)).astype(jnp.float32))
+		self.survival = Rule(jax.random.bernoulli(rngs(), shape=(9,)).astype(jnp.float32))
 
 	def __call__(self, state: State, perception: Perception, input: Input | None = None) -> State:
 		"""Apply the Life rules based on birth/survival.
