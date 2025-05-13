@@ -11,6 +11,7 @@ on:
       - "**.py"
       - "pyproject.toml"
       - ".github/workflows/ruff.yml"
+  workflow_dispatch:
 
 jobs:
   ruff:
