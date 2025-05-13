@@ -1,6 +1,6 @@
 [project]
 name = "cax"
-version = "0.2.0"
+version = "0.2.1"
 description = "Cellular Automata Accelerated in JAX"
 authors = [{ name="Maxence Faldor", email="maxencefaldor@gmail.com" }]
 readme = "README.md"
@@ -37,7 +37,6 @@ dev = [
     "mypy>=1.11.0",
 ]
 examples = [
-	"torch>=2.6.0",
 	"torchvision>=0.21.0",
 	"tqdm>=4.67.0",
 	"ipykernel>=6.29.0",
