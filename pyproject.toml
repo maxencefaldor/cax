@@ -1,6 +1,6 @@
 [project]
 name = "cax"
-version = "0.2.1"
+version = "0.3.0"
 description = "Cellular Automata Accelerated in JAX"
 authors = [{ name="Maxence Faldor", email="maxencefaldor@gmail.com" }]
 readme = "README.md"
@@ -13,10 +13,11 @@ dependencies = [
 	"pillow>=11.1.0",
 ]
 keywords = [
+	"complex systems",
 	"artificial life",
+	"open-endedness",
 	"emergence",
 	"self-organization",
-	"open-endedness",
 	"cellular automata",
 	"neural cellular automata",
 ]

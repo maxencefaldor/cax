@@ -1,5 +1,5 @@
 """Core Module."""
 
-from .ca import CA
+from .cs import ComplexSystem
 
-__all__ = ["CA"]
+__all__ = ["ComplexSystem"]

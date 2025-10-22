@@ -4,7 +4,7 @@ import jax.numpy as jnp
 import pytest
 from flax import nnx
 
-from cax.core.ca import CA
+from cax.core.ca import System
 from cax.core.perceive import ConvPerceive
 from cax.core.update import NCAUpdate
 
@@ -99,7 +99,7 @@ def test_nca_update_in_ca():
 		rngs=rngs,
 	)
 
-	ca = CA(perceive, update)
+	ca = System(perceive, update)
 
 	input_data = jnp.ones((num_steps, *spatial_dims, input_size))
 	final_state, metrics = ca(state, input_data, num_steps=num_steps, input_in_axis=0)

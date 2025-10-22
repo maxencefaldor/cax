@@ -68,7 +68,7 @@ Here, you can see the basic CAX API usage:
 import jax
 from flax import nnx
 
-from cax.core.ca import CA
+from cax.core.cs import ComplexSystem
 from cax.core.perceive import ConvPerceive
 from cax.core.update import NCAUpdate
 
@@ -96,10 +96,10 @@ update = NCAUpdate(
 	cell_dropout_rate=cell_dropout_rate,
 	zeros_init=True,
 )
-ca = CA(perceive, update)
+cs = ComplexSystem(perceive, update)
 
 state = jax.random.normal(key, (64, 64, channel_size))
-state, metrics = ca(state, num_steps=128)
+state, metrics = cs(state, num_steps=128)
 ```
 
 For a more detailed overview, get started with this notebook [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/maxencefaldor/cax/blob/main/examples/00_getting_started.ipynb)
