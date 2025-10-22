@@ -19,6 +19,7 @@ wheels/
 .pytest_cache
 
 # Custom
+.env
 output/
 examples/1D-ARC/
 examples/data/
