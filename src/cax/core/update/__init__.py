@@ -9,10 +9,6 @@ Available update modules may include:
 - Rule-based updates
 - Neural network-based updates
 - Custom update mechanisms
-
-These modules are designed to work with the CAX library, providing flexible
-and efficient update options for different types of cellular automata
-models.
 """
 
 from .mlp_update import MLPUpdate
