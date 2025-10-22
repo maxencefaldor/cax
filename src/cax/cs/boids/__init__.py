@@ -1,9 +1,9 @@
 """Boids module."""
 
-from .boid_policy import BoidPolicy
-from .boids import Boids
-from .boids_perceive import BoidsPerceive
-from .boids_update import BoidsUpdate
+from .policy import BoidPolicy
+from .cs import Boids
+from .perceive import BoidsPerceive
+from .update import BoidsUpdate
 from .perception import Perception
 from .state import State
 

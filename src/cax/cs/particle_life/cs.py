@@ -7,7 +7,7 @@ import jax
 import jax.numpy as jnp
 from flax import nnx
 
-from cax.core.ca import CA, metrics_fn
+from cax.core.ca import System, metrics_fn
 from cax.utils.render import clip_and_uint8, hsv_to_rgb
 
 from .particle_life_perceive import ParticleLifePerceive
@@ -15,7 +15,7 @@ from .particle_life_update import ParticleLifeUpdate
 from .state import State
 
 
-class ParticleLife(CA):
+class ParticleLife(System):
 	"""Particle life model."""
 
 	def __init__(

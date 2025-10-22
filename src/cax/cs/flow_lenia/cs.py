@@ -1,21 +1,21 @@
-"""Lenia model."""
+"""Flow Lenia model."""
 
 from collections.abc import Callable
 
 from flax import nnx
 from jax import Array
 
-from cax.core.ca import CA, metrics_fn
+from cax.core.ca import System, metrics_fn
 from cax.types import State
 from cax.utils import clip_and_uint8, render_array_with_channels_to_rgb
 
-from .lenia_perceive import LeniaPerceive, gaussian_kernel_fn
-from .lenia_update import LeniaUpdate, exponential_growth_fn
-from .rule import RuleParams
+from ..lenia.lenia_perceive import LeniaPerceive, gaussian_kernel_fn
+from ..lenia.rule import RuleParams
+from .flow_lenia_update import FlowLeniaUpdate, exponential_growth_fn
 
 
-class Lenia(CA):
-	"""Lenia model."""
+class FlowLenia(System):
+	"""Flow Lenia model."""
 
 	def __init__(
 		self,
@@ -28,9 +28,31 @@ class Lenia(CA):
 		state_scale: float = 1,
 		kernel_fn: Callable = gaussian_kernel_fn,
 		growth_fn: Callable = exponential_growth_fn,
+		# Flow Lenia parameters
+		theta_A: float = 1.0,
+		n: int = 2,
+		dd: int = 5,
+		sigma: float = 0.65,
 		metrics_fn: Callable = metrics_fn,
 	):
-		"""Initialize Lenia."""
+		"""Initialize Lenia.
+
+		Args:
+			spatial_dims: Spatial dimensions.
+			channel_size: Number of channels.
+			R: Space resolution.
+			T: Time resolution.
+			rule_params: Parameters for the rules.
+			state_scale: Scaling factor for the state.
+			kernel_fn: Kernel function.
+			growth_fn: Growth function.
+			theta_A: Threshold for alpha in Flow Lenia.
+			n: Exponent for alpha in Flow Lenia.
+			dd: Maximum displacement distance.
+			sigma: Spread parameter.
+			metrics_fn: Metrics function.
+
+		"""
 		perceive = LeniaPerceive(
 			spatial_dims=spatial_dims,
 			channel_size=channel_size,
@@ -39,19 +61,17 @@ class Lenia(CA):
 			state_scale=state_scale,
 			kernel_fn=kernel_fn,
 		)
-		update = LeniaUpdate(
+		update = FlowLeniaUpdate(
 			channel_size=channel_size,
 			T=T,
 			rule_params=rule_params,
 			growth_fn=growth_fn,
+			theta_A=theta_A,
+			n=n,
+			dd=dd,
+			sigma=sigma,
 		)
 		super().__init__(perceive, update, metrics_fn=metrics_fn)
-
-	@nnx.jit
-	def update_rule_params(self, rule_params: RuleParams):
-		"""Update the rule parameters."""
-		self.perceive.update_rule_params(rule_params)
-		self.update.update_rule_params(rule_params)
 
 	@nnx.jit
 	def render(self, state: State) -> Array:

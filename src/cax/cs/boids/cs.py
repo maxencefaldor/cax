@@ -7,15 +7,15 @@ import jax
 import jax.numpy as jnp
 from flax import nnx
 
-from cax.core.ca import CA, metrics_fn
+from cax.core.cs import ComplexSystem, metrics_fn
 from cax.types import State
 from cax.utils import clip_and_uint8
 
-from .boids_perceive import BoidsPerceive
-from .boids_update import BoidsUpdate
+from .perceive import BoidsPerceive
+from .update import BoidsUpdate
 
 
-class Boids(CA):
+class Boids(ComplexSystem):
 	"""Boids model."""
 
 	def __init__(

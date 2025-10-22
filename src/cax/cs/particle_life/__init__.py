@@ -1,8 +1,8 @@
 """Particle Life module."""
 
-from .particle_life import ParticleLife
-from .particle_life_perceive import ParticleLifePerceive
-from .particle_life_update import ParticleLifeUpdate
+from .cs import ParticleLife
+from .perceive import ParticleLifePerceive
+from .update import ParticleLifeUpdate
 from .perception import Perception
 from .state import State
 

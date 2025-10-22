@@ -1,7 +1,7 @@
-"""Lenia module."""
+"""Flow Lenia module."""
 
-from .growth import GrowthParams, exponential_growth_fn
-from .kernel import (
+from ..lenia.growth import GrowthParams, exponential_growth_fn
+from ..lenia.kernel import (
 	FreeKernelParams,
 	KernelParams,
 	exponential_kernel_fn,
@@ -10,15 +10,15 @@ from .kernel import (
 	polynomial_kernel_fn,
 	rectangular_kernel_fn,
 )
-from .lenia import Lenia
-from .lenia_perceive import LeniaPerceive
-from .lenia_update import LeniaUpdate
-from .rule import RuleParams
+from ..lenia.perceive import LeniaPerceive as FlowLeniaPerceive
+from ..lenia.rule import RuleParams
+from .cs import FlowLenia
+from .update import FlowLeniaUpdate
 
 __all__ = [
-	"Lenia",
-	"LeniaPerceive",
-	"LeniaUpdate",
+	"FlowLenia",
+	"FlowLeniaPerceive",
+	"FlowLeniaUpdate",
 	"KernelParams",
 	"FreeKernelParams",
 	"exponential_kernel_fn",

@@ -9,7 +9,7 @@ from cax.core.update.update import Update
 from cax.types import Input, Perception, Rule, State
 
 
-class ElementaryCAUpdate(Update):
+class ElementaryUpdate(Update):
 	"""Elementary Cellular Automata update class."""
 
 	def __init__(self, rngs: nnx.Rngs):

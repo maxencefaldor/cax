@@ -27,11 +27,11 @@ def metrics_fn(next_state: State, state: State, perception: Perception, input: I
 	return next_state
 
 
-class CA(nnx.Module):
-	"""Cellular Automata class."""
+class ComplexSystem(nnx.Module):
+	"""Complex system class."""
 
 	def __init__(self, perceive: Perceive, update: Update, *, metrics_fn: Callable = metrics_fn):
-		"""Initialize the CA.
+		"""Initialize the complex system.
 
 		Args:
 			perceive: Perception module.
@@ -68,7 +68,7 @@ class CA(nnx.Module):
 		num_steps: int = 1,
 		input_in_axis: int | None = None,
 	) -> tuple[State, Metrics]:
-		"""Run the CA for multiple steps.
+		"""Run the complex system for multiple steps.
 
 		Args:
 			state: Initial state.
@@ -81,10 +81,10 @@ class CA(nnx.Module):
 
 		"""
 
-		def step(carry: tuple[CA, State], input: Input | None) -> tuple[tuple[CA, State], State]:
-			ca, state = carry
-			state, metrics = ca.step(state, input)
-			return (ca, state), metrics
+		def step(carry: tuple[ComplexSystem, State], input: Input | None) -> tuple[tuple[ComplexSystem, State], State]:
+			cs, state = carry
+			state, metrics = cs.step(state, input)
+			return (cs, state), metrics
 
 		(_, state), metrics = nnx.scan(
 			step,

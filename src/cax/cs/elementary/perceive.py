@@ -6,7 +6,7 @@ from flax import nnx
 from cax.core.perceive import ConvPerceive
 
 
-class ElementaryCAPerceive(ConvPerceive):
+class ElementaryPerceive(ConvPerceive):
 	"""Elementary Cellular Automata perceive class."""
 
 	def __init__(self, rngs: nnx.Rngs, *, padding: str = "CIRCULAR"):

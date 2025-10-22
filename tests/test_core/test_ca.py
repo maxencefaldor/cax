@@ -4,7 +4,7 @@ import jax.numpy as jnp
 import pytest
 from flax import nnx
 
-from cax.core import CA
+from cax.core import System
 from cax.core.perceive import Perceive
 from cax.core.update import Update
 
@@ -34,28 +34,28 @@ class InputUpdate(Update):
 
 
 @pytest.fixture
-def ca() -> CA:
+def ca() -> System:
 	"""Create a CA instance for testing."""
 	perceive = DummyPerceive()
 	update = DummyUpdate()
-	return CA(perceive, update)
+	return System(perceive, update)
 
 
 @pytest.fixture
-def ca_with_input_update() -> CA:
+def ca_with_input_update() -> System:
 	"""Create a CA instance with InputUpdate for testing."""
 	perceive = DummyPerceive()
 	update = InputUpdate()
-	return CA(perceive, update)
+	return System(perceive, update)
 
 
-def test_ca_init(ca: CA) -> None:
+def test_ca_init(ca: System) -> None:
 	"""Test the initialization of the CA class."""
 	assert isinstance(ca.perceive, DummyPerceive)
 	assert isinstance(ca.update, DummyUpdate)
 
 
-def test_ca_step(ca: CA) -> None:
+def test_ca_step(ca: System) -> None:
 	"""Test the step method of the CA class."""
 	state = jnp.array([1.0, 2.0, 3.0])
 	new_state, metrics = ca.step(state)
@@ -65,7 +65,7 @@ def test_ca_step(ca: CA) -> None:
 	assert jnp.allclose(metrics, expected_state)
 
 
-def test_ca_call_single_step(ca: CA) -> None:
+def test_ca_call_single_step(ca: System) -> None:
 	"""Test the CA class with a single step."""
 	state = jnp.array([1.0, 2.0, 3.0])
 	new_state, metrics = ca(state, num_steps=1)
@@ -76,7 +76,7 @@ def test_ca_call_single_step(ca: CA) -> None:
 	assert jnp.allclose(metrics[0], expected_state)
 
 
-def test_ca_call_multiple_steps(ca: CA) -> None:
+def test_ca_call_multiple_steps(ca: System) -> None:
 	"""Test the CA class with multiple steps."""
 	state = jnp.array([1.0, 2.0, 3.0])
 	final_state, metrics = ca(state, num_steps=3)
@@ -87,7 +87,7 @@ def test_ca_call_multiple_steps(ca: CA) -> None:
 	assert jnp.allclose(metrics, expected_metrics)
 
 
-def test_ca_call_metrics_history(ca: CA) -> None:
+def test_ca_call_metrics_history(ca: System) -> None:
 	"""Test the CA class returns metrics history."""
 	state = jnp.array([1.0, 2.0, 3.0])
 	_, metrics = ca(state, num_steps=3)
@@ -96,7 +96,7 @@ def test_ca_call_metrics_history(ca: CA) -> None:
 	assert jnp.allclose(metrics, expected_metrics)
 
 
-def test_ca_call_with_input(ca_with_input_update: CA) -> None:
+def test_ca_call_with_input(ca_with_input_update: System) -> None:
 	"""Test the CA class with input."""
 	state = jnp.array([1.0, 2.0, 3.0])
 	input_val = jnp.array([0.1, 0.2, 0.3])
@@ -106,7 +106,7 @@ def test_ca_call_with_input(ca_with_input_update: CA) -> None:
 	assert jnp.allclose(metrics[0], expected_state)
 
 
-def test_ca_call_with_input_multiple_steps(ca_with_input_update: CA) -> None:
+def test_ca_call_with_input_multiple_steps(ca_with_input_update: System) -> None:
 	"""Test the CA class with input over multiple steps."""
 	state = jnp.array([1.0, 2.0, 3.0])
 	input_val = jnp.array([[4.0, 5.0, 6.0], [7.0, 8.0, 9.0]])
@@ -122,7 +122,7 @@ def test_ca_call_with_input_multiple_steps(ca_with_input_update: CA) -> None:
 	assert jnp.allclose(metrics, expected_metrics)
 
 
-def test_ca_vmap(ca: CA) -> None:
+def test_ca_vmap(ca: System) -> None:
 	"""Test vectorized mapping of the CA class."""
 	states = jnp.array([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]])
 	final_states, metrics = nnx.vmap(lambda state: ca(state, num_steps=3))(states)

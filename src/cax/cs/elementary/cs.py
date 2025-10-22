@@ -6,21 +6,21 @@ import jax.numpy as jnp
 from flax import nnx
 from jax import Array
 
-from cax.core.ca import CA, metrics_fn
+from cax.core.cs import ComplexSystem, metrics_fn
 from cax.types import State
 from cax.utils import clip_and_uint8
 
-from .elementary_ca_perceive import ElementaryCAPerceive
-from .elementary_ca_update import ElementaryCAUpdate
+from .perceive import ElementaryPerceive
+from .update import ElementaryUpdate
 
 
-class ElementaryCA(CA):
+class Elementary(ComplexSystem):
 	"""Elementary Cellular Automata model."""
 
 	def __init__(self, rngs: nnx.Rngs, *, metrics_fn: Callable = metrics_fn):
 		"""Initialize Elementary CA."""
-		perceive = ElementaryCAPerceive(rngs=rngs)
-		update = ElementaryCAUpdate(rngs=rngs)
+		perceive = ElementaryPerceive(rngs=rngs)
+		update = ElementaryUpdate(rngs=rngs)
 		super().__init__(perceive, update, metrics_fn=metrics_fn)
 
 	@nnx.jit
