@@ -12,7 +12,12 @@ class Encoder(nnx.Module):
 	"""Encoder module for the VAE."""
 
 	def __init__(
-		self, spatial_dims: Sequence[int], features: Sequence[int], latent_size: int, rngs: nnx.Rngs
+		self,
+		spatial_dims: Sequence[int],
+		features: Sequence[int],
+		latent_size: int,
+		*,
+		rngs: nnx.Rngs,
 	):
 		"""Initialize the Encoder module.
 
@@ -20,16 +25,14 @@ class Encoder(nnx.Module):
 			spatial_dims: Spatial dimensions of the input.
 			features: Sequence of feature sizes for convolutional layers.
 			latent_size: Size of the latent space.
-			rngs: Random number generators.
+			rngs: rng key.
 
 		"""
-		super().__init__()
 		self.features = features
 		self.latent_size = latent_size
 
-		self.convs = []
-		for in_features, out_features in zip(self.features[:-1], self.features[1:]):
-			self.convs.append(
+		self.convs = nnx.List(
+			[
 				nnx.Conv(
 					in_features=in_features,
 					out_features=out_features,
@@ -38,7 +41,9 @@ class Encoder(nnx.Module):
 					padding="SAME",
 					rngs=rngs,
 				)
-			)
+				for in_features, out_features in zip(self.features[:-1], self.features[1:])
+			]
+		)
 
 		flattened_size = spatial_dims[0] * spatial_dims[1] * self.features[-1]
 		for _ in range(len(self.features) - 1):
@@ -98,7 +103,6 @@ class Decoder(nnx.Module):
 			rngs: Random number generators.
 
 		"""
-		super().__init__()
 		self.features = features
 		self.latent_size = latent_size
 
@@ -112,9 +116,8 @@ class Decoder(nnx.Module):
 			in_features=self.latent_size, out_features=flattened_size, rngs=rngs
 		)
 
-		self.convs = []
-		for in_features, out_features in zip(self.features[:-1], self.features[1:]):
-			self.convs.append(
+		self.convs = nnx.List(
+			[
 				nnx.ConvTranspose(
 					in_features=in_features,
 					out_features=out_features,
@@ -123,7 +126,9 @@ class Decoder(nnx.Module):
 					padding="SAME",
 					rngs=rngs,
 				)
-			)
+				for in_features, out_features in zip(self.features[:-1], self.features[1:])
+			]
+		)
 
 	def __call__(self, z: Array) -> Array:
 		"""Forward pass of the decoder.

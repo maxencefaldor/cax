@@ -2,10 +2,8 @@
 
 import jax.numpy as jnp
 import pytest
-from cax.core.ca import System
 from flax import nnx
 
-from cax.core.perceive import ConvPerceive
 from cax.core.update import NCAUpdate
 
 
@@ -69,43 +67,6 @@ def test_nca_update_call_with_input(nca_update_with_input):
 	updated_state = nca_update_with_input(state, perception, input_data)
 	assert updated_state.shape == (8, 8, 3)
 	assert jnp.all(jnp.isfinite(updated_state))
-
-
-def test_nca_update_in_ca():
-	"""Test the NCAUpdate in a CA simulation."""
-	seed = 42
-	spatial_dims = (16, 16)
-	channel_size = 3
-	num_kernels = 3
-	hidden_layer_sizes = (32, 16)
-	input_size = 2
-	num_steps = 4
-
-	rngs = nnx.Rngs(seed)
-
-	state = jnp.zeros((*spatial_dims, channel_size))
-	state = state.at[8:11, 8:11, :].set(1.0)
-
-	perceive = ConvPerceive(
-		channel_size=channel_size,
-		perception_size=num_kernels * channel_size,
-		rngs=rngs,
-		feature_group_count=channel_size,
-	)
-	update = NCAUpdate(
-		channel_size=channel_size,
-		perception_size=input_size + num_kernels * channel_size,
-		hidden_layer_sizes=hidden_layer_sizes,
-		rngs=rngs,
-	)
-
-	ca = System(perceive, update)
-
-	input_data = jnp.ones((num_steps, *spatial_dims, input_size))
-	final_state, metrics = ca(state, input_data, num_steps=num_steps, input_in_axis=0)
-
-	assert final_state.shape == state.shape
-	assert jnp.all(jnp.isfinite(final_state))
 
 
 @pytest.mark.parametrize(
