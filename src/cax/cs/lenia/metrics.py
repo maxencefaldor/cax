@@ -1,7 +1,6 @@
 """Metrics function for Lenia.
 
-This file contains an example implementation of a metrics function, `metrics_fn`, specifically
-designed for Lenia.
+This file contains an example implementation of a metrics function specifically designed for Lenia.
 
 The function is responsible for calculating various statistical measures within the Lenia world,
 including the mass, center of mass, and other pertinent metrics. These computations are essential

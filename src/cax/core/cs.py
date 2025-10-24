@@ -59,11 +59,12 @@ class ComplexSystem(nnx.Module):
 		return state
 
 	@nnx.jit
-	def render(self, state: State) -> Array:
+	def render(self, state: State, **kwargs) -> Array:
 		"""Render state to RGB.
 
 		Args:
-			state: An array with two spatial/time dimensions.
+			state: A state.
+			**kwargs: Additional rendering-specific keyword arguments.
 
 		Returns:
 			The rendered RGB image in uint8 format.

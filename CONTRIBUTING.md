@@ -17,7 +17,7 @@ Follow these steps to contribute code:
 3. Install your fork from source using [https://docs.astral.sh/uv/](`uv`).
 
 ```bash
-uv run python -c "import cax; print(cax.__doc__)"
+uv sync --all-extras --dev
 ```
 
 4. Add the CAX repository as an upstream remote, so you can use it to sync your changes.

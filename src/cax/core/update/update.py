@@ -1,4 +1,4 @@
-"""Update base module for Cellular Automata.
+"""Update base module.
 
 This module defines the `Update` class, which serves as a base class for all update modules
 in the CAX library. The `Update` class inherits from `nnx.Module` to utilize Flax's neural

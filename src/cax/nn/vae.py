@@ -100,7 +100,7 @@ class Decoder(nnx.Module):
 			spatial_dims: Spatial dimensions of the output.
 			features: Sequence of feature sizes for transposed convolutional layers.
 			latent_size: Size of the latent space.
-			rngs: Random number generators.
+			rngs: rng key.
 
 		"""
 		self.features = features
@@ -164,7 +164,7 @@ class VAE(nnx.Module):
 			spatial_dims: Spatial dimensions of the input/output.
 			features: Sequence of feature sizes for encoder and decoder.
 			latent_size: Size of the latent space.
-			rngs: Random number generators.
+			rngs: rng key.
 
 		"""
 		super().__init__()
