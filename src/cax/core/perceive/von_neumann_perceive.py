@@ -1,4 +1,4 @@
-"""Von Neumann Perceive module."""
+"""Von Neumann perceive module."""
 
 from itertools import product
 
@@ -10,7 +10,7 @@ from .perceive import Perceive
 
 
 class VonNeumannPerceive(Perceive):
-	"""Von Neumann Perceive class.
+	"""Von Neumann perceive class.
 
 	This class implements perception based on the Von Neumann neighborhood.
 	The Von Neumann neighborhood includes cells within a specified Manhattan distance of the central
@@ -18,7 +18,7 @@ class VonNeumannPerceive(Perceive):
 	"""
 
 	def __init__(self, num_spatial_dims: int, radius: int):
-		"""Initialize the Von Neumann Perceive.
+		"""Initialize Von Neumann perceive.
 
 		Args:
 			num_spatial_dims: Number of spatial dimensions.

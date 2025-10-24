@@ -1,4 +1,4 @@
-"""Multi-Layer Perceptron update module."""
+"""MLP update module."""
 
 from collections.abc import Callable
 
@@ -12,7 +12,7 @@ from cax.types import Input, Perception, State
 
 
 class MLPUpdate(Update):
-	"""Multi-Layer Perceptron update class."""
+	"""MLP update class."""
 
 	def __init__(
 		self,
@@ -20,21 +20,21 @@ class MLPUpdate(Update):
 		channel_size: int,
 		perception_size: int,
 		hidden_layer_sizes: tuple[int, ...],
-		rngs: nnx.Rngs,
 		*,
 		activation_fn: Callable = nnx.relu,
 		zeros_init: bool = False,
+		rngs: nnx.Rngs,
 	):
-		"""Initialize the MLPUpdate layer.
+		"""Initialize MLP update.
 
 		Args:
 			num_spatial_dims: Number of spatial dimensions.
 			channel_size: Number of channels in the output.
 			perception_size: Size of the input perception.
 			hidden_layer_sizes: Sizes of hidden layers.
-			rngs: Random number generators.
 			activation_fn: Activation function to use.
 			zeros_init: Whether to use zeros initialization for the weights of the last layer.
+			rngs: rng key.
 
 		"""
 		in_features = (perception_size,) + hidden_layer_sizes
@@ -42,18 +42,20 @@ class MLPUpdate(Update):
 		kernel_init = [default_kernel_init for _ in hidden_layer_sizes] + [
 			initializers.zeros_init() if zeros_init else default_kernel_init
 		]
-		self.layers = [
-			nnx.Conv(
-				in_features,
-				out_features,
-				kernel_size=num_spatial_dims * (1,),
-				kernel_init=kernel_init,
-				rngs=rngs,
-			)
-			for in_features, out_features, kernel_init in zip(
-				in_features, out_features, kernel_init
-			)
-		]
+		self.layers = nnx.List(
+			[
+				nnx.Conv(
+					in_features,
+					out_features,
+					kernel_size=num_spatial_dims * (1,),
+					kernel_init=kernel_init,
+					rngs=rngs,
+				)
+				for in_features, out_features, kernel_init in zip(
+					in_features, out_features, kernel_init
+				)
+			]
+		)
 		self.activation_fn = activation_fn
 
 	def __call__(self, state: State, perception: Perception, input: Input | None = None) -> State:

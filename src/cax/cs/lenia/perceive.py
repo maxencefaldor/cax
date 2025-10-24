@@ -1,8 +1,4 @@
-"""Lenia perceive module.
-
-[1] Lenia - Biology of Artificial Life, Bert Wang-Chak Chan. 2019.
-[2] Discovering Sensorimotor Agency in Cellular Automata using Diversity Search, Hamon, et al. 2024.
-"""
+"""Lenia perceive module."""
 
 from collections.abc import Callable
 
@@ -15,7 +11,7 @@ from cax.core.perceive import Perceive
 from cax.types import Perception, State
 
 from .kernel import gaussian_kernel_fn
-from .rule import RuleParams
+from .rule import LeniaRuleParams
 
 
 class LeniaPerceive(Perceive):
@@ -25,40 +21,34 @@ class LeniaPerceive(Perceive):
 		self,
 		spatial_dims: tuple[int, ...],
 		channel_size: int,
-		R: int,
-		rule_params: RuleParams,
 		*,
-		state_scale: float,
+		R: int,
+		state_scale: float = 1.0,
 		kernel_fn: Callable = gaussian_kernel_fn,
+		rule_params: LeniaRuleParams,
 	):
-		"""Initialize LeniaPerceive.
+		"""Initialize Lenia perceive.
 
 		Args:
 			spatial_dims: Spatial dimensions.
 			channel_size: Number of channels.
 			R: Space resolution.
-			rule_params: Parameters for the rules.
 			state_scale: Scaling factor for the state.
 			kernel_fn: Kernel function.
+			rule_params: Parameters for the rules.
 
 		"""
-		super().__init__()
 		self.spatial_dims = spatial_dims
 		self.num_spatial_dims = len(spatial_dims)
 		self.spatial_axes = tuple(range(self.num_spatial_dims))
-
 		self.channel_size = channel_size
 		self.R = R
 		self.state_scale = state_scale
+
+		self.reshape_channel_to_kernel = nnx.Param(self._reshape_channel_to_kernel(rule_params))
+
 		self.kernel_fn = kernel_fn
-
-		# Compute kernel fft
-		self.kernel_fft = nnx.Param(self.compute_kernel_fft(rule_params))
-
-		# Reshape channel to kernel
-		self.reshape_channel_to_kernel = nnx.Param(
-			self.compute_reshape_channel_to_kernel(rule_params)
-		)
+		self.kernel_fft = nnx.Param(self._kernel_fft(rule_params))
 
 	def __call__(self, state: State) -> Perception:
 		"""Apply Lenia perception to the input state.
@@ -81,17 +71,7 @@ class LeniaPerceive(Perceive):
 
 		return U_k
 
-	@nnx.jit
-	def update_rule_params(self, rule_params: RuleParams):
-		"""Update the rule parameters."""
-		# Compute kernel fft
-		self.kernel_fft.value = self.compute_kernel_fft(rule_params)
-
-		# Compute reshape channel to kernel
-		self.reshape_channel_to_kernel.value = self.compute_reshape_channel_to_kernel(rule_params)
-
-	@nnx.jit
-	def compute_kernel_fft(self, rule_params: RuleParams) -> Array:
+	def _kernel_fft(self, rule_params: LeniaRuleParams) -> Array:
 		"""Compute the kernel fft based on the kernel function and rules parameters."""
 		x = jnp.mgrid[[slice(-dim // 2, dim // 2) for dim in self.spatial_dims]] / (
 			self.state_scale * self.R
@@ -113,8 +93,7 @@ class LeniaPerceive(Perceive):
 
 		return kernel_fft
 
-	@nnx.jit
-	def compute_reshape_channel_to_kernel(self, rule_params: RuleParams) -> Array:
+	def _reshape_channel_to_kernel(self, rule_params: LeniaRuleParams) -> Array:
 		"""Compute array to reshape from channel to kernel."""
 		return nnx.vmap(lambda x: jax.nn.one_hot(x, num_classes=self.channel_size), out_axes=1)(
 			rule_params.channel_source

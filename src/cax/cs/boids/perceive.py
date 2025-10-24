@@ -1,23 +1,19 @@
-"""Boids Perceive module."""
+"""Boids perceive module."""
 
-import jax
 import jax.numpy as jnp
 from flax import nnx
 
 from cax.core.perceive import Perceive
 from cax.types import State
 
-from .perception import Perception
+from .perception import BoidsPerception
 
 
 class BoidsPerceive(Perceive):
-	"""Boids Perceive class.
-
-	This class implements perception based on the Boids.
-	"""
+	"""Boids perceive class."""
 
 	def __init__(self, boid_policy: nnx.Module):
-		"""Initialize the Boids Perceive.
+		"""Initialize Boids perceive.
 
 		Args:
 			boid_policy: Boid policy.
@@ -25,7 +21,7 @@ class BoidsPerceive(Perceive):
 		"""
 		self.boid_policy = boid_policy
 
-	def __call__(self, state: State) -> Perception:
+	def __call__(self, state: State) -> BoidsPerception:
 		"""Apply Boids perception to the input state.
 
 		Args:
@@ -35,8 +31,14 @@ class BoidsPerceive(Perceive):
 			The Boids perception.
 
 		"""
-		acceleration = jax.vmap(self.boid_policy, in_axes=(None, 0))(
-			state, jnp.arange(state.position.shape[-2])
-		)
+		num_boids = state.position.shape[-2]
 
-		return Perception(acceleration=acceleration)
+		state_axes = nnx.StateAxes({nnx.RngState: 0, nnx.Intermediate: 0, ...: None})
+		acceleration = nnx.split_rngs(splits=num_boids)(
+			nnx.vmap(
+				lambda boid_policy, state, boid_idx: boid_policy(state, boid_idx),
+				in_axes=(state_axes, None, 0),
+			)
+		)(self.boid_policy, state, jnp.arange(num_boids))
+
+		return BoidsPerception(acceleration=acceleration)

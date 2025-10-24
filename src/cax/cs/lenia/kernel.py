@@ -18,7 +18,7 @@ class KernelParams:
 
 @struct.dataclass
 class FreeKernelParams:
-	"""Free kernel parameters from https://arxiv.org/abs/2212.07906."""
+	"""Free kernel parameters from [2]."""
 
 	r: Array
 	b: Array

@@ -12,7 +12,7 @@ from cax.core.update.update import Update
 from cax.types import Input, Perception, State
 
 from ..lenia.growth import exponential_growth_fn
-from ..lenia.rule import RuleParams
+from ..lenia.rule import LeniaRuleParams
 
 
 class FlowLeniaUpdate(Update):
@@ -21,34 +21,37 @@ class FlowLeniaUpdate(Update):
 	def __init__(
 		self,
 		channel_size: int,
-		T: int,
-		rule_params: RuleParams,
 		*,
+		T: int,
 		growth_fn: Callable = exponential_growth_fn,
+		rule_params: LeniaRuleParams,
 		# Flow Lenia parameters
 		theta_A: float = 1.0,
 		n: int = 2,
 		dd: int = 5,
 		sigma: float = 0.65,
 	):
-		"""Initialize the FlowLeniaUpdate.
+		"""Initialize Flow Lenia update.
 
 		Args:
 			channel_size: Number of channels.
 			T: Time resolution.
+			growth_fn: Growth mapping function.
 			rule_params: Parameters for the rules.
-			growth_fn: Growth function.
 			theta_A: Threshold for alpha computation in Flow Lenia.
 			n: Exponent for alpha computation in Flow Lenia.
-			dt: Time step for flow displacement.
 			dd: Maximum displacement distance.
 			sigma: Spread parameter for reintegration tracking.
 
 		"""
-		super().__init__()
 		self.channel_size = channel_size
 		self.T = T
+
+		self.weight = rule_params.weight
+		self.reshape_kernel_to_channel = nnx.Param(self._reshape_kernel_to_channel(rule_params))
+
 		self.growth_fn = growth_fn
+		self.growth_params = nnx.data(rule_params.growth_params)
 
 		# Flow Lenia parameters
 		self.theta_A = theta_A
@@ -57,31 +60,21 @@ class FlowLeniaUpdate(Update):
 		self.dd = dd
 		self.sigma = sigma
 
-		# Set rule parameters
-		self.rule_params = jax.tree.map(nnx.Param, rule_params)
-
-		# Reshape kernel to channel
-		self.reshape_kernel_to_channel = nnx.Param(
-			jax.vmap(lambda x: jax.nn.one_hot(x, num_classes=channel_size))(
-				rule_params.channel_target
-			)
-		)
-
 	def __call__(self, state: State, perception: Perception, input: Input | None = None) -> State:
 		"""Apply the Flow Lenia update.
 
 		Args:
-			state: Current state of shape (y, x, c).
-			perception: Perceived state of shape (y, x, k).
-			input: External input (unused).
+			state: Current state.
+			perception: Perceived state.
+			input: Input (unused in this implementation).
 
 		Returns:
-			Updated state of shape (y, x, c).
+			Next state.
 
 		"""
 		# Compute growth
-		G_k = self.rule_params.weight * self.growth_fn(
-			perception, self.rule_params.growth_params
+		G_k = self.weight * self.growth_fn(
+			perception, self.growth_params
 		)  # (*spatial_dims, num_rules,)
 
 		# Aggregate growth to channels
@@ -167,6 +160,12 @@ class FlowLeniaUpdate(Update):
 		new_state = jnp.sum(nX, axis=0)  # (SY, SX, C)
 
 		return new_state
+
+	def _reshape_kernel_to_channel(self, rule_params: LeniaRuleParams) -> Array:
+		"""Compute array to reshape from kernel to channel."""
+		return nnx.vmap(lambda x: jax.nn.one_hot(x, num_classes=self.channel_size))(
+			rule_params.channel_target
+		)
 
 
 def get_sobel_kernels():

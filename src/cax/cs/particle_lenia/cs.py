@@ -1,4 +1,4 @@
-"""Particle Lenia model.
+"""Particle Lenia module.
 
 [1] https://google-research.github.io/self-organising-systems/particle-lenia/
 """
@@ -9,53 +9,71 @@ from functools import partial
 import jax
 import jax.numpy as jnp
 from flax import nnx
+from jax import Array
 
-from cax.core.ca import System, metrics_fn
-from cax.types import State
+from cax.core.cs import ComplexSystem
+from cax.types import Input, State
 from cax.utils.render import clip_and_uint8
 
 from ..lenia.growth import exponential_growth_fn
 from .kernel import peak_kernel_fn
-from .particle_lenia_perceive import ParticleLeniaPerceive
-from .particle_lenia_update import ParticleLeniaUpdate
-from .rule import RuleParams
+from .perceive import ParticleLeniaPerceive
+from .rule import ParticleLeniaRuleParams
+from .update import ParticleLeniaUpdate
 
 
-class ParticleLenia(System):
-	"""Particle Lenia model."""
+class ParticleLenia(ComplexSystem):
+	"""Particle Lenia class."""
 
 	def __init__(
 		self,
 		num_spatial_dims: int,
-		T: int,
-		rule_params: RuleParams,
 		*,
+		T: int,
 		kernel_fn: Callable = peak_kernel_fn,
 		growth_fn: Callable = exponential_growth_fn,
-		metrics_fn: Callable = metrics_fn,
+		rule_params: ParticleLeniaRuleParams,
 	):
-		"""Initialize Particle Lenia."""
+		"""Initialize Particle Lenia.
+
+		Args:
+			num_spatial_dims: Number of spatial dimensions.
+			T: Time resolution.
+			kernel_fn: Kernel function.
+			growth_fn: Growth mapping function.
+			rule_params: Parameters for the rules.
+
+		"""
 		self.num_spatial_dims = num_spatial_dims
-		perceive = ParticleLeniaPerceive(
+		self.perceive = ParticleLeniaPerceive(
 			num_spatial_dims=num_spatial_dims,
-			rule_params=rule_params,
 			kernel_fn=kernel_fn,
 			growth_fn=growth_fn,
+			rule_params=rule_params,
 		)
-		update = ParticleLeniaUpdate(
+		self.update = ParticleLeniaUpdate(
 			T=T,
 		)
-		super().__init__(perceive, update, metrics_fn=metrics_fn)
+
+	def _step(self, state: State, input: Input | None = None, *, sow: bool = False) -> State:
+		perception = self.perceive(state)
+		next_state = self.update(state, perception, input)
+
+		if sow:
+			self.sow(nnx.Intermediate, "state", next_state)
+
+		return next_state
 
 	@partial(nnx.jit, static_argnames=("resolution", "extent", "particle_radius", "type"))
 	def render(
 		self,
 		state: State,
+		*,
 		resolution: int = 512,
 		extent: float = 15.0,
 		particle_radius: float = 0.3,
 		type: str = "UG",  # Options: "particles", "UG", "E"
-	) -> jax.Array:
+	) -> Array:
 		"""Render state to RGB.
 
 		Args:
@@ -139,5 +157,4 @@ class ParticleLenia(System):
 			# Just show particles
 			rgb = vis_particle
 
-		# Clip values to valid range and convert to uint8
 		return clip_and_uint8(rgb)

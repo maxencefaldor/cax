@@ -1,47 +1,40 @@
-"""Particle Life perceive."""
+"""Particle Life perceive module."""
 
 import jax.numpy as jnp
-from flax import nnx
 from jax import Array
 
 from cax.core.perceive import Perceive
 from cax.types import Perception, State
 
-from .perception import Perception as ParticleLifePerception
+from .perception import ParticleLifePerception as ParticleLifePerception
 
 
 class ParticleLifePerceive(Perceive):
-	"""Particle Life Perceive class.
-
-	This class implements perception based on the Particle Life.
-	"""
+	"""Particle Life perceive class."""
 
 	def __init__(
 		self,
-		A: Array,
 		*,
+		force_factor: float = 1.0,
 		r_max: float = 0.15,
 		beta: float = 0.3,
-		force_factor: float = 1.0,
-		boundary: str = "CIRCULAR",
+		A: Array,
 	):
-		"""Initialize the Particle Life Perceive.
+		"""Initialize Particle Life perceive.
 
 		Args:
-			A: Attraction matrix.
+			force_factor: Force factor.
 			r_max: Maximum distance for attraction.
 			beta: Attraction threshold.
-			force_factor: Force factor.
-			boundary: Boundary condition.
+			A: Attraction matrix.
 
 		"""
-		self.A = nnx.Param(A)
+		self.force_factor = force_factor
 		self.r_max = r_max
 		self.beta = beta
-		self.force_factor = force_factor
-		self.boundary = boundary
+		self.A = A
 
-	def get_forces(self, distances: Array, attraction_factors: Array) -> Array:
+	def _get_forces(self, distances: Array, attraction_factors: Array) -> Array:
 		"""Calculate interaction forces between particles.
 
 		Args:
@@ -62,7 +55,7 @@ class ParticleLifePerceive(Perceive):
 			default=0.0,
 		)
 
-	def get_acceleration(self, forces: Array, direction_norm: Array) -> Array:
+	def _get_acceleration(self, forces: Array, direction_norm: Array) -> Array:
 		"""Calculate accelerations from forces and direction norms.
 
 		Args:
@@ -91,9 +84,8 @@ class ParticleLifePerceive(Perceive):
 		pos_diff = state.position[..., None, :, :] - state.position[..., :, None, :]
 
 		# Apply periodic boundary conditions
-		if self.boundary == "CIRCULAR":
-			pos_diff = jnp.where(pos_diff > 0.5, pos_diff - 1.0, pos_diff)
-			pos_diff = jnp.where(pos_diff < -0.5, pos_diff + 1.0, pos_diff)
+		pos_diff = jnp.where(pos_diff > 0.5, pos_diff - 1.0, pos_diff)
+		pos_diff = jnp.where(pos_diff < -0.5, pos_diff + 1.0, pos_diff)
 
 		# Calculate distances and normalized directions with periodic conditions
 		distance = jnp.linalg.norm(pos_diff, axis=-1)
@@ -102,9 +94,9 @@ class ParticleLifePerceive(Perceive):
 		)
 
 		# Calculate forces
-		forces = self.get_forces(distance, attraction_factors)
+		forces = self._get_forces(distance, attraction_factors)
 
 		# Calculate accelerations
-		acceleration = self.get_acceleration(forces, direction_norm)
+		acceleration = self._get_acceleration(forces, direction_norm)
 
 		return ParticleLifePerception(acceleration=acceleration)

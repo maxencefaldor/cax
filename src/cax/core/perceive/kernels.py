@@ -1,4 +1,4 @@
-"""Kernel functions for cellular automata perception."""
+"""Kernel functions for perception modules."""
 
 import jax.numpy as jnp
 from jax import Array

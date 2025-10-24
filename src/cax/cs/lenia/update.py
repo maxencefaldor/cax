@@ -11,7 +11,7 @@ from cax.core.update.update import Update
 from cax.types import Input, Perception, State
 
 from .growth import exponential_growth_fn
-from .rule import RuleParams
+from .rule import LeniaRuleParams
 
 
 class LeniaUpdate(Update):
@@ -20,47 +20,43 @@ class LeniaUpdate(Update):
 	def __init__(
 		self,
 		channel_size: int,
-		T: int,
-		rule_params: RuleParams,
 		*,
+		T: int,
 		growth_fn: Callable = exponential_growth_fn,
+		rule_params: LeniaRuleParams,
 	):
-		"""Initialize the LeniaUpdate.
+		"""Initialize Lenia update.
 
 		Args:
 			channel_size: Number of channels.
 			T: Time resolution.
+			growth_fn: Growth mapping function.
 			rule_params: Parameters for the rules.
-			growth_fn: Growth function.
 
 		"""
-		super().__init__()
 		self.channel_size = channel_size
 		self.T = T
+
+		self.weight = rule_params.weight
+		self.reshape_kernel_to_channel = nnx.Param(self._reshape_kernel_to_channel(rule_params))
+
 		self.growth_fn = growth_fn
-
-		# Set rule parameters
-		self.rule_params = jax.tree.map(nnx.Param, rule_params)
-
-		# Reshape kernel to channel
-		self.reshape_kernel_to_channel = nnx.Param(
-			self.compute_reshape_kernel_to_channel(rule_params)
-		)
+		self.growth_params = nnx.data(rule_params.growth_params)
 
 	def __call__(self, state: State, perception: Perception, input: Input | None = None) -> State:
-		"""Apply the Lenia update rule.
+		"""Apply the Lenia update.
 
 		Args:
-			state: Current state of the cellular automaton.
+			state: Current state.
 			perception: Perceived state.
-			input: External input (unused in this implementation).
+			input: Input (unused in this implementation).
 
 		Returns:
-			Updated state after applying the Lenia.
+			Next state.
 
 		"""
 		# Compute growth
-		G_k = self.rule_params.weight * self.growth_fn(perception, self.rule_params.growth_params)
+		G_k = self.weight * self.growth_fn(perception, self.growth_params)
 
 		# Aggregate growth to channels
 		G = jnp.dot(G_k, self.reshape_kernel_to_channel.value)
@@ -70,17 +66,7 @@ class LeniaUpdate(Update):
 
 		return state
 
-	@nnx.jit
-	def update_rule_params(self, rule_params: RuleParams):
-		"""Update the rule parameters."""
-		# Update rule parameters
-		self.rule_params = jax.tree.map(nnx.Param, rule_params)
-
-		# Compute reshape channel to kernel
-		self.reshape_kernel_to_channel.value = self.compute_reshape_kernel_to_channel(rule_params)
-
-	@nnx.jit
-	def compute_reshape_kernel_to_channel(self, rule_params: RuleParams) -> Array:
+	def _reshape_kernel_to_channel(self, rule_params: LeniaRuleParams) -> Array:
 		"""Compute array to reshape from kernel to channel."""
 		return nnx.vmap(lambda x: jax.nn.one_hot(x, num_classes=self.channel_size))(
 			rule_params.channel_target

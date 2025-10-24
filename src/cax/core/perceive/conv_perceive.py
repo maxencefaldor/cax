@@ -1,4 +1,4 @@
-"""Convolution Perceive module."""
+"""Convolution perceive module."""
 
 from collections.abc import Callable
 
@@ -10,31 +10,31 @@ from .perceive import Perceive
 
 
 class ConvPerceive(Perceive):
-	"""Convolution Perceive class."""
+	"""Convolution perceive class."""
 
 	def __init__(
 		self,
 		channel_size: int,
 		perception_size: int,
-		rngs: nnx.Rngs,
 		*,
 		kernel_size: int | tuple[int, ...] = (3, 3),
 		padding: str = "SAME",
 		feature_group_count: int = 1,
 		use_bias: bool = False,
 		activation_fn: Callable | None = None,
+		rngs: nnx.Rngs,
 	):
-		"""Initialize the ConvPerceive layer.
+		"""Initialize convolution perceive.
 
 		Args:
 			channel_size: Number of input channels.
 			perception_size: Number of output perception features.
-			rngs: Random number generators.
 			kernel_size: Size of the convolutional kernel.
 			padding: Padding to use.
 			feature_group_count: Number of feature groups.
 			use_bias: Whether to use bias in convolutional layers.
 			activation_fn: Activation function to use.
+			rngs: rng key.
 
 		"""
 		self.conv = nnx.Conv(

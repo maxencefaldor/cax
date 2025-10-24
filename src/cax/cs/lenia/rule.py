@@ -1,4 +1,4 @@
-"""Lenia rule module."""
+"""Lenia rule parameters module."""
 
 from flax import struct
 
@@ -7,8 +7,8 @@ from .kernel import KernelParams
 
 
 @struct.dataclass
-class RuleParams:
-	"""Rule parameters."""
+class LeniaRuleParams:
+	"""Lenia rule parameters class."""
 
 	channel_source: int
 	channel_target: int

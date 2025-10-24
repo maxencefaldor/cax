@@ -7,8 +7,9 @@
 import jax
 import jax.numpy as jnp
 from flax import nnx
+from jax import Array
 
-from .state import State
+from .state import BoidsState
 
 
 class BoidPolicy(nnx.Module):
@@ -16,7 +17,6 @@ class BoidPolicy(nnx.Module):
 
 	def __init__(
 		self,
-		rngs: nnx.Rngs,
 		*,
 		separation_weight: float = 4.5,
 		alignment_weight: float = 0.65,
@@ -26,9 +26,22 @@ class BoidPolicy(nnx.Module):
 		acceleration_scale: float = 1.0,
 		noise_scale: float = 0.05,
 		acceleration_max: float = jnp.inf,
+		rngs: nnx.Rngs,
 	):
-		"""Initialize the boid policy."""
-		self.rngs = rngs
+		"""Initialize the boid policy.
+
+		Args:
+			separation_weight: Weight for separation force.
+			alignment_weight: Weight for alignment force.
+			cohesion_weight: Weight for cohesion force.
+			perception: Perception radius.
+			separation_distance: Separation distance.
+			acceleration_scale: Scale for acceleration.
+			noise_scale: Scale for noise.
+			acceleration_max: Maximum acceleration.
+			rngs: rng key.
+
+		"""
 		self.separation_weight = separation_weight
 		self.alignment_weight = alignment_weight
 		self.cohesion_weight = cohesion_weight
@@ -37,8 +50,9 @@ class BoidPolicy(nnx.Module):
 		self.acceleration_scale = acceleration_scale
 		self.noise_scale = noise_scale
 		self.acceleration_max = acceleration_max
+		self.rngs = rngs
 
-	def _toroidal_distance2(self, position_1: jax.Array, position_2: jax.Array) -> jax.Array:
+	def _toroidal_distance2(self, position_1: Array, position_2: Array) -> Array:
 		"""Calculate squared distance considering toroidal world in [0, 1]^n."""
 		# Calculate component-wise distances
 		vector = self._toroidal_vector(position_1, position_2)
@@ -46,7 +60,7 @@ class BoidPolicy(nnx.Module):
 		# Return squared Euclidean distance
 		return jnp.sum(vector**2)
 
-	def _toroidal_vector(self, position_1: jax.Array, position_2: jax.Array) -> jax.Array:
+	def _toroidal_vector(self, position_1: Array, position_2: Array) -> Array:
 		"""Get vector from position_1 to position_2 considering toroidal world in [0, 1]^n."""
 		# Calculate component-wise displacements
 		pos_diff = position_2 - position_1
@@ -57,17 +71,17 @@ class BoidPolicy(nnx.Module):
 
 		return pos_diff
 
-	def _normalize(self, vector: jax.Array) -> jax.Array:
+	def _normalize(self, vector: Array) -> Array:
 		"""Normalize a vector."""
 		norm = jnp.maximum(jnp.linalg.norm(vector), 1e-8)
 		return vector / norm
 
-	def _clip_by_norm(self, vector: jax.Array, max_val: float) -> jax.Array:
+	def _clip_by_norm(self, vector: Array, max_val: float) -> Array:
 		"""Limit the magnitude of a vector."""
 		norm = jnp.linalg.norm(vector)
 		return jnp.where(norm > max_val, vector * max_val / norm, vector)
 
-	def separation(self, state: State, boid_idx: int) -> jax.Array:
+	def separation(self, state: BoidsState, boid_idx: int) -> Array:
 		"""Calculate separation force for a boid."""
 		# Calculate distances to all other boids
 		distances = jax.vmap(
@@ -87,7 +101,7 @@ class BoidPolicy(nnx.Module):
 
 		return self._normalize(steer)
 
-	def alignment(self, state: State, boid_idx: int) -> jax.Array:
+	def alignment(self, state: BoidsState, boid_idx: int) -> Array:
 		"""Calculate alignment force for a boid."""
 		# Calculate distances to all other boids
 		distances = jax.vmap(
@@ -107,7 +121,7 @@ class BoidPolicy(nnx.Module):
 
 		return self._normalize(steer)
 
-	def cohesion(self, state: State, boid_idx: int) -> jax.Array:
+	def cohesion(self, state: BoidsState, boid_idx: int) -> Array:
 		"""Calculate cohesion force for a boid."""
 		# Calculate distances to all other boids
 		distances = jax.vmap(
@@ -129,7 +143,7 @@ class BoidPolicy(nnx.Module):
 
 		return self._normalize(steer)
 
-	def __call__(self, state: State, boid_idx: int) -> jax.Array:
+	def __call__(self, state: BoidsState, boid_idx: int) -> Array:
 		"""Apply the boid policy.
 
 		Args:

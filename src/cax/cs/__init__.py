@@ -1,1 +1,1 @@
-"""Systems implemented in CAX."""
+"""Complex systems implemented in CAX."""

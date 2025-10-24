@@ -1,65 +1,31 @@
-"""Cellular Automata module."""
+"""Complex system module."""
 
-from collections.abc import Callable
 from functools import partial
 
 from flax import nnx
 from jax import Array
 
-from cax.core.perceive import Perceive
-from cax.core.update import Update
-from cax.types import Input, Metrics, Perception, State
-
-
-def metrics_fn(next_state: State, state: State, perception: Perception, input: Input) -> Metrics:
-	"""Metrics function returning the state.
-
-	Args:
-		next_state: Next state.
-		state: Current state.
-		perception: Perception.
-		input: Input.
-
-	Returns:
-		A PyTree of metrics.
-
-	"""
-	return next_state
+from cax.types import Input, State
 
 
 class ComplexSystem(nnx.Module):
 	"""Complex system class."""
 
-	def __init__(self, perceive: Perceive, update: Update, *, metrics_fn: Callable = metrics_fn):
-		"""Initialize the complex system.
-
-		Args:
-			perceive: Perception module.
-			update: Update module.
-			metrics_fn: Metrics function.
-
-		"""
-		self.perceive = perceive
-		self.update = update
-		self.metrics_fn = metrics_fn
-
-	@nnx.jit
-	def step(self, state: State, input: Input | None = None) -> tuple[State, Metrics]:
-		"""Perform a single step.
+	def _step(self, state: State, input: Input | None = None, *, sow: bool = False) -> State:
+		"""Step the complex system for a single time step.
 
 		Args:
 			state: Current state.
 			input: Optional input.
+			sow: Whether to sow intermediate values.
 
 		Returns:
-			Updated state.
+			Next state.
 
 		"""
-		perception = self.perceive(state)
-		next_state = self.update(state, perception, input)
-		return next_state, self.metrics_fn(next_state, state, perception, input)
+		raise NotImplementedError
 
-	@partial(nnx.jit, static_argnames=("num_steps", "input_in_axis"))
+	@partial(nnx.jit, static_argnames=("num_steps", "input_in_axis", "sow"))
 	def __call__(
 		self,
 		state: State,
@@ -67,32 +33,30 @@ class ComplexSystem(nnx.Module):
 		*,
 		num_steps: int = 1,
 		input_in_axis: int | None = None,
-	) -> tuple[State, Metrics]:
-		"""Run the complex system for multiple steps.
+		sow: bool = False,
+	) -> State:
+		"""Step the complex system for multiple time steps.
 
 		Args:
-			state: Initial state.
+			state: Current state.
 			input: Optional input.
-			num_steps: Number of steps to run.
+			num_steps: Number of steps.
 			input_in_axis: Axis for input if provided for each step.
+			sow: Whether to sow intermediate values.
 
 		Returns:
-			Final state and all intermediate metrics.
+			Final state.
 
 		"""
-
-		def step(carry: tuple[ComplexSystem, State], input: Input | None) -> tuple[tuple[ComplexSystem, State], State]:
-			cs, state = carry
-			state, metrics = cs.step(state, input)
-			return (cs, state), metrics
-
-		(_, state), metrics = nnx.scan(
-			step,
-			in_axes=(nnx.Carry, input_in_axis),
+		state_axes = nnx.StateAxes({nnx.Intermediate: 0, ...: nnx.Carry})
+		state = nnx.scan(
+			lambda cs, state, input: cs._step(state, input, sow=sow),
+			in_axes=(state_axes, nnx.Carry, input_in_axis),
+			out_axes=nnx.Carry,
 			length=num_steps,
-		)((self, state), input)
+		)(self, state, input)
 
-		return state, metrics
+		return state
 
 	@nnx.jit
 	def render(self, state: State) -> Array:
