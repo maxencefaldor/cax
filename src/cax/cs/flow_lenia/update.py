@@ -48,7 +48,7 @@ class FlowLeniaUpdate(Update):
 		self.T = T
 
 		self.weight = rule_params.weight
-		self.reshape_kernel_to_channel = nnx.Param(self._reshape_kernel_to_channel(rule_params))
+		self.reshape_kernel_to_channel = self._reshape_kernel_to_channel(rule_params)
 
 		self.growth_fn = growth_fn
 		self.growth_params = nnx.data(rule_params.growth_params)
@@ -79,7 +79,7 @@ class FlowLeniaUpdate(Update):
 
 		# Aggregate growth to channels
 		# Affinity map U, previously called growth in Lenia
-		U = jnp.dot(G_k, self.reshape_kernel_to_channel.value)  # (*spatial_dims, channel_size,)
+		U = jnp.dot(G_k, self.reshape_kernel_to_channel)  # (*spatial_dims, channel_size,)
 
 		# Affinity gradient
 		nabla_U = sobel(U)  # (*spatial_dims, 2, c)
