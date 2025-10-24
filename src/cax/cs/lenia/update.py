@@ -38,7 +38,7 @@ class LeniaUpdate(Update):
 		self.T = T
 
 		self.weight = rule_params.weight
-		self.reshape_kernel_to_channel = nnx.Param(self._reshape_kernel_to_channel(rule_params))
+		self.reshape_kernel_to_channel = self._reshape_kernel_to_channel(rule_params)
 
 		self.growth_fn = growth_fn
 		self.growth_params = nnx.data(rule_params.growth_params)
@@ -59,7 +59,7 @@ class LeniaUpdate(Update):
 		G_k = self.weight * self.growth_fn(perception, self.growth_params)
 
 		# Aggregate growth to channels
-		G = jnp.dot(G_k, self.reshape_kernel_to_channel.value)
+		G = jnp.dot(G_k, self.reshape_kernel_to_channel)
 
 		# Update state and clip
 		state = jnp.clip(state + G / self.T, 0.0, 1.0)

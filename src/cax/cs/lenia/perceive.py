@@ -45,10 +45,10 @@ class LeniaPerceive(Perceive):
 		self.R = R
 		self.state_scale = state_scale
 
-		self.reshape_channel_to_kernel = nnx.Param(self._reshape_channel_to_kernel(rule_params))
+		self.reshape_channel_to_kernel = self._reshape_channel_to_kernel(rule_params)
 
 		self.kernel_fn = kernel_fn
-		self.kernel_fft = nnx.Param(self._kernel_fft(rule_params))
+		self.kernel_fft = self._kernel_fft(rule_params)
 
 	def __call__(self, state: State) -> Perception:
 		"""Apply Lenia perception to the input state.
@@ -64,7 +64,7 @@ class LeniaPerceive(Perceive):
 		state_fft = jnp.fft.fftn(state, axes=self.spatial_axes)
 
 		# Deaggregate channels for kernel convolution
-		state_fft_k = jnp.dot(state_fft, self.reshape_channel_to_kernel.value)
+		state_fft_k = jnp.dot(state_fft, self.reshape_channel_to_kernel)
 
 		# Compute kernel convolution
 		U_k = jnp.real(jnp.fft.ifftn(self.kernel_fft * state_fft_k, axes=self.spatial_axes))
