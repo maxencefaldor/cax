@@ -6,11 +6,11 @@ import jax.numpy as jnp
 from flax import nnx
 from jax import Array
 
-from cax.core.cs import ComplexSystem
-from cax.types import Input
+from cax.core import ComplexSystem, Input
 from cax.utils import clip_and_uint8
 
 from .perceive import BoidsPerceive
+from .policy import BoidPolicy
 from .state import BoidsState
 from .update import BoidsUpdate
 
@@ -23,7 +23,7 @@ class Boids(ComplexSystem):
 		*,
 		dt: float = 0.01,
 		velocity_half_life: float = jnp.inf,
-		boid_policy: nnx.Module,
+		boid_policy: BoidPolicy,
 	):
 		"""Initialize Boids.
 

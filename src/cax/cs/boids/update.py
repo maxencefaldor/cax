@@ -2,8 +2,8 @@
 
 import jax.numpy as jnp
 
-from cax.core.update.update import Update
-from cax.types import Input
+from cax.core import Input
+from cax.core.update import Update
 
 from .perception import BoidsPerception
 from .state import BoidsState

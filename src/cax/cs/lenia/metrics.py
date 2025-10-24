@@ -9,7 +9,8 @@ for analyzing the state and dynamics of the Lenia system.
 
 import jax.numpy as jnp
 
-from cax.types import PyTree, State
+from cax.core import State
+from cax.types import PyTree
 
 
 def metrics_fn(

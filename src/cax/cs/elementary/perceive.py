@@ -9,11 +9,10 @@ from cax.core.perceive import ConvPerceive
 class ElementaryPerceive(ConvPerceive):
 	"""Elementary Cellular Automata perceive class."""
 
-	def __init__(self, *, padding: str = "CIRCULAR", rngs: nnx.Rngs):
+	def __init__(self, *, rngs: nnx.Rngs):
 		"""Initialize Elementary perceive.
 
 		Args:
-			padding: Padding to use.
 			rngs: rng key.
 
 		"""
@@ -22,7 +21,7 @@ class ElementaryPerceive(ConvPerceive):
 			channel_size=channel_size,
 			perception_size=3 * channel_size,
 			kernel_size=(3,),
-			padding=padding,
+			padding="CIRCULAR",
 			feature_group_count=channel_size,
 			use_bias=False,
 			activation_fn=None,

@@ -2,8 +2,11 @@
 
 import jax.numpy as jnp
 
-from cax.core.update.update import Update
-from cax.types import Input, Perception, State
+from cax.core import Input
+from cax.core.update import Update
+
+from .perception import ParticleLifePerception
+from .state import ParticleLifeState
 
 
 class ParticleLifeUpdate(Update):
@@ -25,7 +28,12 @@ class ParticleLifeUpdate(Update):
 		self.dt = dt
 		self.friction_factor = float(jnp.power(0.5, dt / velocity_half_life))
 
-	def __call__(self, state: State, perception: Perception, input: Input | None = None) -> State:
+	def __call__(
+		self,
+		state: ParticleLifeState,
+		perception: ParticleLifePerception,
+		input: Input | None = None,
+	) -> ParticleLifeState:
 		"""Apply the Particle Life rules to update the state.
 
 		Args:

@@ -3,9 +3,11 @@
 from flax import struct
 from jax import Array
 
+from cax.core import State
+
 
 @struct.dataclass
-class BoidsState:
+class BoidsState(State):
 	"""Boids state class."""
 
 	position: Array  # (num_boids, num_spatial_dims)
