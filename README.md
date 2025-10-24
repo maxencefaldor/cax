@@ -94,7 +94,7 @@ For a more detailed overview, get started with this notebook [![Colab](https://c
 
 ## Installation ⚙️
 
-You will need Python 3.10 or later, and a working JAX installation installed in a virtual environment.
+You will need Python 3.11 or later, and a working JAX installation installed in a virtual environment.
 
 Then, install CAX from PyPi with `uv`:
 ```

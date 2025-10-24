@@ -1,10 +1,9 @@
-"""Perception base module for Cellular Automata.
+"""Perceive base module.
 
 This module defines the `Perceive` class, which serves as a base class for all perception modules
 in the CAX library. The `Perceive` class inherits from `nnx.Module` to utilize Flax's neural
 network functionalities. It is designed to be subclassed by specific perception implementations
 that process the current state of the environment or system and return a perception.
-
 """
 
 from flax import nnx
