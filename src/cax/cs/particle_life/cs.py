@@ -1,63 +1,78 @@
-"""Particle Life model."""
+"""Particle Life module."""
 
-from collections.abc import Callable
 from functools import partial
 
-import jax
 import jax.numpy as jnp
 from flax import nnx
+from jax import Array
 
-from cax.core.ca import System, metrics_fn
+from cax.core.cs import ComplexSystem
+from cax.types import Input
 from cax.utils.render import clip_and_uint8, hsv_to_rgb
 
-from .particle_life_perceive import ParticleLifePerceive
-from .particle_life_update import ParticleLifeUpdate
-from .state import State
+from .perceive import ParticleLifePerceive
+from .state import ParticleLifeState
+from .update import ParticleLifeUpdate
 
 
-class ParticleLife(System):
-	"""Particle life model."""
+class ParticleLife(ComplexSystem):
+	"""Particle Life class."""
 
 	def __init__(
 		self,
 		num_classes: int,
-		rngs: nnx.Rngs,
 		*,
+		dt: float = 0.01,
+		force_factor: float = 1.0,
+		velocity_half_life: float = 0.01,
 		r_max: float = 0.15,
 		beta: float = 0.3,
-		dt: float = 0.01,
-		velocity_half_life: float = 0.01,
-		force_factor: float = 1.0,
-		boundary: str = "CIRCULAR",
-		metrics_fn: Callable = metrics_fn,
+		A: Array,
 	):
-		"""Initialize Particle Life."""
+		"""Initialize Particle Life.
+
+		Args:
+			num_classes: Number of classes.
+			dt: Time step of the simulation.
+			force_factor: Force factor.
+			velocity_half_life: Velocity half-life for friction.
+			r_max: Maximum distance for attraction.
+			beta: Attraction threshold.
+			A: Attraction matrix.
+
+		"""
 		self.num_classes = num_classes
 
-		key = rngs.params()
-		A = jax.random.uniform(key, (num_classes, num_classes), minval=-1.0, maxval=1.0)
-
-		perceive = ParticleLifePerceive(
-			A=A,
+		self.perceive = ParticleLifePerceive(
+			force_factor=force_factor,
 			r_max=r_max,
 			beta=beta,
-			force_factor=force_factor,
-			boundary=boundary,
+			A=A,
 		)
-		update = ParticleLifeUpdate(
+		self.update = ParticleLifeUpdate(
 			dt=dt,
 			velocity_half_life=velocity_half_life,
-			boundary=boundary,
 		)
-		super().__init__(perceive, update, metrics_fn=metrics_fn)
+
+	def _step(
+		self, state: ParticleLifeState, input: Input | None = None, *, sow: bool = False
+	) -> ParticleLifeState:
+		perception = self.perceive(state)
+		next_state = self.update(state, perception, input)
+
+		if sow:
+			self.sow(nnx.Intermediate, "state", next_state)
+
+		return next_state
 
 	@partial(nnx.jit, static_argnames=("resolution", "particle_radius"))
 	def render(
 		self,
-		state: State,
+		state: ParticleLifeState,
+		*,
 		resolution: int = 512,
 		particle_radius: float = 0.005,
-	) -> jax.Array:
+	) -> Array:
 		"""Render state to RGB.
 
 		Args:
@@ -110,5 +125,4 @@ class ParticleLife(System):
 			background * (1.0 - mask[..., None]) + particle_colors * mask[..., None]
 		)  # Shape: (resolution, resolution, 3)
 
-		# Clip values to valid range and convert to uint8
 		return clip_and_uint8(rgb)

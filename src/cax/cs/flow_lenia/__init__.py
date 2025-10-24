@@ -11,7 +11,7 @@ from ..lenia.kernel import (
 	rectangular_kernel_fn,
 )
 from ..lenia.perceive import LeniaPerceive as FlowLeniaPerceive
-from ..lenia.rule import RuleParams
+from ..lenia.rule import LeniaRuleParams
 from .cs import FlowLenia
 from .update import FlowLeniaUpdate
 
@@ -28,5 +28,5 @@ __all__ = [
 	"free_kernel_fn",
 	"GrowthParams",
 	"exponential_growth_fn",
-	"RuleParams",
+	"LeniaRuleParams",
 ]

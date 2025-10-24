@@ -1,4 +1,4 @@
-"""Moore Perceive module."""
+"""Moore perceive module."""
 
 from itertools import product
 
@@ -10,7 +10,7 @@ from .perceive import Perceive
 
 
 class MoorePerceive(Perceive):
-	"""Moore Perceive class.
+	"""Moore perceive class.
 
 	This class implements perception based on the Moore neighborhood.
 	The Moore neighborhood includes cells that are within a certain distance from the central cell
@@ -18,7 +18,7 @@ class MoorePerceive(Perceive):
 	"""
 
 	def __init__(self, num_spatial_dims: int, radius: int):
-		"""Initialize the Moore Perceive.
+		"""Initialize Moore perceive.
 
 		Args:
 			num_spatial_dims: Number of spatial dimensions.

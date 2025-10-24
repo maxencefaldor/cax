@@ -2,14 +2,14 @@
 
 from .cs import ParticleLife
 from .perceive import ParticleLifePerceive
+from .perception import ParticleLifePerception
+from .state import ParticleLifeState
 from .update import ParticleLifeUpdate
-from .perception import Perception
-from .state import State
 
 __all__ = [
 	"ParticleLife",
 	"ParticleLifePerceive",
 	"ParticleLifeUpdate",
-	"Perception",
-	"State",
+	"ParticleLifePerception",
+	"ParticleLifeState",
 ]

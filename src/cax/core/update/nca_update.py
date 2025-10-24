@@ -11,14 +11,13 @@ from cax.types import Input, Perception, State
 
 
 class NCAUpdate(ResidualUpdate):
-	"""Neural Cellular Automata Update class."""
+	"""Neural Cellular Automata update class."""
 
 	def __init__(
 		self,
 		channel_size: int,
 		perception_size: int,
 		hidden_layer_sizes: tuple[int, ...],
-		rngs: nnx.Rngs,
 		*,
 		activation_fn: Callable = nnx.relu,
 		step_size: float = 1.0,
@@ -26,20 +25,21 @@ class NCAUpdate(ResidualUpdate):
 		kernel_size: Sequence[int] = (3, 3),
 		alive_threshold: float = 0.1,
 		zeros_init: bool = False,
+		rngs: nnx.Rngs,
 	):
-		"""Initialize the NCAUpdate layer.
+		"""Initialize NCA update.
 
 		Args:
 			channel_size: Number of input channels.
 			perception_size: Size of the perception.
 			hidden_layer_sizes: Sizes of hidden layers.
-			rngs: Random number generators.
 			activation_fn: Activation function to use.
 			step_size: Step size for the update.
 			cell_dropout_rate: Dropout rate for cells.
 			kernel_size: Size of the convolutional kernel.
 			alive_threshold: Threshold for determining if a cell is alive.
 			zeros_init: Whether to use zeros initialization for the weights of the last layer.
+			rngs: rng key.
 
 		"""
 		super().__init__(

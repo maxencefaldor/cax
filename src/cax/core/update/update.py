@@ -23,15 +23,12 @@ class Update(nnx.Module):
 		This method should be implemented by subclasses to define specific update logic.
 
 		Args:
-			state: The current state of the environment or system.
-			perception: The current perception of the environment.
-			input: The input provided to the system.
+			state: Current state.
+			perception: Current perception.
+			input: Optional input.
 
 		Returns:
-			The new state after applying the update.
-
-		Raises:
-			NotImplementedError: This base method raises an error if not overridden by subclasses.
+			Next state.
 
 		"""
 		raise NotImplementedError

@@ -1,51 +1,65 @@
-"""Boids model."""
+"""Boids module."""
 
-from collections.abc import Callable
 from functools import partial
 
-import jax
 import jax.numpy as jnp
 from flax import nnx
+from jax import Array
 
-from cax.core.cs import ComplexSystem, metrics_fn
-from cax.types import State
+from cax.core.cs import ComplexSystem
+from cax.types import Input
 from cax.utils import clip_and_uint8
 
 from .perceive import BoidsPerceive
+from .state import BoidsState
 from .update import BoidsUpdate
 
 
 class Boids(ComplexSystem):
-	"""Boids model."""
+	"""Boids class."""
 
 	def __init__(
 		self,
-		boid_policy: nnx.Module,
 		*,
 		dt: float = 0.01,
 		velocity_half_life: float = jnp.inf,
-		boundary: str = "CIRCULAR",
-		metrics_fn: Callable = metrics_fn,
+		boid_policy: nnx.Module,
 	):
-		"""Initialize Boids."""
-		perceive = BoidsPerceive(
+		"""Initialize Boids.
+
+		Args:
+			dt: Time step of the simulation.
+			velocity_half_life: Velocity half life for friction.
+			boid_policy: Boid policy.
+
+		"""
+		self.perceive = BoidsPerceive(
 			boid_policy=boid_policy,
 		)
-
-		update = BoidsUpdate(
+		self.update = BoidsUpdate(
 			dt=dt,
 			velocity_half_life=velocity_half_life,
-			boundary=boundary,
 		)
-		super().__init__(perceive, update, metrics_fn=metrics_fn)
+
+	def _step(
+		self, state: BoidsState, input: Input | None = None, *, sow: bool = False
+	) -> BoidsState:
+		perception = self.perceive(state)
+		next_state = self.update(state, perception, input)
+
+		if sow:
+			self.sow(nnx.Intermediate, "state", next_state)
+
+		return next_state
 
 	@partial(nnx.jit, static_argnames=("resolution", "boids_size"))
 	def render(
 		self,
-		state: State,
+		state: BoidsState,
+		*,
 		resolution: int = 512,
 		boids_size: float = 0.01,
-	) -> jax.Array:
+	) -> Array:
 		"""Render state to RGB.
 
 		Args:

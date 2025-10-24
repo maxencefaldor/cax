@@ -1,11 +1,11 @@
-"""Particle Life perception."""
+"""Particle Life perception module."""
 
 from flax import struct
 from jax import Array
 
 
 @struct.dataclass
-class Perception:
-	"""Perception for Particle Life."""
+class ParticleLifePerception:
+	"""Particle Life perception class."""
 
 	acceleration: Array  # (num_particles, num_spatial_dims)

@@ -21,18 +21,15 @@ class Perceive(nnx.Module):
 	"""
 
 	def __call__(self, state: State) -> Perception:
-		"""Process the current state and return a perception.
+		"""Process the current state to produce a perception.
 
 		This method should be implemented by subclasses to define specific perception logic.
 
 		Args:
-			state: State of the cellular automaton.
+			state: Current state.
 
 		Returns:
-			The resulting perception based on the input state.
-
-		Raises:
-			NotImplementedError: This base method raises an error if not overridden by subclasses.
+			Perception based on the current state.
 
 		"""
 		raise NotImplementedError

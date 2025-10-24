@@ -1,7 +1,4 @@
-"""Particle Lenia perceive module.
-
-[1] https://google-research.github.io/self-organising-systems/particle-lenia/
-"""
+"""Particle Lenia perceive module."""
 
 from collections.abc import Callable
 
@@ -15,39 +12,38 @@ from cax.types import Perception, State
 
 from ..lenia.growth import exponential_growth_fn
 from .kernel import peak_kernel_fn
-from .rule import RuleParams
+from .rule import ParticleLeniaRuleParams
 
 
 class ParticleLeniaPerceive(Perceive):
-	"""Particle Lenia perception.
-
-	This class implements a perception mechanism using for Lenia.
-	"""
+	"""Particle Lenia perceive class."""
 
 	def __init__(
 		self,
 		num_spatial_dims: int,
-		rule_params: RuleParams,
 		*,
 		kernel_fn: Callable = peak_kernel_fn,
 		growth_fn: Callable = exponential_growth_fn,
+		rule_params: ParticleLeniaRuleParams,
 	):
-		"""Initialize the LeniaPerceive layer.
+		"""Initialize Particle Lenia perceive.
 
 		Args:
 			num_spatial_dims: Number of spatial dimensions.
-			rule_params: Parameters for the rules.
 			kernel_fn: Kernel function.
 			growth_fn: Growth mapping function.
+			rule_params: Parameters for the rules.
 
 		"""
-		super().__init__()
 		self.num_spatial_dims = num_spatial_dims
-		self.kernel_fn = kernel_fn
-		self.growth_fn = growth_fn
 
-		# Set rule parameters
-		self.rule_params = jax.tree.map(nnx.Param, rule_params)
+		self.kernel_fn = kernel_fn
+		self.kernel_params = nnx.data(rule_params.kernel_params)
+
+		self.growth_fn = growth_fn
+		self.growth_params = nnx.data(rule_params.growth_params)
+
+		self.c_rep = rule_params.c_rep
 
 	def __call__(self, state: State) -> Perception:
 		"""Apply Particle Lenia perception to the input state.
@@ -67,13 +63,13 @@ class ParticleLeniaPerceive(Perceive):
 		r = jnp.sqrt(jnp.clip(jnp.sum(jnp.square(x - state), axis=-1), min=1e-10))
 
 		# Compute Lenia field
-		U = jnp.sum(self.kernel_fn(r, self.rule_params.kernel_params))
+		U = jnp.sum(self.kernel_fn(r, self.kernel_params))
 
 		# Compute growth field
-		G = self.growth_fn(U, self.rule_params.growth_params)
+		G = self.growth_fn(U, self.growth_params)
 
 		# Compute repulsion potential field
-		R = 0.5 * self.rule_params.c_rep * jnp.sum(jnp.maximum(1.0 - r, 0.0) ** 2)
+		R = 0.5 * self.c_rep * jnp.sum(jnp.maximum(1.0 - r, 0.0) ** 2)
 
 		# Return energy field
 		return U, G, R

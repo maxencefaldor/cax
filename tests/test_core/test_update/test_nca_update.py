@@ -2,9 +2,9 @@
 
 import jax.numpy as jnp
 import pytest
+from cax.core.ca import System
 from flax import nnx
 
-from cax.core.ca import System
 from cax.core.perceive import ConvPerceive
 from cax.core.update import NCAUpdate
 

@@ -3,8 +3,8 @@
 import io
 from urllib.request import urlopen
 
-import jax
 import PIL.Image
+from jax import Array
 from PIL.Image import Image
 
 
@@ -25,7 +25,7 @@ def get_image_from_url(url: str) -> Image:
 	return image_pil
 
 
-def get_emoji(emoji: str) -> jax.Array:
+def get_emoji(emoji: str) -> Array:
 	"""Fetch, process, and return an emoji as a JAX array.
 
 	Args:

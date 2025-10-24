@@ -1,7 +1,7 @@
 """Metrics function for Lenia.
 
 This file contains an example implementation of a metrics function, `metrics_fn`, specifically
-designed for the Lenia model.
+designed for Lenia.
 
 The function is responsible for calculating various statistical measures within the Lenia world,
 including the mass, center of mass, and other pertinent metrics. These computations are essential
@@ -10,26 +10,23 @@ for analyzing the state and dynamics of the Lenia system.
 
 import jax.numpy as jnp
 
-from cax.types import Input, Metrics, Perception, State
+from cax.types import PyTree, State
 
 
 def metrics_fn(
-	next_state: State,
 	state: State,
-	perception: Perception,
-	input: Input,
 	*,
 	R: int,
 	active_threshold: float = 0.1,
 	empty_fraction: float = 0.01,
 	full_fraction: float = 0.5,
-) -> Metrics:
+) -> PyTree:
 	"""Metrics function for Lenia."""
-	spatial_dims = next_state.shape[:-1]
+	spatial_dims = state.shape[:-1]
 	num_spatial_dims = len(spatial_dims)
 
 	# Compute mass in grid units
-	mass_grid = jnp.sum(next_state, axis=-1)
+	mass_grid = jnp.sum(state, axis=-1)
 
 	# Compute mass
 	mass = jnp.sum(mass_grid) / (R**num_spatial_dims)

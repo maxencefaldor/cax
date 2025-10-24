@@ -1,17 +1,17 @@
 """Boids module."""
 
-from .policy import BoidPolicy
 from .cs import Boids
 from .perceive import BoidsPerceive
+from .perception import BoidsPerception
+from .policy import BoidPolicy
+from .state import BoidsState
 from .update import BoidsUpdate
-from .perception import Perception
-from .state import State
 
 __all__ = [
-	"BoidPolicy",
 	"Boids",
 	"BoidsPerceive",
 	"BoidsUpdate",
-	"Perception",
-	"State",
+	"BoidsState",
+	"BoidsPerception",
+	"BoidPolicy",
 ]

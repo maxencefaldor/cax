@@ -2,34 +2,36 @@
 
 import jax
 import jax.numpy as jnp
-from flax import nnx
 from jax import Array
 
 from cax.core.update.update import Update
-from cax.types import Input, Perception, Rule, State
+from cax.types import Input, Perception, State
 
 
 class ElementaryUpdate(Update):
 	"""Elementary Cellular Automata update class."""
 
-	def __init__(self, rngs: nnx.Rngs):
-		"""Initialize the ElementaryUpdate."""
-		self.rngs = rngs
-		self.configurations = nnx.Param(
-			jnp.array(
-				[
-					[1.0, 1.0, 1.0],
-					[1.0, 1.0, 0.0],
-					[1.0, 0.0, 1.0],
-					[1.0, 0.0, 0.0],
-					[0.0, 1.0, 1.0],
-					[0.0, 1.0, 0.0],
-					[0.0, 0.0, 1.0],
-					[0.0, 0.0, 0.0],
-				]
-			)
+	def __init__(self, wolfram_code: Array):
+		"""Initialize Elementary update.
+
+		Args:
+			wolfram_code: The Wolfram code of the Elementary Cellular Automaton.
+
+		"""
+		self.configurations = jnp.array(
+			[
+				[1, 1, 1],
+				[1, 1, 0],
+				[1, 0, 1],
+				[1, 0, 0],
+				[0, 1, 1],
+				[0, 1, 0],
+				[0, 0, 1],
+				[0, 0, 0],
+			],
+			dtype=jnp.float32,
 		)
-		self.wolfram_code = Rule(self.sample_wolfram_code())
+		self.wolfram_code = wolfram_code
 
 	def __call__(self, state: State, perception: Perception, input: Input | None = None) -> State:
 		"""Apply the Elementary Cellular Automata update rule.
@@ -47,23 +49,5 @@ class ElementaryUpdate(Update):
 		def update_pattern(pattern: Array, value: Array) -> Array:
 			return jnp.where(jnp.all(perception == pattern, axis=-1, keepdims=True), value, 0.0)
 
-		state = jnp.sum(
-			jax.vmap(update_pattern)(self.configurations.value, self.wolfram_code.value), axis=0
-		)
+		state = jnp.sum(jax.vmap(update_pattern)(self.configurations, self.wolfram_code), axis=0)
 		return state
-
-	@nnx.jit
-	def sample_wolfram_code(self) -> Array:
-		"""Sample random Wolfram code."""
-		return jax.random.bernoulli(self.rngs(), shape=(8,)).astype(jnp.float32)
-
-	@nnx.jit
-	def update_wolfram_code(self, wolfram_code: Array) -> None:
-		"""Update the Wolfram code."""
-		self.wolfram_code.value = wolfram_code
-
-	def update_wolfram_code_from_string(self, wolfram_code: str) -> None:
-		"""Set the rule from a string of 8 bits."""
-		assert len(wolfram_code) == 8, "Wolfram code must be 8 bits long."
-		assert all(bit in "01" for bit in wolfram_code), "Wolfram code must contain only 0s and 1s."
-		self.wolfram_code.value = jnp.array([int(bit) for bit in wolfram_code], dtype=jnp.float32)

@@ -17,12 +17,12 @@ class ResidualUpdate(MLPUpdate):
 		channel_size: int,
 		perception_size: int,
 		hidden_layer_sizes: tuple[int, ...],
-		rngs: nnx.Rngs,
 		*,
 		activation_fn: Callable = nnx.relu,
 		step_size: float = 1.0,
 		cell_dropout_rate: float = 0.0,
 		zeros_init: bool = False,
+		rngs: nnx.Rngs,
 	):
 		"""Initialize the ResidualUpdate module.
 
@@ -31,11 +31,11 @@ class ResidualUpdate(MLPUpdate):
 			channel_size: Number of channels in the state.
 			perception_size: Size of the perception input.
 			hidden_layer_sizes: Sizes of hidden layers in the MLP.
-			rngs: Random number generators.
 			activation_fn: Activation function to use.
 			step_size: Step size for the residual update.
 			cell_dropout_rate: Dropout rate for cell updates.
 			zeros_init: Whether to use zeros initialization for the weights of the last layer.
+			rngs: rng key.
 
 		"""
 		super().__init__(
@@ -43,9 +43,9 @@ class ResidualUpdate(MLPUpdate):
 			channel_size=channel_size,
 			perception_size=perception_size,
 			hidden_layer_sizes=hidden_layer_sizes,
-			rngs=rngs,
 			activation_fn=activation_fn,
 			zeros_init=zeros_init,
+			rngs=rngs,
 		)
 		self.dropout = nnx.Dropout(rate=cell_dropout_rate, broadcast_dims=(-1,), rngs=rngs)
 		self.step_size = step_size
