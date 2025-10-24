@@ -11,8 +11,7 @@ import jax.numpy as jnp
 from flax import nnx
 from jax import Array
 
-from cax.core.cs import ComplexSystem
-from cax.types import Input, State
+from cax.core import ComplexSystem, Input, State
 from cax.utils.render import clip_and_uint8
 
 from ..lenia.growth import exponential_growth_fn

@@ -4,9 +4,9 @@ import jax.numpy as jnp
 from flax import nnx
 
 from cax.core.perceive import Perceive
-from cax.types import State
 
 from .perception import BoidsPerception
+from .state import BoidsState
 
 
 class BoidsPerceive(Perceive):
@@ -21,7 +21,7 @@ class BoidsPerceive(Perceive):
 		"""
 		self.boid_policy = boid_policy
 
-	def __call__(self, state: State) -> BoidsPerception:
+	def __call__(self, state: BoidsState) -> BoidsPerception:
 		"""Apply Boids perception to the input state.
 
 		Args:

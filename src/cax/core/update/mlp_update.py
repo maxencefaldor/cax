@@ -7,8 +7,10 @@ from flax import nnx
 from flax.nnx.nn import initializers
 from flax.nnx.nn.linear import default_kernel_init
 
-from cax.core.update.update import Update
-from cax.types import Input, Perception, State
+from cax.core import Input, State
+from cax.core.perceive import Perception
+
+from .update import Update
 
 
 class MLPUpdate(Update):

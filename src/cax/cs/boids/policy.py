@@ -18,38 +18,40 @@ class BoidPolicy(nnx.Module):
 	def __init__(
 		self,
 		*,
+		acceleration_max: float = jnp.inf,
+		acceleration_scale: float = 1.0,
+		perception: float = 0.2,
+		separation_distance: float = 0.02,
 		separation_weight: float = 4.5,
 		alignment_weight: float = 0.65,
 		cohesion_weight: float = 0.75,
-		perception: float = 0.2,
-		separation_distance: float = 0.02,
-		acceleration_scale: float = 1.0,
 		noise_scale: float = 0.05,
-		acceleration_max: float = jnp.inf,
 		rngs: nnx.Rngs,
 	):
-		"""Initialize the boid policy.
+		"""Initialize boid policy.
 
 		Args:
+			acceleration_max: Maximum acceleration.
+			acceleration_scale: Scale for acceleration.
+			perception: Perception radius.
+			separation_distance: Separation distance.
 			separation_weight: Weight for separation force.
 			alignment_weight: Weight for alignment force.
 			cohesion_weight: Weight for cohesion force.
-			perception: Perception radius.
-			separation_distance: Separation distance.
-			acceleration_scale: Scale for acceleration.
 			noise_scale: Scale for noise.
-			acceleration_max: Maximum acceleration.
 			rngs: rng key.
 
 		"""
-		self.separation_weight = separation_weight
-		self.alignment_weight = alignment_weight
-		self.cohesion_weight = cohesion_weight
+		self.acceleration_max = acceleration_max
+		self.acceleration_scale = acceleration_scale
 		self.perception = perception
 		self.separation_distance = separation_distance
-		self.acceleration_scale = acceleration_scale
-		self.noise_scale = noise_scale
-		self.acceleration_max = acceleration_max
+
+		self.separation_weight = nnx.Param(separation_weight)
+		self.alignment_weight = nnx.Param(alignment_weight)
+		self.cohesion_weight = nnx.Param(cohesion_weight)
+		self.noise_scale = nnx.Param(noise_scale)
+
 		self.rngs = rngs
 
 	def _toroidal_distance2(self, position_1: Array, position_2: Array) -> Array:
@@ -164,14 +166,11 @@ class BoidPolicy(nnx.Module):
 
 		# Scale and add noise
 		acceleration *= self.acceleration_scale
-		acceleration += (
-			jax.random.uniform(
-				self.rngs.params(),
-				shape=acceleration.shape,
-				minval=-1.0,
-				maxval=1.0,
-			)
-			* self.noise_scale
+		acceleration += self.noise_scale * jax.random.uniform(
+			self.rngs.params(),
+			shape=acceleration.shape,
+			minval=-1.0,
+			maxval=1.0,
 		)
 
 		# Limit acceleration

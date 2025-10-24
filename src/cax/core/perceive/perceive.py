@@ -6,9 +6,14 @@ network functionalities. It is designed to be subclassed by specific perception 
 that process the current state of the environment or system and return a perception.
 """
 
-from flax import nnx
+from flax import nnx, struct
 
-from cax.types import Perception, State
+from cax.core import State
+
+
+@struct.dataclass
+class Perception:
+	"""Perception class."""
 
 
 class Perceive(nnx.Module):

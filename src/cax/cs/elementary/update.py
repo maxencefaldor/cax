@@ -4,14 +4,15 @@ import jax
 import jax.numpy as jnp
 from jax import Array
 
-from cax.core.update.update import Update
-from cax.types import Input, Perception, State
+from cax.core import Input, State
+from cax.core.perceive import Perception
+from cax.core.update import Update
 
 
 class ElementaryUpdate(Update):
 	"""Elementary Cellular Automata update class."""
 
-	def __init__(self, wolfram_code: Array):
+	def __init__(self, *, wolfram_code: Array):
 		"""Initialize Elementary update.
 
 		Args:
@@ -37,12 +38,12 @@ class ElementaryUpdate(Update):
 		"""Apply the Elementary Cellular Automata update rule.
 
 		Args:
-			state: The current state of the cellular automaton.
+			state: Current state.
 			perception: The perceived state of the neighborhood.
-			input: Additional input to the update rule (not used in this implementation).
+			input: Input (not used in this implementation).
 
 		Returns:
-			The updated state of the cellular automaton.
+			Next state.
 
 		"""
 

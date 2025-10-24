@@ -4,9 +4,9 @@ from itertools import product
 
 import jax.numpy as jnp
 
-from cax.types import Perception, State
+from cax.core import State
 
-from .perceive import Perceive
+from .perceive import Perceive, Perception
 
 
 class VonNeumannPerceive(Perceive):

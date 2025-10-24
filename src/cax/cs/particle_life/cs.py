@@ -6,8 +6,7 @@ import jax.numpy as jnp
 from flax import nnx
 from jax import Array
 
-from cax.core.cs import ComplexSystem
-from cax.types import Input
+from cax.core import ComplexSystem, Input
 from cax.utils.render import clip_and_uint8, hsv_to_rgb
 
 from .perceive import ParticleLifePerceive

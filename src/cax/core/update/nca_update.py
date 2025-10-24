@@ -6,8 +6,10 @@ from functools import partial
 from flax import nnx
 from jax import Array
 
-from cax.core.update.residual_update import ResidualUpdate
-from cax.types import Input, Perception, State
+from cax.core import Input, State
+from cax.core.perceive import Perception
+
+from .residual_update import ResidualUpdate
 
 
 class NCAUpdate(ResidualUpdate):

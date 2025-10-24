@@ -8,8 +8,9 @@ from flax import nnx
 from jax import Array
 from jax.scipy.signal import convolve2d
 
-from cax.core.update.update import Update
-from cax.types import Input, Perception, State
+from cax.core import Input, State
+from cax.core.perceive import Perception
+from cax.core.update import Update
 
 from ..lenia.growth import exponential_growth_fn
 from ..lenia.rule import LeniaRuleParams

@@ -3,8 +3,8 @@
 import jax.numpy as jnp
 from jax import Array
 
-from cax.core.perceive import Perceive
-from cax.types import Perception, State
+from cax.core import State
+from cax.core.perceive import Perceive, Perception
 
 from .perception import ParticleLifePerception as ParticleLifePerception
 

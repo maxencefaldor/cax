@@ -5,8 +5,7 @@ from collections.abc import Callable
 from flax import nnx
 from jax import Array
 
-from cax.core.cs import ComplexSystem
-from cax.types import Input, State
+from cax.core import ComplexSystem, Input, State
 from cax.utils import clip_and_uint8, render_array_with_channels_to_rgb
 
 from .metrics import metrics_fn

@@ -16,4 +16,9 @@ from .nca_update import NCAUpdate
 from .residual_update import ResidualUpdate
 from .update import Update
 
-__all__ = ["Update", "MLPUpdate", "NCAUpdate", "ResidualUpdate"]
+__all__ = [
+	"Update",
+	"MLPUpdate",
+	"ResidualUpdate",
+	"NCAUpdate",
+]

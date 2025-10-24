@@ -3,9 +3,11 @@
 from flax import struct
 from jax import Array
 
+from cax.core import State
+
 
 @struct.dataclass
-class ParticleLifeState:
+class ParticleLifeState(State):
 	"""Particle Life state class."""
 
 	class_: Array  # (num_particles,)

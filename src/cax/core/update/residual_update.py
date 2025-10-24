@@ -4,8 +4,10 @@ from collections.abc import Callable
 
 from flax import nnx
 
-from cax.core.update.mlp_update import MLPUpdate
-from cax.types import Input, Perception, State
+from cax.core import Input, State
+from cax.core.perceive import Perception
+
+from .mlp_update import MLPUpdate
 
 
 class ResidualUpdate(MLPUpdate):

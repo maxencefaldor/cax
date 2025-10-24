@@ -7,7 +7,8 @@ network functionalities.
 
 from flax import nnx
 
-from cax.types import Input, Perception, State
+from cax.core import Input, State
+from cax.core.perceive import Perception
 
 
 class Update(nnx.Module):
