@@ -62,44 +62,32 @@ The library is thoroughly tested and documented with numerous examples to get yo
 
 ## Getting Started 🚦
 
-Here, you can see the basic CAX API usage:
+Here, you can see the basic CAX API usage with Conway's Game of Life:
 
 ```python
 import jax
+import jax.numpy as jnp
 from flax import nnx
 
-from cax.core.cs import ComplexSystem
-from cax.core.perceive import ConvPerceive
-from cax.core.update import NCAUpdate
+from cax.cs.life import Life
 
 seed = 0
 
-channel_size = 16
-num_kernels = 3
-hidden_layer_sizes = (128,)
-cell_dropout_rate = 0.5
+num_steps = 128
+spatial_dims = (32, 32)
+channel_size = 1
+rule_golly = "B3/S23"  # Conway's Game of Life
 
 key = jax.random.key(seed)
 rngs = nnx.Rngs(seed)
 
-perceive = ConvPerceive(
-	channel_size=channel_size,
-	perception_size=num_kernels * channel_size,
-	rngs=rngs,
-	feature_group_count=channel_size,
-)
-update = NCAUpdate(
-	channel_size=channel_size,
-	perception_size=num_kernels * channel_size,
-	hidden_layer_sizes=hidden_layer_sizes,
-	rngs=rngs,
-	cell_dropout_rate=cell_dropout_rate,
-	zeros_init=True,
-)
-cs = ComplexSystem(perceive, update)
+birth, survival = Life.birth_survival_from_string(rule_golly)
+cs = Life(birth=birth, survival=survival, rngs=rngs)
 
-state = jax.random.normal(key, (64, 64, channel_size))
-state, metrics = cs(state, num_steps=128)
+state_init = jax.random.bernoulli(key, p=0.5, shape=(*spatial_dims, channel_size)).astype(
+	jnp.float32
+)
+state_final = cs(state_init, num_steps=num_steps, sow=True)
 ```
 
 For a more detailed overview, get started with this notebook [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/maxencefaldor/cax/blob/main/examples/00_getting_started.ipynb)

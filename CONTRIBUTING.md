@@ -87,7 +87,7 @@ Informative bug reports tend to have:
 
 ### Core Principles
 
-- Every CA in CAX inherits from `nnx.Module` and follows the perceive/update architecture
+- Every complex system in CAX inherits from `nnx.Module` and follows the perceive/update architecture
 - The perceive module defines how cells observe their neighborhood (e.g., `ConvPerceive`)
 - The update module specifies how cells update their state based on these observations (e.g., `ResidualUpdate`, `NCAUpdate`, `LeniaUpdate`)
 
@@ -95,42 +95,60 @@ Informative bug reports tend to have:
 
 1. **Vectorization**: Use JAX's `vmap` for operations applied to all cells
 2. **Hardware Acceleration**: Leverage Flax components (e.g., `nnx.Conv`, `nnx.Linear`) rather than writing custom operations
-3. **Batching**: Design your CA to handle batched inputs from the start
-4. **JIT Compilation**: Ensure your CA is compatible with `jit` by avoiding Python control flow
+3. **Batching**: Design your complex system to handle batched inputs from the start
+4. **JIT Compilation**: Ensure your complex system is compatible with `jit` by avoiding Python control flow
 5. **Random Number Handling**: Use `nnx.Rngs` for managing random states consistently
 
 ### Example Structure
 
-You should design your perceive and update module, so that they are readily compatible with the core `CA` class.
+In CAX, every complex system must inherit from the `ComplexSystem` class and implement two required methods:
+- `_step`: Defines how the system evolves over one time step
+- `render`: Converts the system state into a visual representation
+
+The `_step` method can perform any computation, but it must follow this signature: take a `State` as input, an optional `Input`, and return an updated `State`. Many complex systems (like cellular automata or particle systems) follow a common pattern where individual components (e.g., cells, particles, etc.) first perceive their local neighborhood, then update their state based on this perception and current state. For this reason, we recommend structuring the `_step` method into two phases:
+
+1. **Perceive**: Gather information from the neighborhood
+2. **Update**: Modify the state based on current state and perception
+
+This structure is optional but helps organize the code clearly.
+
+You should design your perceive and update modules so that they are readily compatible with the core `ComplexSystem` class.
 
 ```python
-perceive = MyPerceive(...)
-update = MyUpdate(...)
+class CustomNCA(ComplexSystem):
+	"""Custom neural cellular automaton."""
 
-ca = CA(perceive, update)
+	def __init__(self, *, rngs: nnx.Rngs):
+		"""Initialize custom cellular automaton.
+
+		Args:
+			rngs: rngs key.
+
+		"""
+		# CAX provides a set of perceive modules but you can define your own.
+		self.perceive = CustomPerceive(...)
+
+		# CAX provides a set of update modules but you can define your own.
+		self.update = CustomUpdate(...)
+
+	def _step(self, state: State, input: Input | None = None, *, sow: bool = False) -> State:
+		perception = self.perceive(state)
+		next_state = self.update(state, perception, input)
+
+		if sow:
+			self.sow(nnx.Intermediate, "state", next_state)
+
+		return next_state
+
+	@nnx.jit
+	def render(self, state):
+		"""Render state to RGB."""
+		rgba = state[..., -4:]
+		rgb = rgba_to_rgb(rgba)
+
+		# Clip values to valid range and convert to uint8
+		return clip_and_uint8(rgb)
 ```
-
-A CA step will correspond to:
-
-```python
-@nnx.jit
-def step(self, state: State, input: Input | None = None) -> State:
-	"""Perform a single step of the CA.
-
-	Args:
-		state: Current state.
-		input: Optional input.
-
-	Returns:
-		Updated state.
-
-	"""
-	perception = self.perceive(state)
-	state = self.update(state, perception, input)
-	return state
-```
-
-and a full forward pass will correspond to a simple jax.lax.scan of this function.
 
 ### Common Pitfalls
 
