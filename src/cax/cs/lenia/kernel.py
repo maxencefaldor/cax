@@ -63,12 +63,12 @@ def polynomial_kernel_core(radius, alpha=4):
 
 def rectangular_kernel_core(radius):
 	"""Rectangular kernel core."""
-	return jnp.where((radius >= 1 / 4) & (radius <= 3 / 4), 1, 0)
+	return jnp.where((radius >= 1 / 4) & (radius <= 3 / 4), 1.0, 0.0)
 
 
-def gaussian_kernel_core(radius):
+def gaussian_kernel_core(radius, std=0.15):
 	"""Gaussian kernel core."""
-	return bell(radius, 0.5, 0.15)
+	return bell(radius, 0.5, std)
 
 
 # Kernel shells
