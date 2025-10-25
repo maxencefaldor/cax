@@ -1,10 +1,15 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
 [project]
 name = "cax"
 version = "0.3.0"
 description = "Cellular Automata Accelerated in JAX"
 authors = [{ name="Maxence Faldor", email="maxencefaldor@gmail.com" }]
 readme = "README.md"
-license_files = ["LICENSE"]
+license = "MIT"
+license-files = ["LICENSE"]
 requires-python = ">=3.11"
 dependencies = [
 	"jax>=0.8.0",
@@ -48,10 +53,6 @@ examples = [
 [project.urls]
 Homepage = "https://github.com/maxencefaldor/cax"
 
-[build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
-
 [tool.ruff]
 src = ["src", "tests"]
 target-version = "py311"
@@ -60,17 +61,17 @@ line-length = 100
 [tool.ruff.lint]
 select = ["E", "D", "F", "I", "N", "SIM", "UP", "W"]
 ignore = [
-	"D203",
-	"D206",
-	"D213",
-	"N803",  # Argument name `A` should be lowercase
-	"N806",  # Variable `A` in function should be lowercase
-	"W191",  # Indentation contains tabs
+	"D203",  # incorrect-blank-line-before-class
+	"D206",  # docstring-tab-indentation
+	"D213",  # multi-line-summary-second-line
+	"N803",  # non-lowercase-variable-in-function
+	"N806",  # invalid-argument-name
+	"W191",  # tab-indentation
 ]
 
 [tool.ruff.lint.per-file-ignores]
 "**/*.ipynb" = [
-	"F811",  # Checks for variable definitions that redefine (or "shadow") unused variables.
+	"F811",  # redefined-while-unused
 ]
 
 [tool.ruff.format]
