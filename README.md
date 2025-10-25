@@ -26,7 +26,7 @@ CAX supports discrete and continuous systems, including neural cellular automata
 
 ### Rich 🎨
 
-CAX provides a comprehensive collection of 15+ ready-to-use systems. From simulating one-dimensional [elementary cellular automata](examples/10_elementary_ca.ipynb) to training three-dimensional [self-autoencoding neural cellular automata](examples/45_self_autoencoding_mnist.ipynb), or even creating beautiful [Lenia](examples/20_lenia.ipynb) simulations, CAX provides a versatile platform for exploring the rich world of self-organizing systems.
+CAX provides a comprehensive collection of 15+ ready-to-use systems. From simulating one-dimensional [elementary cellular automata](examples/10_elementary.ipynb) to training three-dimensional [self-autoencoding neural cellular automata](examples/45_self_autoencoding_mnist.ipynb), or even creating beautiful [Lenia](examples/20_lenia.ipynb) simulations, CAX provides a versatile platform for exploring the rich world of self-organizing systems.
 
 ### Flexible 🧩
 
@@ -44,7 +44,7 @@ The library is thoroughly tested and documented with numerous examples to get yo
 
 | Cellular Automata | Reference | Example |
 | --- | --- | --- |
-| Elementary Cellular Automata | [Wolfram (2002)](https://www.wolframscience.com/nks/) | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/maxencefaldor/cax/blob/main/examples/10_elementary_ca.ipynb) |
+| Elementary Cellular Automata | [Wolfram (2002)](https://www.wolframscience.com/nks/) | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/maxencefaldor/cax/blob/main/examples/10_elementary.ipynb) |
 | Conway's Game of Life | [Gardner (1970)](https://web.stanford.edu/class/sts145/Library/life.pdf) | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/maxencefaldor/cax/blob/main/examples/11_life.ipynb) |
 | Lenia | [Chan (2020)](https://arxiv.org/abs/2005.03742) | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/maxencefaldor/cax/blob/main/examples/20_lenia.ipynb) |
 | Flow Lenia | [Plantec et al. (2022)](https://arxiv.org/abs/2212.07906) | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/maxencefaldor/cax/blob/main/examples/21_flow_lenia.ipynb) |
