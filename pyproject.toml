@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "cax"
-version = "0.3.0"
+version = "0.3.1"
 description = "Cellular Automata Accelerated in JAX"
 authors = [{ name="Maxence Faldor", email="maxencefaldor@gmail.com" }]
 readme = "README.md"
