@@ -112,12 +112,15 @@ If you use CAX in your research, please cite the following paper:
 
 ```bibtex
 @inproceedings{cax,
-	title       = {{CAX}: Cellular Automata Accelerated in {JAX}},
-	author      = {Maxence Faldor and Antoine Cully},
-	booktitle   = {The Thirteenth International Conference on Learning Representations},
-	year        = {2025},
-	url         = {https://openreview.net/forum?id=o2Igqm95SJ},
-	keywords    = {artificial life, emergence, self-organization, open-endedness, cellular automata, neural cellular automata},
+	title = {{CAX}: {Cellular} {Automata} {Accelerated} in {JAX}},
+	volume = {2025},
+	url = {https://proceedings.iclr.cc/paper_files/paper/2025/file/19206a6ed5ed0aaeed440448dfc5cf7e-Paper-Conference.pdf},
+	booktitle = {International {Conference} on {Representation} {Learning}},
+	author = {Faldor, Maxence and Cully, Antoine},
+	editor = {Yue, Y. and Garg, A. and Peng, N. and Sha, F. and Yu, R.},
+	year = {2025},
+	pages = {8947--8960},
+	keywords = {artificial life, emergence, self-organization, open-endedness, cellular automata, neural cellular automata},
 }
 ```
 
