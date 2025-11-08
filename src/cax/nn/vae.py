@@ -145,7 +145,7 @@ class Decoder(nnx.Module):
 		for conv in self.convs[:-1]:
 			x = jax.nn.relu(conv(x))
 		x = self.convs[-1](x)
-		return x  # type: ignore
+		return x
 
 
 class VAE(nnx.Module):
@@ -210,7 +210,7 @@ class VAE(nnx.Module):
 			Generated output tensor.
 
 		"""
-		return jax.nn.sigmoid(self.decoder(z))  # type: ignore
+		return jax.nn.sigmoid(self.decoder(z))
 
 	def __call__(self, x: Array) -> tuple[Array, Array, Array]:
 		"""Forward pass of the VAE.

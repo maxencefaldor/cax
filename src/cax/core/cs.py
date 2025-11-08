@@ -1,6 +1,7 @@
 """Complex system module."""
 
 from functools import partial
+from typing import Any
 
 from flax import nnx
 from jax import Array
@@ -59,7 +60,7 @@ class ComplexSystem(nnx.Module):
 		return state
 
 	@nnx.jit
-	def render(self, state: State, **kwargs) -> Array:
+	def render(self, state: State, **kwargs: Any) -> Array:
 		"""Render state to RGB.
 
 		Args:
