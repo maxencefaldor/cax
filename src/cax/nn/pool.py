@@ -10,7 +10,17 @@ from cax.types import PyTree
 
 
 class Pool(struct.PyTreeNode):
-	"""Pool class."""
+	"""A container for PyTree arrays supporting in-place updates and random sampling.
+
+	The pool holds a PyTree of arrays whose first dimension is the pool size. It can be created
+	from a PyTree with leading batch dimension. Sampling returns indices and the sliced
+	batch for the same indices across all leaves.
+
+	Attributes:
+		size: Number of items in the pool (inferred from the leading dimension of the data).
+		data: PyTree of arrays stacked along the leading dimension.
+
+	"""
 
 	size: int = struct.field(pytree_node=False)
 	data: PyTree
@@ -20,10 +30,10 @@ class Pool(struct.PyTreeNode):
 		"""Create a new Pool instance.
 
 		Args:
-			data: Data to store in the pool.
+			data: PyTree whose leaves are arrays with shape `(N, ...)`, where `N` is the pool size.
 
 		Returns:
-			A new Pool instance.
+			A new Pool instance with `size == N` and `data == data`.
 
 		"""
 		size = jax.tree.leaves(data)[0].shape[0]
@@ -34,11 +44,11 @@ class Pool(struct.PyTreeNode):
 		"""Update batch in the pool at the specified indices.
 
 		Args:
-			idxs: The indices at which to update the batch.
-			batch: The batch to update at the specified indices.
+			idxs: Integer indices with shape `(B,)` indicating rows to overwrite.
+			batch: PyTree matching `data` leaves sliced to `(B, ...)`.
 
 		Returns:
-			A new Pool instance with the updated batch.
+			A new Pool instance with the updated batch applied at `idxs` across all leaves.
 
 		"""
 		data = jax.tree.map(
@@ -51,11 +61,12 @@ class Pool(struct.PyTreeNode):
 		"""Sample a batch from the pool.
 
 		Args:
-			key: A random key.
-			batch_size: The size of the batch to sample.
+			key: JAX PRNG key.
+			batch_size: Number of rows to sample.
 
 		Returns:
-			A tuple containing the batch indices in the pool and the batch.
+			A tuple `(idxs, batch)` where `idxs` has shape `(batch_size,)` and `batch` is a PyTree
+			with each leaf shaped `(batch_size, ...)`.
 
 		"""
 		idxs = jax.random.choice(key, self.size, shape=(batch_size,))

@@ -10,7 +10,7 @@ authors:
     email: "maxencefaldor@gmail.com"
     orcid: "https://orcid.org/0000-0003-4743-9494"
 version: "0.3.2"
-date-released: "2024-10-04" # Based on the arXiv paper submission date
+date-released: "2024-10-04"
 repository-code: "https://github.com/maxencefaldor/cax"
 license: "MIT"
 keywords:

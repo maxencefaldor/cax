@@ -1,14 +1,7 @@
-"""Update modules for Cellular Automata.
+"""Update modules for complex systems.
 
-This module contains various update mechanisms used in Cellular Automata
-implementations. These update modules are responsible for determining the
-next state of each cell based on its current state and the information
-gathered from its neighborhood.
-
-Available update modules may include:
-- Rule-based updates
-- Neural network-based updates
-- Custom update mechanisms
+These modules transform a state using a perception and optional input to produce the next
+state. Implementations include MLP-based, residual, and Neural Cellular Automata updates.
 """
 
 from .mlp_update import MLPUpdate

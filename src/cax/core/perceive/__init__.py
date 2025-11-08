@@ -1,13 +1,8 @@
-"""Perception modules for Cellular Automata.
+"""Perception modules for complex systems.
 
-This module contains various perception mechanisms used in Cellular Automata
-implementations. These perception modules are responsible for gathering
-information from the neighborhood of each cell, which is then used to
-determine the cell's next state.
-
-These modules are designed to work with the CAX library, providing flexible
-and efficient perception options for different types of cellular automata
-models.
+These modules gather neighborhood information from the state to produce a perception that
+downstream updates consume. Implementations include neighborhood-based sampling and convolutional
+variants.
 """
 
 from .conv_perceive import ConvPerceive

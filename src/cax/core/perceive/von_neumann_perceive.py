@@ -31,6 +31,13 @@ class VonNeumannPerceive(Perceive):
 	def __call__(self, state: State) -> Perception:
 		"""Apply Von Neumann perception to the state.
 
+		The input is assumed to have shape `(..., *spatial_dims, channel_size)` where `spatial_dims`
+		is a tuple of `num_spatial_dims` dimensions and `channel_size` is the number of channels.
+		This method concatenates the central cell and all neighbors within the Von Neumann
+		neighborhood (Manhattan distance `<= radius`) along the channel axis. The number of
+		concatenated positions equals:
+			`1 + sum_{k=1..radius} 2 * num_spatial_dims * binom(num_spatial_dims + k - 1, k)`.
+
 		Args:
 			state: State of the cellular automaton.
 

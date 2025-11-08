@@ -5,7 +5,19 @@ from jax import Array
 
 
 def rgba_to_rgb(array: Array) -> Array:
-	"""Convert RGBA to RGB."""
+	"""Convert an RGBA image to RGB by alpha compositing over white.
+
+	The function assumes the last dimension encodes channels and that the input is normalized
+	to the range ``[0, 1]`` with shape ``(..., 4)``. The output preserves the input shape
+	except for the channel dimension, which becomes ``3``.
+
+	Args:
+		array: RGBA image with shape ``(..., 4)`` and values in ``[0, 1]``.
+
+	Returns:
+		RGB image with shape ``(..., 3)`` and values in ``[0, 1]``.
+
+	"""
 	assert array.shape[-1] == 4
 	rgb, alpha = array[..., :-1], array[..., -1:]
 	alpha = jnp.clip(alpha, min=0.0, max=1.0)
@@ -13,7 +25,17 @@ def rgba_to_rgb(array: Array) -> Array:
 
 
 def rgb_to_hsv(rgb: Array) -> Array:
-	"""Convert RGB to HSV."""
+	"""Convert RGB to HSV.
+
+	Input and output are in the range ``[0, 1]`` and use channel-last layout.
+
+	Args:
+		rgb: RGB image with shape ``(..., 3)``.
+
+	Returns:
+		HSV image with shape ``(..., 3)``.
+
+	"""
 	input_shape = rgb.shape
 	rgb = rgb.reshape(-1, 3)
 	r, g, b = rgb[..., 0], rgb[..., 1], rgb[..., 2]
@@ -41,7 +63,17 @@ def rgb_to_hsv(rgb: Array) -> Array:
 
 
 def hsv_to_rgb(hsv: Array) -> Array:
-	"""Convert HSV to RGB."""
+	"""Convert HSV to RGB.
+
+	Input and output are in the range ``[0, 1]`` and use channel-last layout.
+
+	Args:
+		hsv: HSV image with shape ``(..., 3)``.
+
+	Returns:
+		RGB image with shape ``(..., 3)``.
+
+	"""
 	input_shape = hsv.shape
 	hsv = hsv.reshape(-1, 3)
 	h, s, v = hsv[..., 0], hsv[..., 1], hsv[..., 2]
@@ -68,13 +100,21 @@ def hsv_to_rgb(hsv: Array) -> Array:
 
 
 def clip_and_uint8(frame: Array) -> Array:
-	"""Clip values to valid range and convert to uint8."""
+	"""Clip a floating-point image to ``[0, 1]`` and convert to ``uint8``.
+
+	Args:
+		frame: Image-like array with values expected in or near ``[0, 1]``.
+
+	Returns:
+		Array of dtype ``uint8`` with values in ``[0, 255]``.
+
+	"""
 	frame = jnp.clip(frame, min=0.0, max=1.0)
 	return (frame * 255).astype(jnp.uint8)
 
 
 def render_array_with_channels_to_rgb(array: Array) -> Array:
-	"""Render an array with channels as RGB image.
+	"""Render an array with channels as an RGB image.
 
 	This function processes an input array and converts it into an RGB image based on the number of
 	channels present in the array. The conversion logic is as follows:
@@ -90,11 +130,10 @@ def render_array_with_channels_to_rgb(array: Array) -> Array:
 	to uint8 format.
 
 	Args:
-		array: The input array to be rendered, with shape (..., C), where C is the number of
-			channels.
+		array: Input array with shape ``(..., C)`` and values in ``[0, 1]``.
 
 	Returns:
-		The rendered RGB image in uint8 format.
+		RGB array with shape ``(..., 3)`` and values in ``[0, 1]``.
 
 	"""
 	num_channels = array.shape[-1]
@@ -117,7 +156,7 @@ def render_array_with_channels_to_rgb(array: Array) -> Array:
 
 
 def render_array_with_channels_to_rgba(array: Array) -> Array:
-	"""Render an array with channels as RGBA image.
+	"""Render an array with channels as an RGBA image.
 
 	This function processes an input array and converts it into an RGBA image based on the number of
 	channels present in the array. The conversion logic is as follows:
@@ -129,11 +168,10 @@ def render_array_with_channels_to_rgba(array: Array) -> Array:
 	- If the array has 4 or more channels, the last four channels are used directly as RGBA.
 
 	Args:
-		array: The input array to be rendered, with shape (..., C), where C is the number of
-			channels.
+		array: Input array with shape ``(..., C)`` and values in ``[0, 1]``.
 
 	Returns:
-		The rendered RGBA image in uint8 format.
+		RGBA array with shape ``(..., 4)`` and values in ``[0, 1]``.
 
 	"""
 	num_channels = array.shape[-1]

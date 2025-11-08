@@ -9,7 +9,11 @@ from jax import Array
 
 
 class Encoder(nnx.Module):
-	"""Encoder module for the VAE."""
+	"""Encoder module for the VAE.
+
+	Applies a stack of strided convolutions followed by linear layers to produce mean and
+	log-variance parameters of a diagonal Gaussian in latent space.
+	"""
 
 	def __init__(
 		self,
@@ -60,10 +64,10 @@ class Encoder(nnx.Module):
 		"""Forward pass of the encoder.
 
 		Args:
-			x: Input tensor.
+			x: Input tensor with shape `(..., H, W, channel_size)`.
 
 		Returns:
-			Tuple of mean and log variance of the latent distribution.
+			Tuple `(mean, logvar)` each with shape `(..., latent_size)`.
 
 		"""
 		for conv in self.convs:
@@ -82,14 +86,18 @@ class Encoder(nnx.Module):
 			logvar: Log variance of the latent distribution.
 
 		Returns:
-			Sampled latent vector.
+			Sampled latent vector with shape matching `mean`.
 
 		"""
 		return mean + jnp.exp(logvar * 0.5) * jax.random.normal(self.rngs(), shape=mean.shape)
 
 
 class Decoder(nnx.Module):
-	"""Decoder module for the VAE."""
+	"""Decoder module for the VAE.
+
+	Maps latent vectors back to image space using a linear layer followed by transposed
+	convolutions.
+	"""
 
 	def __init__(
 		self, spatial_dims: Sequence[int], features: Sequence[int], latent_size: int, rngs: nnx.Rngs
@@ -134,10 +142,10 @@ class Decoder(nnx.Module):
 		"""Forward pass of the decoder.
 
 		Args:
-			z: Latent vector.
+			z: Latent vector with shape `(..., latent_size)`.
 
 		Returns:
-			Reconstructed output tensor.
+			Reconstructed output tensor with shape `(..., H, W, channel_size)`.
 
 		"""
 		x = jax.nn.relu(self.linear(z))
@@ -149,7 +157,12 @@ class Decoder(nnx.Module):
 
 
 class VAE(nnx.Module):
-	"""Variational Autoencoder module."""
+	"""Variational Autoencoder module.
+
+	Combines an encoder and decoder with a reparameterization sampler for training with the
+	evidence lower bound (ELBO).
+
+	"""
 
 	def __init__(
 		self,
@@ -179,10 +192,10 @@ class VAE(nnx.Module):
 		"""Encode input to latent space.
 
 		Args:
-			x: Input tensor.
+			x: Input tensor with shape `(..., H, W, channel_size)`.
 
 		Returns:
-			Tuple of sampled latent vector, mean, and log variance.
+			Tuple `(z, mean, logvar)` where all have shape `(..., latent_size)`.
 
 		"""
 		mean, logvar = self.encoder(x)
@@ -192,10 +205,10 @@ class VAE(nnx.Module):
 		"""Decode latent vector to output space.
 
 		Args:
-			z: Latent vector.
+			z: Latent vector with shape `(..., latent_size)`.
 
 		Returns:
-			Reconstructed output tensor.
+			Reconstructed output tensor with shape `(..., H, W, channel_size)`.
 
 		"""
 		return self.decoder(z)
@@ -204,10 +217,10 @@ class VAE(nnx.Module):
 		"""Generate output from latent vector.
 
 		Args:
-			z: Latent vector.
+			z: Latent vector with shape `(..., latent_size)`.
 
 		Returns:
-			Generated output tensor.
+			Generated output tensor with shape `(..., H, W, channel_size)` in the range `[0, 1]`.
 
 		"""
 		return jax.nn.sigmoid(self.decoder(z))
@@ -216,10 +229,10 @@ class VAE(nnx.Module):
 		"""Forward pass of the VAE.
 
 		Args:
-			x: Input tensor.
+			x: Input tensor with shape `(..., H, W, channel_size)`.
 
 		Returns:
-			Tuple of reconstructed logits, mean, and log variance.
+			Tuple `(logits, mean, logvar)`
 
 		"""
 		z, mean, logvar = self.encode(x)
@@ -236,7 +249,7 @@ def kl_divergence(mean: Array, logvar: Array) -> Array:
 		logvar: Log variance of the latent distribution.
 
 	Returns:
-		KL divergence value.
+		Scalar KL divergence value (sum over last dimension).
 
 	"""
 	return -0.5 * jnp.sum(1 + logvar - jnp.square(mean) - jnp.exp(logvar))
@@ -251,7 +264,7 @@ def binary_cross_entropy_with_logits(logits: Array, labels: Array) -> Array:
 		labels: True labels.
 
 	Returns:
-		Binary cross-entropy loss.
+		Summed Binary Cross-Entropy loss over the last dimension.
 
 	"""
 	logits = jax.nn.log_sigmoid(logits)
@@ -263,13 +276,13 @@ def vae_loss(logits: Array, labels: Array, mean: Array, logvar: Array) -> Array:
 	"""Compute VAE loss.
 
 	Args:
-		logits: Predicted logits.
-		labels: Labels in one hot encoding.
+		logits: Predicted logits from the decoder.
+		labels: Target labels (e.g., normalized images or one-hot vectors).
 		mean: Mean of the latent distribution.
 		logvar: Log variance of the latent distribution.
 
 	Returns:
-		Total VAE loss.
+		Total VAE loss equal to `mean(BCE) + mean(KL)`.
 
 	"""
 	bce_loss = jnp.mean(binary_cross_entropy_with_logits(logits, labels))

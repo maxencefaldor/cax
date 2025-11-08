@@ -1,4 +1,9 @@
-"""Kernel functions for perception modules."""
+"""Kernel utilities for perception modules.
+
+Each function returns a small spatial kernel suitable for neighborhood aggregation or
+finite-difference style operations. Kernels use channel-last layout and a support of
+size 3 along each spatial dimension.
+"""
 
 import jax.numpy as jnp
 from jax import Array
@@ -7,15 +12,17 @@ from jax import Array
 def identity_kernel(ndim: int) -> Array:
 	"""Create an identity kernel for the given number of dimensions.
 
+	The kernel has value 1 at the central position and 0 elsewhere.
+
 	Args:
 		ndim: Number of dimensions for the kernel.
 
 	Returns:
-		The identity kernel.
+		Array with shape `ndim * (3,) + (1,)`.
 
 	"""
-	kernel = jnp.zeros((3,) * ndim)
-	center_idx = (1,) * ndim
+	kernel = jnp.zeros(ndim * (3,))
+	center_idx = ndim * (1,)
 	kernel = kernel.at[center_idx].set(1.0)
 	return jnp.expand_dims(kernel, axis=-1)
 
@@ -23,11 +30,13 @@ def identity_kernel(ndim: int) -> Array:
 def neighbors_kernel(ndim: int) -> Array:
 	"""Create a neighbors kernel for the given number of dimensions.
 
+	This kernel is `1 - identity_kernel`, selecting all neighbors and excluding the center.
+
 	Args:
 		ndim: Number of dimensions for the kernel.
 
 	Returns:
-		The neighbors kernel.
+		Array with shape `ndim * (3,) + (1,)`.
 
 	"""
 	kernel = identity_kernel(ndim)
@@ -39,10 +48,10 @@ def grad_kernel(ndim: int, *, normalize: bool = True) -> Array:
 
 	Args:
 		ndim: Number of dimensions for the kernel.
-		normalize: Whether to normalize the kernel.
+		normalize: Whether to L1-normalize each axis kernel.
 
 	Returns:
-		The gradient kernel.
+		Array with shape `ndim * (3,) + (ndim,)`, one kernel per spatial axis.
 
 	"""
 	grad = jnp.array([-1, 0, 1])
@@ -65,14 +74,14 @@ def grad_kernel(ndim: int, *, normalize: bool = True) -> Array:
 
 
 def grad2_kernel(ndim: int, normalize: bool = True) -> Array:
-	"""Create a second-order gradient kernel for the given number of dimensions.
+	"""Create a second-order (Laplacian) kernel.
 
 	Args:
 		ndim: Number of dimensions for the kernel.
-		normalize: Whether to normalize the kernel.
+		normalize: Whether to L1-normalize the kernel.
 
 	Returns:
-		The second-order gradient kernel.
+		Array with shape `ndim * (3,) + (1,)`.
 
 	"""
 	kernel = jnp.zeros([3] * ndim)

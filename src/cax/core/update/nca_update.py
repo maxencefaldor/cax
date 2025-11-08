@@ -13,7 +13,10 @@ from .residual_update import ResidualUpdate
 
 
 class NCAUpdate(ResidualUpdate):
-	"""Neural Cellular Automata update class."""
+	"""Neural Cellular Automata update class.
+
+	Builds on the residual update and applies an alive mask so that only active cells update.
+	"""
 
 	def __init__(
 		self,
@@ -59,15 +62,15 @@ class NCAUpdate(ResidualUpdate):
 		self.alive_threshold = alive_threshold
 
 	def __call__(self, state: State, perception: Perception, input: Input | None = None) -> State:
-		"""Apply the NCA update to the input state.
+		"""Process the current state, perception, and input to produce a new state.
 
 		Args:
-			state: Current state of the cellular automata.
-			perception: Perceived state.
-			input: External input to the system.
+			state: Current state.
+			perception: Current perception.
+			input: Optional input.
 
 		Returns:
-			Updated state after applying the NCA rules.
+			Next state.
 
 		"""
 		alive_mask = self.get_alive_mask(state)
@@ -79,7 +82,7 @@ class NCAUpdate(ResidualUpdate):
 		"""Generate a mask of alive cells based on the current state.
 
 		Args:
-			state: Current state of the cellular automata.
+			state: Current state.
 
 		Returns:
 			A boolean mask indicating which cells are alive.
@@ -94,10 +97,10 @@ def state_to_alive(state: State) -> State:
 	"""Extract the 'alive' component from the state.
 
 	Args:
-		state: The input state.
+		state: Input state.
 
 	Returns:
-		State: The 'alive' component of the state.
+		The 'alive' component of the state.
 
 	"""
 	return state[..., -1:]

@@ -25,15 +25,17 @@ def get_image_from_url(url: str) -> Image:
 
 
 def get_emoji(emoji: str) -> Image:
-	"""Fetch, process, and return an emoji as a JAX array.
+	"""Fetch and return an emoji as a PIL Image.
+
+	The emoji glyph is downloaded from Google's Noto Emoji repository (PNG, 128 px). The image
+	is returned as a PIL Image without further processing. Callers may convert to arrays or
+	resize as needed.
 
 	Args:
 		emoji: The emoji character to fetch.
-		size: The desired size of the emoji image.
-		padding: The amount of padding to add around the emoji.
 
 	Returns:
-		The processed emoji image.
+		A ``PIL.Image.Image`` instance containing the emoji.
 
 	"""
 	# Get the emoji image

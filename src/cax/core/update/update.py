@@ -1,9 +1,4 @@
-"""Update base module.
-
-This module defines the `Update` class, which serves as a base class for all update modules
-in the CAX library. The `Update` class inherits from `nnx.Module` to utilize Flax's neural
-network functionalities.
-"""
+"""Update base module."""
 
 from flax import nnx
 
@@ -12,10 +7,10 @@ from cax.core.perceive import Perception
 
 
 class Update(nnx.Module):
-	"""A base class for update modules.
+	"""Base class for update modules.
 
-	This class is designed to be subclassed by specific update implementations.
-	It inherits from flax.nnx.Module to leverage Flax's neural network functionalities.
+	Subclasses implement transforms mapping a state and a perception (and optional input)
+	to the next state.
 	"""
 
 	def __call__(self, state: State, perception: Perception, input: Input | None = None) -> State:

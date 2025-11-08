@@ -16,7 +16,12 @@ from .rule import LeniaRuleParams
 
 
 class LeniaUpdate(Update):
-	"""Lenia update class."""
+	"""Lenia update class.
+
+	Applies the Lenia growth mapping to a perception tensor and updates the state in discrete
+	time with resolution `T`. Growth is computed per-kernel and then aggregated back to
+	channels via a linear transform.
+	"""
 
 	def __init__(
 		self,
@@ -68,7 +73,18 @@ class LeniaUpdate(Update):
 		return state
 
 	def _reshape_kernel_to_channel(self, rule_params: LeniaRuleParams) -> Array:
-		"""Compute array to reshape from kernel to channel."""
+		"""Compute array to reshape from kernel to channel.
+
+		Returns a matrix `K -> C` that aggregates per-kernel growth into channel space
+		using `rule_params.channel_target`.
+
+		Args:
+			rule_params: Rule parameters containing the `channel_target` mapping.
+
+		Returns:
+			Array with shape `(K, C)` suitable for `jnp.dot(G_k, reshape)`.
+
+		"""
 		return nnx.vmap(lambda x: jax.nn.one_hot(x, num_classes=self.channel_size))(
 			rule_params.channel_target
 		)
