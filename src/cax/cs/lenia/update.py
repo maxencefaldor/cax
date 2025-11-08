@@ -1,4 +1,9 @@
-"""Lenia update module."""
+"""Lenia update module.
+
+This module implements the update rule for Lenia, which applies a growth mapping to the
+potential fields and updates the state. Growth values are computed per-kernel using a
+parameterized growth function, then aggregated back to channels.
+"""
 
 from collections.abc import Callable
 
@@ -16,11 +21,12 @@ from .rule import LeniaRuleParams
 
 
 class LeniaUpdate(Update):
-	"""Lenia update class.
+	"""Lenia update rule.
 
-	Applies the Lenia growth mapping to a perception tensor and updates the state in discrete
-	time with resolution `T`. Growth is computed per-kernel and then aggregated back to
-	channels via a linear transform.
+	Applies the growth mapping to potential fields to determine how much each cell should
+	grow or decay. Growth is computed per-kernel using parameterized growth functions,
+	weighted, and aggregated to target channels. The state is updated in discrete time
+	steps with temporal resolution T.
 	"""
 
 	def __init__(
@@ -35,9 +41,12 @@ class LeniaUpdate(Update):
 
 		Args:
 			channel_size: Number of channels.
-			T: Time resolution.
-			growth_fn: Growth mapping function.
-			rule_params: Parameters for the rules.
+			T: Time resolution controlling the temporal discretization. Higher values
+				produce smoother temporal dynamics with smaller update steps.
+			growth_fn: Callable that maps neighborhood potential to growth values. Defines
+				how cells respond to their local environment.
+			rule_params: Instance of LeniaRuleParams containing kernel and growth parameters
+				for each channel.
 
 		"""
 		self.channel_size = channel_size
@@ -50,15 +59,21 @@ class LeniaUpdate(Update):
 		self.growth_params = nnx.data(rule_params.growth_params)
 
 	def __call__(self, state: State, perception: Perception, input: Input | None = None) -> State:
-		"""Apply the Lenia update.
+		"""Process the current state, perception, and input to produce a new state.
+
+		Computes growth values from potential fields using the growth function, aggregates
+		them to target channels, and updates the state with temporal resolution T. The
+		updated state is clipped to [0, 1].
 
 		Args:
-			state: Current state.
-			perception: Perceived state.
-			input: Input (unused in this implementation).
+			state: Array with shape (*spatial_dims, channel_size) representing the current state.
+			perception: Array with shape (*spatial_dims, num_kernels) containing potential fields
+				from the perception step.
+			input: Optional input (unused in this implementation).
 
 		Returns:
-			Next state.
+			Next state with shape (*spatial_dims, channel_size) after applying growth and
+				clipping to [0, 1].
 
 		"""
 		# Compute growth

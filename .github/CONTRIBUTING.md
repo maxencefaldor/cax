@@ -14,7 +14,7 @@ Follow these steps to contribute code:
 
 2. Clone your fork and go at the root of the repository.
 
-3. Install your fork from source using [https://docs.astral.sh/uv/](`uv`).
+3. Install your fork from source using [`uv`](https://docs.astral.sh/uv/).
 
 ```bash
 uv sync --all-extras --dev
@@ -71,7 +71,7 @@ git push --set-upstream origin name-of-change
 
 ## Report a bug or suggest a new feature using GitHub issues
 
-Go to https://github.com/maxencefaldor/cax/issues and click on "New issue".
+Go to [https://github.com/maxencefaldor/cax/issues](https://github.com/maxencefaldor/cax/issues) and click on "New issue".
 
 Informative bug reports tend to have:
 

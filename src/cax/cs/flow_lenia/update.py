@@ -1,4 +1,10 @@
-"""Flow Lenia update module."""
+"""Flow Lenia update module.
+
+This module implements the update rule for Flow Lenia, which extends Lenia with flow-based
+advection. In addition to growth, it computes displacement fields from affinity and
+concentration gradients, then applies reintegration tracking to transport matter.
+
+"""
 
 from collections.abc import Callable
 
@@ -17,7 +23,14 @@ from ..lenia.rule import LeniaRuleParams
 
 
 class FlowLeniaUpdate(Update):
-	"""Flow Lenia update class."""
+	"""Flow Lenia update rule.
+
+	Extends the standard Lenia update with flow-based advection. Computes affinity fields
+	(growth potentials) and their gradients, combines them with concentration gradients to
+	produce flow fields, and applies reintegration tracking to transport cell matter through
+	space. This creates mass-conservative dynamics with fluid-like behaviors.
+
+	"""
 
 	def __init__(
 		self,
@@ -36,13 +49,20 @@ class FlowLeniaUpdate(Update):
 
 		Args:
 			channel_size: Number of channels.
-			T: Time resolution.
-			growth_fn: Growth mapping function.
-			rule_params: Parameters for the rules.
-			theta_A: Threshold for alpha computation in Flow Lenia.
-			n: Exponent for alpha computation in Flow Lenia.
-			dd: Maximum displacement distance.
-			sigma: Spread parameter for reintegration tracking.
+			T: Time resolution controlling the temporal discretization. Higher values
+				produce smoother temporal dynamics with smaller update steps.
+			growth_fn: Callable that maps neighborhood potential to growth values. Defines
+				how cells respond to their local environment.
+			rule_params: Instance of LeniaRuleParams containing kernel and growth parameters
+				for each channel.
+			theta_A: Threshold value for computing the flow activation alpha. Higher values
+				make flow less sensitive to local density.
+			n: Exponent controlling the nonlinearity of flow activation. Higher values create
+				sharper transitions between flow and no-flow regions.
+			dd: Maximum displacement distance in pixels that flow can induce per time step.
+				Controls the strength of advective transport.
+			sigma: Spread parameter for the displacement kernel. Smaller values create more
+				localized flow, larger values produce smoother displacement fields.
 
 		"""
 		self.channel_size = channel_size
@@ -62,15 +82,21 @@ class FlowLeniaUpdate(Update):
 		self.sigma = sigma
 
 	def __call__(self, state: State, perception: Perception, input: Input | None = None) -> State:
-		"""Apply the Flow Lenia update.
+		"""Process the current state, perception, and input to produce a new state.
+
+		Computes affinity fields from perception, derives flow fields from affinity and
+		concentration gradients, and applies reintegration tracking to transport matter
+		through space while preserving mass.
 
 		Args:
-			state: Current state.
-			perception: Perceived state.
-			input: Input (unused in this implementation).
+			state: Array with shape (height, width, channel_size) representing the current state.
+			perception: Array with shape (height, width, num_kernels) containing potential fields
+				from the perception step.
+			input: Optional input (unused in this implementation).
 
 		Returns:
-			Next state.
+			Next state with shape (height, width, channel_size) after applying flow-based
+				advection and mass redistribution.
 
 		"""
 		# Compute growth
@@ -102,14 +128,22 @@ class FlowLeniaUpdate(Update):
 		return state
 
 	def apply_reintegration_tracking(self, state: State, F: Array) -> State:
-		"""Apply reintegration tracking to update the state based on the flow field.
+		"""Apply reintegration tracking to transport matter according to flow fields.
+
+		Implements the reintegration tracking algorithm that transports matter from each
+		cell to surrounding cells based on the flow field. Matter is distributed according
+		to how well each target cell matches the desired displacement, ensuring smooth and
+		mass-conservative transport.
 
 		Args:
-			state: Current state of shape (y, x, c).
-			F: Flow field of shape (y, x, 2, c).
+			state: Array with shape (height, width, channel_size) representing the current
+				state before advection.
+			F: Flow field with shape (height, width, 2, channel_size) specifying the desired
+				displacement for each cell in each channel, where axis -2 is [dy, dx].
 
 		Returns:
-			New state of shape (y, x, c).
+			New state with shape (height, width, channel_size) after matter redistribution
+				through flow-based advection.
 
 		"""
 		SY, SX, C = state.shape

@@ -1,4 +1,8 @@
-"""Elementary Cellular Automata perceive module."""
+"""Elementary Cellular Automata perceive module.
+
+This module implements the perception function for Elementary Cellular Automata. It extracts
+the three-cell neighborhood (left, self, right) for each cell using a fixed convolution kernel.
+"""
 
 import jax.numpy as jnp
 from flax import nnx
@@ -7,7 +11,12 @@ from cax.core.perceive import ConvPerceive
 
 
 class ElementaryPerceive(ConvPerceive):
-	"""Elementary Cellular Automata perceive class."""
+	"""Elementary Cellular Automata perception.
+
+	Extracts the three-cell neighborhood for each cell in a one-dimensional cellular automaton.
+	The perception consists of three channels: left neighbor, self, and right neighbor.
+	Uses circular padding to implement periodic boundary conditions.
+	"""
 
 	def __init__(self, *, rngs: nnx.Rngs):
 		"""Initialize Elementary perceive.

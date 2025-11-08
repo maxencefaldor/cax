@@ -1,14 +1,15 @@
 # CAX: Cellular Automata Accelerated in JAX
 
 <div align="center">
-	<img src="docs/cax.png" alt="logo" width="512"></img>
+	<img src="https://raw.githubusercontent.com/maxencefaldor/cax/main/docs/assets/cax.png" alt="logo" width="448"></img>
 </div>
 
-[![Pyversions](https://img.shields.io/pypi/pyversions/cax.svg?style=flat)](https://pypi.python.org/pypi/cax)
-[![PyPI version](https://badge.fury.io/py/cax.svg)](https://badge.fury.io/py/cax)
-[![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
-[![Paper](http://img.shields.io/badge/paper-arxiv.2410.02651-B31B1B.svg)](https://arxiv.org/abs/2410.02651)
-[![X](https://img.shields.io/badge/X-%23000000.svg?style=for-the-badge&logo=X&logoColor=white&style=flat)](https://x.com/maxencefaldor/status/1842211478796918945)
+<div align="center">
+	<a href="https://pypi.python.org/pypi/cax"><img alt="PyPI - Python Version" src="https://img.shields.io/pypi/pyversions/cax.svg?style=flat"></img></a>
+	<a href="https://pypi.python.org/pypi/cax"><img alt="PyPI - Version" src="https://img.shields.io/pypi/v/cax.svg?style=flat"></img></a>
+	<a href="https://arxiv.org/abs/2410.02651"><img alt="Paper" src="http://img.shields.io/badge/paper-arxiv.2410.02651-B31B1B.svg"></img></a>
+	<a href="https://x.com/maxencefaldor/status/1842211478796918945"><img alt="X URL" src="https://img.shields.io/twitter/url?url=https%3A%2F%2Fx.com%2Fmaxencefaldor%2Fstatus%2F1842211478796918945"></img></a>
+</div>
 
 CAX is a high-performance and flexible open-source library designed to **accelerate artificial life research**. 🧬
 
@@ -38,7 +39,7 @@ CAX is built on top of the JAX/Flax ecosystem for speed and scalability. The lib
 
 ### Tested & Documented 📚
 
-The library is thoroughly tested and documented with numerous examples to get you started! Our comprehensive guides walk you through everything from basic cellular automata to advanced neural implementations.
+The library is thoroughly tested and [documented](https://maxencefaldor.github.io/cax/) with numerous examples to get you started! Our comprehensive guides walk you through everything from basic cellular automata to advanced neural implementations.
 
 ## Implemented Systems 🦎
 
@@ -126,4 +127,4 @@ If you use CAX in your research, please cite the following paper:
 
 ## Contributing 👷
 
-Contributions are welcome! If you find a bug or are missing your favorite self-organizing system, please open an issue or submit a pull request following our [contribution guidelines](CONTRIBUTING.md) 🤗.
+Contributions are welcome! If you find a bug or are missing your favorite self-organizing system, please open an issue or submit a pull request following our [contribution guidelines](https://maxencefaldor.github.io/cax/contributing/) 🤗.

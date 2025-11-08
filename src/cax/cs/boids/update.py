@@ -1,4 +1,10 @@
-"""Boids update module."""
+"""Boids update module.
+
+This module implements the update rule for Boids, which integrates steering accelerations
+to update velocities and positions. Includes optional velocity damping through friction
+and periodic boundary conditions.
+
+"""
 
 import jax.numpy as jnp
 
@@ -10,7 +16,13 @@ from .state import BoidsState
 
 
 class BoidsUpdate(Update):
-	"""Boids update class."""
+	"""Boids update rule.
+
+	Updates boid positions and velocities by integrating steering accelerations. Applies
+	friction as exponential velocity decay and wraps positions using periodic boundary
+	conditions.
+
+	"""
 
 	def __init__(
 		self,
@@ -21,8 +33,11 @@ class BoidsUpdate(Update):
 		"""Initialize Boids update.
 
 		Args:
-			dt: Time step of the simulation.
-			velocity_half_life: Velocity half life for friction.
+			dt: Time step of the simulation in arbitrary time units. Smaller values
+				produce smoother motion but require more steps for the same duration.
+			velocity_half_life: Time constant for velocity decay due to friction. After
+				this time, velocity is halved without steering input. Use jnp.inf for no
+				friction. Smaller values create more damped, sluggish motion.
 
 		"""
 		self.dt = dt
@@ -31,15 +46,20 @@ class BoidsUpdate(Update):
 	def __call__(
 		self, state: BoidsState, perception: BoidsPerception, input: Input | None = None
 	) -> BoidsState:
-		"""Apply the Boids rules to update the state.
+		"""Process the current state, perception, and input to produce a new state.
+
+		Integrates steering accelerations to update velocities with friction, then updates
+		positions. Applies periodic boundary conditions by wrapping positions to [0, 1].
 
 		Args:
-			state: Current state.
-			perception: Perceived state, including cell state and neighbor count.
-			input: Input (unused in this implementation).
+			state: BoidsState containing current position and velocity arrays with shape
+				(num_boids, num_spatial_dims).
+			perception: BoidsPerception containing acceleration array with shape
+				(num_boids, num_spatial_dims) from the perception step.
+			input: Optional input (unused in this implementation).
 
 		Returns:
-			Next state.
+			New BoidsState with updated positions and velocities.
 
 		"""
 		velocity = self.friction_factor * state.velocity + self.dt * perception.acceleration

@@ -41,6 +41,7 @@ docs = [
 	"mkdocs",
 	"mkdocs-material",
 	"mkdocstrings[python]",
+	"mkdocs-jupyter",
 ]
 examples = [
 	"torchvision>=0.21.0",
@@ -53,6 +54,7 @@ examples = [
 
 [project.urls]
 Homepage = "https://github.com/maxencefaldor/cax"
+Documentation = "https://maxencefaldor.github.io/cax/"
 
 [build-system]
 requires = ["hatchling"]

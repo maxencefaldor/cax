@@ -1,7 +1,9 @@
 """Boid policy following Craig W. Reynolds (1987).
 
-[1] Craig W. Reynolds. 1987. Flocks, herds and schools: A distributed behavioral model.
-[2] https://www.red3d.com/cwr/papers/1987/boids.html
+References:
+	[1] Craig W. Reynolds. 1987. Flocks, herds and schools: A distributed behavioral model.
+	[2] https://www.red3d.com/cwr/papers/1987/boids.html
+
 """
 
 import jax
