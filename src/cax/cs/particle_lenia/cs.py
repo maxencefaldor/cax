@@ -1,6 +1,13 @@
 """Particle Lenia module.
 
-[1] https://google-research.github.io/self-organising-systems/particle-lenia/
+This module implements Particle Lenia, a particle-based variant of Lenia where discrete
+particles interact through continuous field potentials. Unlike grid-based Lenia, particles
+move freely in continuous space and experience forces derived from kernel and growth fields
+computed from neighboring particles.
+
+References:
+	[1] https://google-research.github.io/self-organising-systems/particle-lenia/
+
 """
 
 from collections.abc import Callable
@@ -36,11 +43,16 @@ class ParticleLenia(ComplexSystem):
 		"""Initialize Particle Lenia.
 
 		Args:
-			num_spatial_dims: Number of spatial dimensions.
-			T: Time resolution.
-			kernel_fn: Kernel function.
-			growth_fn: Growth mapping function.
-			rule_params: Parameters for the rules.
+			num_spatial_dims: Number of spatial dimensions (e.g., 2 for 2D, 3 for 3D).
+				Determines the dimensionality of particle positions and field computations.
+			T: Time resolution controlling the temporal discretization. Higher values
+				produce smoother temporal dynamics with smaller update steps.
+			kernel_fn: Callable that computes pairwise kernel weights between particles
+				based on their distance. Takes rule parameters and returns kernel values.
+			growth_fn: Callable that maps kernel field values to growth field values.
+				Defines how particles respond to their local neighborhood density.
+			rule_params: Instance of ParticleLeniaRuleParams containing kernel and growth
+				parameters such as radii, peak positions, widths, and heights.
 
 		"""
 		self.num_spatial_dims = num_spatial_dims
@@ -73,20 +85,31 @@ class ParticleLenia(ComplexSystem):
 		particle_radius: float = 0.3,
 		type: str = "UG",  # Options: "particles", "UG", "E"
 	) -> Array:
-		"""Render state to RGB.
+		"""Render state to RGB image.
+
+		Renders Particle Lenia state as particles optionally overlaid on field visualizations.
+		Particles appear as blue circles. The background can show kernel field (U), growth field
+		(G), or energy field (E) to visualize the underlying dynamics driving particle motion.
+		Field visualizations use color mapping to represent field intensities across space.
 
 		Args:
-			state: Array of shape (num_particles, num_spatial_dims) containing particle positions.
-			resolution: Resolution of the output image.
-			extent: Extent of the viewing area.
-			particle_radius: Radius of particles.
-			type: Type of visualization to show:
-				"particles": Only show particles (default)
-				"ug": Show kernel and growth fields with particles
-				"e": Show energy field with particles
+			state: Array of shape (num_particles, num_spatial_dims) containing particle positions
+				in continuous space. Currently only 2D visualization is supported.
+			resolution: Size of the output image in pixels for both width and height.
+				Higher values produce smoother field gradients but increase computation cost.
+			extent: Half-width of the viewing area in coordinate space. The view spans from
+				-extent to +extent in each dimension. Adjust to zoom in or out on the particle
+				system.
+			particle_radius: Radius of each particle in coordinate space. Particles are drawn
+				as smooth circles with anti-aliased edges.
+			type: Visualization mode determining what fields to display:
+				"particles": Only show particles on white background (default).
+				"UG": Show particles overlaid on kernel (U) and growth (G) field visualization.
+				"E": Show particles overlaid on energy field visualization.
 
 		Returns:
-			An array of pixels representing the particle positions and fields.
+			RGB image with dtype uint8 and shape (resolution, resolution, 3), showing particles
+				and optionally the underlying field structure that drives their motion.
 
 		"""
 		assert self.num_spatial_dims == 2, "Particle Lenia only supports 2D visualization."

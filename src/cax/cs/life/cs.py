@@ -1,4 +1,10 @@
-"""Life module."""
+"""Life module.
+
+This module implements Conway's Game of Life and other Life-like cellular automata
+that follow birth/survival rules. These are two-dimensional cellular automata where
+each cell's next state depends on its current state and the number of alive neighbors
+in its Moore neighborhood (8 surrounding cells).
+"""
 
 import jax.numpy as jnp
 from flax import nnx
@@ -12,7 +18,14 @@ from .update import LifeUpdate
 
 
 class Life(ComplexSystem):
-	"""Life class."""
+	"""Conway's Game of Life and Life-like cellular automata.
+
+	A two-dimensional cellular automaton where each cell evolves based on its current
+	state (alive or dead) and the number of alive neighbors in its Moore neighborhood.
+	The system is defined by birth and survival rules that determine when cells become
+	alive or remain alive. Classic examples include Conway's Game of Life (B3/S23),
+	HighLife (B36/S23), and Day & Night (B3678/S34678).
+	"""
 
 	def __init__(
 		self,
@@ -24,8 +37,10 @@ class Life(ComplexSystem):
 		"""Initialize Life.
 
 		Args:
-			birth: Birth rule.
-			survival: Survival rule.
+			birth: Array of shape (9,) defining birth conditions. Element i is 1.0 if a dead
+				cell with i alive neighbors should become alive, 0.0 otherwise.
+			survival: Array of shape (9,) defining survival conditions. Element i is 1.0 if a
+				live cell with i alive neighbors should stay alive, 0.0 otherwise.
 			rngs: rng key.
 
 		"""
@@ -43,15 +58,21 @@ class Life(ComplexSystem):
 
 	@classmethod
 	def birth_survival_from_string(cls, rule_golly: str) -> tuple[Array, Array]:
-		"""Create birth and survival arrays from a rule in Golly format.
+		"""Create birth and survival arrays from a rule string in Golly format.
+
+		Parses a rule string in the standard B/S notation used by Golly and other
+		Life simulators. For example, "B3/S23" represents Conway's Game of Life,
+		where dead cells with exactly 3 neighbors become alive (Birth), and live
+		cells with 2 or 3 neighbors survive (Survival).
 
 		Args:
-			rule_golly: A string in the format "B{birth_numbers}/S{survival_numbers}",
-				where birth_numbers and survival_numbers are lists of digits.
+			rule_golly: Rule string in format "B{birth_numbers}/S{survival_numbers}",
+				where birth_numbers and survival_numbers are digits from 0 to 8.
 				For example, "B3/S23" for Conway's Game of Life.
 
 		Returns:
-			Birth and survival arrays.
+			Tuple of (birth, survival) arrays, each of shape (9,) containing binary
+				values (0.0 or 1.0) indicating which neighbor counts activate the rule.
 
 		"""
 		assert "/" in rule_golly, (
@@ -87,13 +108,19 @@ class Life(ComplexSystem):
 
 	@nnx.jit
 	def render(self, state: State) -> Array:
-		"""Render state to RGB.
+		"""Render state to RGB image.
+
+		Converts the Life state to an RGB visualization by replicating the single-channel
+		state values across all three color channels, resulting in a grayscale image where
+		alive cells appear white and dead cells appear black.
 
 		Args:
-			state: An array with two spatial/time dimensions.
+			state: Array with shape (..., height, width, 1) representing the Life state,
+				where each cell is 0.0 (dead) or 1.0 (alive).
 
 		Returns:
-			The rendered RGB image in uint8 format.
+			RGB image with dtype uint8 and shape (..., height, width, 3), where cell
+				values are mapped to grayscale colors in the range [0, 255].
 
 		"""
 		rgb = jnp.repeat(state, 3, axis=-1)

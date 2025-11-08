@@ -1,4 +1,10 @@
-"""Boids module."""
+"""Boids module.
+
+This module implements Boids, a particle-based system that simulates the flocking behavior
+of birds or fish through simple local rules. Each boid (bird-like object) adjusts its
+velocity based on the boid policy. These local interactions produce emergent global flocking
+patterns without centralized coordination.
+"""
 
 from functools import partial
 
@@ -28,9 +34,12 @@ class Boids(ComplexSystem):
 		"""Initialize Boids.
 
 		Args:
-			dt: Time step of the simulation.
-			velocity_half_life: Velocity half life for friction.
-			boid_policy: Boid policy.
+			dt: Time step of the simulation in arbitrary time units. Smaller values
+				produce smoother motion but require more steps for the same duration.
+			velocity_half_life: Time constant for velocity decay due to friction. After
+				this time, velocity is halved without steering input. Use jnp.inf for no
+				friction. Smaller values create more damped, sluggish motion.
+			boid_policy: Policy defining the behavior of the boids.
 
 		"""
 		self.perceive = BoidsPerceive(
@@ -60,15 +69,26 @@ class Boids(ComplexSystem):
 		resolution: int = 512,
 		boids_size: float = 0.01,
 	) -> Array:
-		"""Render state to RGB.
+		"""Render state to RGB image.
+
+		Renders boids as triangular agents pointing in their direction of motion on a
+		white background. Each boid is drawn as a filled triangle with the tip pointing
+		in the velocity direction, providing visual feedback about both position and
+		heading. The visualization uses 2D coordinates in the range [0, 1].
 
 		Args:
-			state: An array of states containing position and velocity.
-			resolution: Resolution of the output image.
-			boids_size: Size of the boids in the [0, 1] coordinate space.
+			state: BoidsState containing position and velocity arrays. Position should have
+				shape (num_boids, 2) with coordinates in [0, 1]. Velocity determines the
+				orientation and can have arbitrary magnitude.
+			resolution: Size of the output image in pixels for both width and height.
+				Higher values produce smoother, more detailed renderings.
+			boids_size: Base width of each boid triangle in coordinate space [0, 1].
+				The triangle height is twice this value. Larger values make boids more
+				visible but may cause overlap.
 
 		Returns:
-			Rendered states as an RGB image array of shape (resolution, resolution, 3).
+			RGB image with dtype uint8 and shape (resolution, resolution, 3), where
+				boids appear as black triangles on a white background.
 
 		"""
 		assert state.position.shape[-1] == 2, "Boids only supports 2D visualization."

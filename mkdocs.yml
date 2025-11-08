@@ -1,0 +1,72 @@
+site_name: CAX
+site_url: https://maxencefaldor.github.io/cax/
+
+theme:
+  name: material
+  logo: assets/cax.png
+
+nav:
+  - Home: index.md
+  - API:
+    - Overview: api/api.md
+    - Core: api/core.md
+    - Perceive: api/perceive.md
+    - Update: api/update.md
+    - Complex Systems:
+      - Overview: api/cs.md
+      - Elementary: api/cs/elementary.md
+      - Life: api/cs/life.md
+      - Lenia: api/cs/lenia.md
+      - Flow Lenia: api/cs/flow_lenia.md
+      - Particle Lenia: api/cs/particle_lenia.md
+      - Particle Life: api/cs/particle_life.md
+      - Boids: api/cs/boids.md
+    - Neural Network Utils: api/nn.md
+    - Utils: api/utils.md
+  - Getting Started: examples/00_getting_started.ipynb
+  - Discrete Cellular Automata:
+    - 10 - Elementary: examples/10_elementary.ipynb
+    - 11 - Life: examples/11_life.ipynb
+  - Lenia:
+    - 20 - Lenia: examples/20_lenia.ipynb
+    - 21 - Flow Lenia: examples/21_flow_lenia.ipynb
+    - 22 - Particle Lenia: examples/22_particle_lenia.ipynb
+  - Particle Systems:
+    - 30 - Particle Life: examples/30_particle_life.ipynb
+    - 31 - Boids: examples/31_boids.ipynb
+  - Neural Cellular Automata:
+    - 40 - Growing NCA: examples/40_growing_nca.ipynb
+    - 41 - Growing Conditional NCA: examples/41_growing_conditional_nca.ipynb
+    - 42 - Growing Unsupervised NCA: examples/42_growing_unsupervised_nca.ipynb
+    - 43 - Diffusing NCA: examples/43_diffusing_nca.ipynb
+    - 44 - Self-classifying MNIST: examples/44_self_classifying_mnist.ipynb
+    - 45 - Self-autoencoding MNIST: examples/45_self_autoencoding_mnist.ipynb
+    - 46 - 1D ARC NCA: examples/46_1d_arc_nca.ipynb
+    - 47 - Attention NCA: examples/47_attention_nca.ipynb
+  - Other:
+    - 50 - VAE: examples/50_vae.ipynb
+    - 51 - RRCNN: examples/51_rrcnn.ipynb
+    - 52 - Growing NCA with Evolution Strategies: examples/52_growing_nca_es.ipynb
+  - Contributing: contributing.md
+
+repo_url: https://github.com/maxencefaldor/cax
+
+plugins:
+  - search
+  - mkdocstrings:
+      default_handler: python
+      handlers:
+        python:
+          paths:
+            - src
+          options:
+            show_root_heading: true
+            members_order: source
+            show_source: true
+            inherited_members: true
+            docstring_style: google
+  - mkdocs-jupyter:
+      execute: false
+      include_source: false
+
+strict: true

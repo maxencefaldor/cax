@@ -1,4 +1,9 @@
-"""Life update module."""
+"""Life update module.
+
+This module implements the update rule for Conway's Game of Life and Life-like cellular
+automata based on birth/survival conditions. Cells become alive (birth) or stay alive
+(survival) based on the number of alive neighbors.
+"""
 
 import jax.numpy as jnp
 from jax import Array
@@ -9,29 +14,40 @@ from cax.core.update import Update
 
 
 class LifeUpdate(Update):
-	"""Life update class."""
+	"""Life update rule.
+
+	Applies birth and survival rules to determine each cell's next state. Dead cells with
+	the right number of alive neighbors are born, and alive cells with the right number
+	of alive neighbors survive. All other cells become or remain dead.
+	"""
 
 	def __init__(self, birth: Array, survival: Array):
 		"""Initialize Life update.
 
 		Args:
-			birth: Birth rule.
-			survival: Survival rule.
+			birth: Array of shape (9,) defining birth conditions. Element i is 1.0 if a dead
+				cell with i alive neighbors should become alive, 0.0 otherwise.
+			survival: Array of shape (9,) defining survival conditions. Element i is 1.0 if a
+				live cell with i alive neighbors should stay alive, 0.0 otherwise.
 
 		"""
 		self.birth = birth
 		self.survival = survival
 
 	def __call__(self, state: State, perception: Perception, input: Input | None = None) -> State:
-		"""Apply the Life rules based on birth/survival.
+		"""Process the current state, perception, and input to produce a new state.
+
+		Determines each cell's next state by checking birth conditions for dead cells and
+		survival conditions for alive cells based on the number of alive neighbors.
 
 		Args:
-			state: Current state of the cellular automaton.
-			perception: Perceived state, including cell state and neighbor count.
-			input: Input (unused in this implementation).
+			state: Current state (unused, next state computed solely from perception).
+			perception: Array with shape (..., height, width, 2) where channel 0 is the cell's
+				state (0.0 or 1.0) and channel 1 is the count of alive neighbors (0-8).
+			input: Optional input (unused in this implementation).
 
 		Returns:
-			Updated state of the cellular automaton.
+			Next state with shape (..., height, width, 1) containing binary cell values.
 
 		"""
 		self_alive = perception[..., 0:1]

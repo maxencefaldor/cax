@@ -1,4 +1,9 @@
-"""Lenia perceive module."""
+"""Lenia perceive module.
+
+This module implements the perception function for Lenia using FFT-based convolution with
+parameterized kernels. Each channel is convolved with its corresponding kernel to produce
+a potential field that represents the local neighborhood configuration.
+"""
 
 from collections.abc import Callable
 
@@ -15,7 +20,12 @@ from .rule import LeniaRuleParams
 
 
 class LeniaPerceive(Perceive):
-	"""Lenia perception class."""
+	"""Lenia perception.
+
+	Computes the potential field for each kernel by convolving the state with parameterized
+	kernels using FFT for efficiency. Each kernel represents a specific neighborhood function
+	that can be customized through the rule parameters.
+	"""
 
 	def __init__(
 		self,
@@ -30,12 +40,15 @@ class LeniaPerceive(Perceive):
 		"""Initialize Lenia perceive.
 
 		Args:
-			spatial_dims: Spatial dimensions.
+			spatial_dims: Spatial dimensions (e.g., (64, 64) for 2D or (32, 32, 32) for 3D).
 			channel_size: Number of channels.
-			R: Space resolution.
-			state_scale: Scaling factor for the state.
-			kernel_fn: Kernel function.
-			rule_params: Parameters for the rules.
+			R: Space resolution defining the kernel radius. Larger values create wider
+				neighborhoods and smoother patterns.
+			state_scale: Scaling factor applied to state values.
+			kernel_fn: Callable that generates convolution kernels. Takes rule parameters
+				and returns kernel weights.
+			rule_params: Instance of LeniaRuleParams containing kernel and growth parameters
+				for each channel.
 
 		"""
 		self.spatial_dims = spatial_dims
@@ -51,13 +64,19 @@ class LeniaPerceive(Perceive):
 		self.kernel_fft = self._kernel_fft(rule_params)
 
 	def __call__(self, state: State) -> Perception:
-		"""Apply Lenia perception to the input state.
+		"""Process the current state to produce a perception.
+
+		Convolves the state with parameterized kernels using FFT to compute the neighborhood
+		potential for each kernel. The result represents how much each local configuration
+		matches the kernel's target pattern.
 
 		Args:
-			state: State of the cellular automaton.
+			state: Array with shape (*spatial_dims, channel_size) representing the current
+				state of the system.
 
 		Returns:
-			The perceived state after applying Lenia convolution.
+			Potential field array with shape (*spatial_dims, num_kernels) representing the
+				convolved neighborhood values for each kernel.
 
 		"""
 		# Compute state fft
