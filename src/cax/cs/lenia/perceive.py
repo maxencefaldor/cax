@@ -1,7 +1,6 @@
 """Lenia perceive module."""
 
 from collections.abc import Callable
-from typing import Any
 
 import jax
 import jax.numpy as jnp

@@ -31,6 +31,12 @@ class MoorePerceive(Perceive):
 	def __call__(self, state: State) -> Perception:
 		"""Apply Moore perception to the input state.
 
+		The input is assumed to have shape `(..., *spatial_dims, channel_size)` where `spatial_dims`
+		is a tuple of `num_spatial_dims` dimensions and `channel_size` is the number of channels.
+		This method concatenates the central cell and all neighbors within the Moore neighborhood
+		along the channel axis, yielding an output with shape `(..., *spatial, channel_size * N)`,
+		where `N = (2 * radius + 1) ** num_spatial_dims`.
+
 		Args:
 			state: State of the cellular automaton.
 

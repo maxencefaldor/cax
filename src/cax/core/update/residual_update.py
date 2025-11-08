@@ -1,4 +1,4 @@
-"""Residual update module with cell dropout."""
+"""Residual update module."""
 
 from collections.abc import Callable
 
@@ -11,7 +11,10 @@ from .mlp_update import MLPUpdate
 
 
 class ResidualUpdate(MLPUpdate):
-	"""Residual update module with cell dropout."""
+	"""Residual update class.
+
+	Extends the MLP update with a residual connection and cell dropout applied to the update.
+	"""
 
 	def __init__(
 		self,
@@ -53,15 +56,15 @@ class ResidualUpdate(MLPUpdate):
 		self.step_size = step_size
 
 	def __call__(self, state: State, perception: Perception, input: Input | None = None) -> State:
-		"""Apply the residual update to the state.
+		"""Process the current state, perception, and input to produce a new state.
 
 		Args:
-			state: Current state of the cellular automaton.
-			perception: Perceived information from the environment.
-			input: External input to the system.
+			state: Current state.
+			perception: Current perception.
+			input: Optional input.
 
 		Returns:
-			Updated state after applying the residual update.
+			Next state.
 
 		"""
 		update = super().__call__(state, perception, input)

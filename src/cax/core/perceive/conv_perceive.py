@@ -49,7 +49,13 @@ class ConvPerceive(Perceive):
 		self.activation_fn = activation_fn
 
 	def __call__(self, state: State) -> Perception:
-		"""Apply perception to the input state.
+		"""Apply convolutional perception to the input state.
+
+		Inputs are expected to have shape `(..., *spatial_dims, channel_size)` where `spatial_dims`
+		is a tuple of `num_spatial_dims` dimensions and `channel_size` is the number of channels.
+		The output shape is `(..., *spatial_dims, perception_size)`. If `activation_fn` is provided,
+		it is applied element-wise to the convolution output. If `activation_fn` is `None`, the
+		convolution output is returned as is.
 
 		Args:
 			state: State of the cellular automaton.

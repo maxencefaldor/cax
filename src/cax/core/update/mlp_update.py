@@ -14,7 +14,12 @@ from .update import Update
 
 
 class MLPUpdate(Update):
-	"""MLP update class."""
+	"""MLP update class.
+
+	Maps a perception (and optional input) to the next state using pointwise convolutional
+	layers (kernel size 1) applied independently at each spatial position.
+
+	"""
 
 	def __init__(
 		self,
@@ -61,18 +66,18 @@ class MLPUpdate(Update):
 		self.activation_fn = activation_fn
 
 	def __call__(self, state: State, perception: Perception, input: Input | None = None) -> State:
-		"""Apply the MLP update to the given state and perception.
+		"""Process the current state, perception, and input to produce a new state.
 
-		If an input is provided, it is concatenated to the perception
-		before being passed through the layers of the MLP.
+		If input is provided, it is concatenated to the perception along the channel axis
+		before being passed through the layers.
 
 		Args:
-			state: Current state of the cellular automaton.
-			perception: Perceived state from the previous step.
-			input: Optional external input to the system.
+			state: Current state.
+			perception: Current perception.
+			input: Optional input.
 
 		Returns:
-			Updated state after applying the MLP layers.
+			Next state.
 
 		"""
 		if input is not None:
