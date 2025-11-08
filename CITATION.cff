@@ -1,0 +1,52 @@
+cff-version: 1.2.0
+message: "If you use this software in your research, please cite the paper below."
+
+# Software Citation
+title: "CAX: Cellular Automata Accelerated in JAX"
+abstract: "Cellular Automata Accelerated in JAX"
+authors:
+  - family-names: "Faldor"
+    given-names: "Maxence"
+    email: "maxencefaldor@gmail.com"
+    orcid: "https://orcid.org/0000-0003-4743-9494"
+version: "0.3.2"
+date-released: "2024-10-04" # Based on the arXiv paper submission date
+repository-code: "https://github.com/maxencefaldor/cax"
+license: "MIT"
+keywords:
+  - "complex systems"
+  - "artificial life"
+  - "open-endedness"
+  - "emergence"
+  - "self-organization"
+  - "cellular automata"
+  - "neural cellular automata"
+
+# Preferred citation (Paper)
+preferred-citation:
+  type: conference-paper
+  title: "CAX: Cellular Automata Accelerated in JAX"
+  authors:
+    - family-names: "Faldor"
+      given-names: "Maxence"
+      orcid: "https://orcid.org/0000-0003-4743-9494"
+    - family-names: "Cully"
+      given-names: "Antoine"
+      orcid: "https://orcid.org/0000-0002-3190-7073"
+  conference:
+    name: "International Conference on Representation Learning"
+  year: 2025
+  volume: 2025
+  pages: "8947--8960"
+  url: "https://proceedings.iclr.cc/paper_files/paper/2025/file/19206a6ed5ed0aaeed440448dfc5cf7e-Paper-Conference.pdf"
+  editors:
+    - family-names: "Yue"
+      given-names: "Y."
+    - family-names: "Garg"
+      given-names: "A."
+    - family-names: "Peng"
+      given-names: "N."
+    - family-names: "Sha"
+      given-names: "F."
+    - family-names: "Yu"
+      given-names: "R."
