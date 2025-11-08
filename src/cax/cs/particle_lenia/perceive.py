@@ -1,6 +1,7 @@
 """Particle Lenia perceive module."""
 
 from collections.abc import Callable
+from typing import Any
 
 import jax
 import jax.numpy as jnp
@@ -22,8 +23,8 @@ class ParticleLeniaPerceive(Perceive):
 		self,
 		num_spatial_dims: int,
 		*,
-		kernel_fn: Callable = peak_kernel_fn,
-		growth_fn: Callable = exponential_growth_fn,
+		kernel_fn: Callable[[Array, Any], Array] = peak_kernel_fn,
+		growth_fn: Callable[[Array, Any], Array] = exponential_growth_fn,
 		rule_params: ParticleLeniaRuleParams,
 	):
 		"""Initialize Particle Lenia perceive.
@@ -58,7 +59,7 @@ class ParticleLeniaPerceive(Perceive):
 		grad_E = jax.grad(lambda x: self.energy_field(state, x))
 		return -jax.vmap(grad_E)(state)
 
-	def compute_fields(self, state: State, x: State) -> Array:
+	def compute_fields(self, state: State, x: State) -> tuple[Array, Array, Array]:
 		"""Compute energy field."""
 		r = jnp.sqrt(jnp.clip(jnp.sum(jnp.square(x - state), axis=-1), min=1e-10))
 

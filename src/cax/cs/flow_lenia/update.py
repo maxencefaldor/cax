@@ -132,7 +132,7 @@ class FlowLeniaUpdate(Update):
 		mu = pos[..., None] + F_clipped  # (SY, SX, 2, C)
 
 		# Define step function for each displacement
-		def step(dy, dx):
+		def step(dy: Array, dx: Array) -> Array:
 			Xr = jnp.roll(state, (dy, dx), axis=(0, 1))  # (SY, SX, C)
 			mur = jnp.roll(mu, (dy, dx), axis=(0, 1))  # (SY, SX, 2, C)
 
@@ -169,25 +169,25 @@ class FlowLeniaUpdate(Update):
 		)
 
 
-def get_sobel_kernels():
+def get_sobel_kernels() -> tuple[Array, Array]:
 	"""Define Sobel kernels exactly as in the reference Flow Lenia code."""
 	kx = jnp.array([[1.0, 0.0, -1.0], [2.0, 0.0, -2.0], [1.0, 0.0, -1.0]], dtype=jnp.float32)
 	ky = jnp.transpose(kx)  # [[1., 2., 1.], [0., 0., 0.], [-1., -2., -1.]]
 	return kx, ky
 
 
-def sobel_x(A, kx):
+def sobel_x(A: Array, kx: Array) -> Array:
 	"""Compute horizontal Sobel filter per channel."""
 	# Apply convolve2d to each channel using vmap
 	return jax.vmap(lambda a: convolve2d(a, kx, mode="same"), in_axes=2, out_axes=2)(A)
 
 
-def sobel_y(A, ky):
+def sobel_y(A: Array, ky: Array) -> Array:
 	"""Compute vertical Sobel filter per channel."""
 	return jax.vmap(lambda a: convolve2d(a, ky, mode="same"), in_axes=2, out_axes=2)(A)
 
 
-def sobel(A):
+def sobel(A: Array) -> Array:
 	"""Compute gradients using Sobel filters, matching the reference Flow Lenia implementation.
 
 	Args:

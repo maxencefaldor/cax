@@ -110,15 +110,15 @@ class ParticleLenia(ComplexSystem):
 		G_field = flat_G.reshape(resolution, resolution)
 
 		# Helper functions for colormapping
-		def lerp(x, a, b):
+		def lerp(x: Array, a: Array, b: Array) -> Array:
 			return a * (1.0 - x) + b * x
 
-		def cmap_e(e):
+		def cmap_e(e: Array) -> Array:
 			stacked = jnp.stack([e, -e], -1).clip(0)
 			colors = jnp.array([[0.3, 1.0, 1.0], [1.0, 0.3, 1.0]], dtype=jnp.float32)
 			return 1.0 - jnp.matmul(stacked, colors)
 
-		def cmap_ug(u, g):
+		def cmap_ug(u: Array, g: Array) -> Array:
 			vis = lerp(u[..., None], jnp.array([0.1, 0.1, 0.3]), jnp.array([0.2, 0.7, 1.0]))
 			return lerp(g[..., None], vis, jnp.array([1.17, 0.91, 0.13]))
 

@@ -37,6 +37,11 @@ dev = [
 	"ruff>=0.6.0",
 	"mypy>=1.11.0",
 ]
+docs = [
+	"mkdocs",
+	"mkdocs-material",
+	"mkdocstrings[python]",
+]
 examples = [
 	"torchvision>=0.21.0",
 	"tqdm>=4.67.0",
@@ -55,7 +60,7 @@ build-backend = "hatchling.build"
 
 [tool.ruff]
 src = ["src", "tests"]
-target-version = "py311"
+target-version = "py313"
 line-length = 100
 
 [tool.ruff.lint]
@@ -78,7 +83,7 @@ ignore = [
 indent-style = "tab"
 
 [tool.mypy]
-python_version = "3.11"
+python_version = "3.13"
 disallow_untyped_defs = "True"
 disallow_any_unimported = "True"
 no_implicit_optional = "True"

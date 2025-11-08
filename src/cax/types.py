@@ -1,8 +1,8 @@
 """Type definitions."""
 
-from typing import Any, TypeAlias
+from typing import Any
 
-PyTree: TypeAlias = Any
+PyTree = Any
 
-State: TypeAlias = PyTree
-Input: TypeAlias = PyTree
+State = PyTree
+Input = PyTree

@@ -26,12 +26,12 @@ class FreeKernelParams:
 	w: Array
 
 
-def bell(x: Array, mean: Array, std: Array) -> Array:
+def bell(x: Array, mean: Array | float, std: Array | float) -> Array:
 	"""Gaussian function."""
 	return jnp.exp(-0.5 * ((x - mean) / std) ** 2)
 
 
-def get_kernel_fn(kernel_core: Callable) -> Callable:
+def get_kernel_fn(kernel_core: Callable[[Array], Array]) -> Callable[[Array, KernelParams], Array]:
 	"""Get kernel function."""
 
 	def kernel_fn(radius: Array, kernel_params: KernelParams) -> Array:
@@ -51,22 +51,22 @@ def get_kernel_fn(kernel_core: Callable) -> Callable:
 
 
 # Kernel cores
-def exponential_kernel_core(radius, alpha=4):
+def exponential_kernel_core(radius: Array, alpha: float = 4.0) -> Array:
 	"""Exponential kernel core."""
 	return jnp.exp(alpha - alpha / (4 * radius * (1 - radius)))
 
 
-def polynomial_kernel_core(radius, alpha=4):
+def polynomial_kernel_core(radius: Array, alpha: float = 4.0) -> Array:
 	"""Polynomial kernel core."""
 	return (4 * radius * (1 - radius)) ** alpha
 
 
-def rectangular_kernel_core(radius):
+def rectangular_kernel_core(radius: Array) -> Array:
 	"""Rectangular kernel core."""
 	return jnp.where((radius >= 1 / 4) & (radius <= 3 / 4), 1.0, 0.0)
 
 
-def gaussian_kernel_core(radius, std=0.15):
+def gaussian_kernel_core(radius: Array, std: float = 0.15) -> Array:
 	"""Gaussian kernel core."""
 	return bell(radius, 0.5, std)
 
