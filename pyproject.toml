@@ -1,6 +1,6 @@
 [project]
 name = "cax"
-version = "0.3.2"
+version = "0.3.3"
 description = "Cellular Automata Accelerated in JAX"
 authors = [{ name="Maxence Faldor", email="maxencefaldor@gmail.com" }]
 readme = "README.md"
