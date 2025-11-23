@@ -5,8 +5,6 @@ forces to update particle velocities and positions. Includes velocity damping th
 friction and periodic boundary conditions.
 """
 
-import jax.numpy as jnp
-
 from cax.core import Input
 from cax.core.update import Update
 
@@ -39,7 +37,7 @@ class ParticleLifeUpdate(Update):
 
 		"""
 		self.dt = dt
-		self.friction_factor = float(jnp.power(0.5, dt / velocity_half_life))
+		self.friction_factor = 0.5 ** (dt / velocity_half_life)
 
 	def __call__(
 		self,

@@ -41,7 +41,7 @@ class BoidsUpdate(Update):
 
 		"""
 		self.dt = dt
-		self.friction_factor = float(jnp.power(0.5, dt / velocity_half_life))
+		self.friction_factor = 0.5 ** (dt / velocity_half_life)
 
 	def __call__(
 		self, state: BoidsState, perception: BoidsPerception, input: Input | None = None
