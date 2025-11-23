@@ -43,4 +43,4 @@ class ElementaryPerceive(ConvPerceive):
 
 		kernel = jnp.concatenate([left_kernel, identity_kernel, right_kernel], axis=-1)
 		kernel = jnp.expand_dims(kernel, axis=-2)
-		self.conv.kernel.value = kernel
+		self.conv.kernel[...] = kernel
