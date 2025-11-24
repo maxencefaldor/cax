@@ -24,3 +24,4 @@ output/
 examples/1D-ARC/
 examples/data/
 site/
+.cache/

@@ -40,6 +40,6 @@ def get_emoji(emoji: str) -> Image:
 	"""
 	# Get the emoji image
 	code = hex(ord(emoji))[2:].lower()
-	url = f"https://github.com/googlefonts/noto-emoji/blob/main/png/128/emoji_u{code}.png?raw=true"
+	url = f"https://raw.githubusercontent.com/googlefonts/noto-emoji/refs/heads/main/png/128/emoji_u{code}.png"
 	image_pil = get_image_from_url(url)
 	return image_pil

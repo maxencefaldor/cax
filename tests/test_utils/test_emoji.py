@@ -63,7 +63,7 @@ def test_get_emoji(emoji: str, mock_urlopen: MagicMock, mock_pil_image: MagicMoc
 
 	result = get_emoji(emoji)
 
-	expected_url = f"https://github.com/googlefonts/noto-emoji/blob/main/png/128/emoji_u{hex(ord(emoji))[2:].lower()}.png?raw=true"
+	expected_url = f"https://raw.githubusercontent.com/googlefonts/noto-emoji/refs/heads/main/png/128/emoji_u{hex(ord(emoji))[2:].lower()}.png"
 	mock_urlopen.assert_called_once_with(expected_url)
 
 	# Check that PIL.Image.open was called correctly (it's called inside get_image_from_url)
