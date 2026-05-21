@@ -8,9 +8,9 @@ license = "MIT"
 license-files = ["LICENSE"]
 requires-python = ">=3.11"
 dependencies = [
-	"jax>=0.8.0",
-	"flax>=0.12.0",
-	"optax>=0.2.0",
+	"jax>=0.10.0",
+	"flax>=0.12.6",
+	"optax>=0.2.8",
 	"pillow>=11.1.0",
 ]
 keywords = [
@@ -26,6 +26,7 @@ classifiers = [
 	"Programming Language :: Python :: 3.11",
 	"Programming Language :: Python :: 3.12",
 	"Programming Language :: Python :: 3.13",
+	"Programming Language :: Python :: 3.14",
 	"License :: OSI Approved :: MIT License",
 	"Operating System :: OS Independent",
 ]
@@ -34,7 +35,8 @@ classifiers = [
 dev = [
 	"pytest>=8.3.0",
 	"pytest-cov>=5.0.0",
-	"ruff>=0.6.0",
+	"pytest-xdist>=3.5.0",
+	"ruff>=0.15.0",
 	"mypy>=1.11.0",
 ]
 docs = [
@@ -62,11 +64,11 @@ build-backend = "hatchling.build"
 
 [tool.ruff]
 src = ["src", "tests"]
-target-version = "py313"
+target-version = "py314"
 line-length = 100
 
 [tool.ruff.lint]
-select = ["E", "D", "F", "I", "N", "SIM", "UP", "W"]
+select = ["B", "D", "E", "F", "I", "N", "PT", "RUF", "SIM", "UP", "W"]
 ignore = [
 	"D203",  # incorrect-blank-line-before-class
 	"D206",  # docstring-tab-indentation
@@ -78,14 +80,18 @@ ignore = [
 
 [tool.ruff.lint.per-file-ignores]
 "**/*.ipynb" = [
+	"B007",  # unused-loop-control-variable
+	"B905",  # zip-without-explicit-strict
 	"F811",  # redefined-while-unused
+	"RUF005",  # collection-literal-concatenation
+	"RUF059",  # unused-unpacked-variable
 ]
 
 [tool.ruff.format]
 indent-style = "tab"
 
 [tool.mypy]
-python_version = "3.13"
+python_version = "3.14"
 disallow_untyped_defs = "True"
 disallow_any_unimported = "True"
 no_implicit_optional = "True"
@@ -93,3 +99,10 @@ check_untyped_defs = "True"
 warn_return_any = "True"
 show_error_codes = "True"
 warn_unused_ignores = "True"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+filterwarnings = [
+	"error::DeprecationWarning",
+	"error::FutureWarning",
+]

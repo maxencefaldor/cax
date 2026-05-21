@@ -12,13 +12,13 @@ from .perceive import Perceive, Perception
 from .von_neumann_perceive import VonNeumannPerceive
 
 __all__ = [
+	"ConvPerceive",
+	"MoorePerceive",
 	"Perceive",
 	"Perception",
-	"MoorePerceive",
 	"VonNeumannPerceive",
-	"ConvPerceive",
+	"grad2_kernel",
+	"grad_kernel",
 	"identity_kernel",
 	"neighbors_kernel",
-	"grad_kernel",
-	"grad2_kernel",
 ]

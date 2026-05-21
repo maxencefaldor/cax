@@ -12,13 +12,13 @@ from .rule import ParticleLeniaRuleParams
 from .update import ParticleLeniaUpdate
 
 __all__ = [
+	"GrowthParams",
+	"KernelParams",
 	"ParticleLenia",
 	"ParticleLeniaPerceive",
-	"ParticleLeniaUpdate",
-	"KernelParams",
-	"bell",
-	"peak_kernel_fn",
-	"exponential_growth_fn",
-	"GrowthParams",
 	"ParticleLeniaRuleParams",
+	"ParticleLeniaUpdate",
+	"bell",
+	"exponential_growth_fn",
+	"peak_kernel_fn",
 ]

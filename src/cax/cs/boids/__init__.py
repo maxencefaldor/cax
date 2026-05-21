@@ -8,10 +8,10 @@ from .state import BoidsState
 from .update import BoidsUpdate
 
 __all__ = [
+	"BoidPolicy",
 	"Boids",
 	"BoidsPerceive",
-	"BoidsUpdate",
-	"BoidsState",
 	"BoidsPerception",
-	"BoidPolicy",
+	"BoidsState",
+	"BoidsUpdate",
 ]

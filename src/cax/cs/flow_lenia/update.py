@@ -146,7 +146,7 @@ class FlowLeniaUpdate(Update):
 				through flow-based advection.
 
 		"""
-		SY, SX, C = state.shape
+		SY, SX, _C = state.shape
 
 		# Generate all possible displacements
 		dys = jnp.arange(-self.dd, self.dd + 1)

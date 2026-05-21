@@ -20,17 +20,17 @@ from .rule import LeniaRuleParams
 from .update import LeniaUpdate
 
 __all__ = [
+	"FreeKernelParams",
+	"GrowthParams",
+	"KernelParams",
 	"Lenia",
 	"LeniaPerceive",
+	"LeniaRuleParams",
 	"LeniaUpdate",
-	"KernelParams",
-	"FreeKernelParams",
+	"exponential_growth_fn",
 	"exponential_kernel_fn",
+	"free_kernel_fn",
 	"gaussian_kernel_fn",
 	"polynomial_kernel_fn",
 	"rectangular_kernel_fn",
-	"free_kernel_fn",
-	"GrowthParams",
-	"exponential_growth_fn",
-	"LeniaRuleParams",
 ]

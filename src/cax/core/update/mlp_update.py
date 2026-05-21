@@ -44,8 +44,8 @@ class MLPUpdate(Update):
 			rngs: rng key.
 
 		"""
-		in_features = (perception_size,) + hidden_layer_sizes
-		out_features = hidden_layer_sizes + (channel_size,)
+		in_features = (perception_size, *hidden_layer_sizes)
+		out_features = (*hidden_layer_sizes, channel_size)
 		kernel_init = [default_kernel_init for _ in hidden_layer_sizes] + [
 			initializers.zeros_init() if zeros_init else default_kernel_init
 		]
@@ -59,7 +59,7 @@ class MLPUpdate(Update):
 					rngs=rngs,
 				)
 				for in_features, out_features, kernel_init in zip(
-					in_features, out_features, kernel_init
+					in_features, out_features, kernel_init, strict=True
 				)
 			]
 		)

@@ -45,7 +45,9 @@ class Encoder(nnx.Module):
 					padding="SAME",
 					rngs=rngs,
 				)
-				for in_features, out_features in zip(self.features[:-1], self.features[1:])
+				for in_features, out_features in zip(
+					self.features[:-1], self.features[1:], strict=True
+				)
 			]
 		)
 
@@ -72,7 +74,7 @@ class Encoder(nnx.Module):
 		"""
 		for conv in self.convs:
 			x = jax.nn.relu(conv(x))
-		x = jnp.reshape(x, x.shape[:-3] + (-1,))
+		x = jnp.reshape(x, (*x.shape[:-3], -1))
 		x = jax.nn.relu(self.linear(x))
 		mean = self.mean(x)
 		logvar = self.logvar(x)
@@ -134,7 +136,9 @@ class Decoder(nnx.Module):
 					padding="SAME",
 					rngs=rngs,
 				)
-				for in_features, out_features in zip(self.features[:-1], self.features[1:])
+				for in_features, out_features in zip(
+					self.features[:-1], self.features[1:], strict=True
+				)
 			]
 		)
 

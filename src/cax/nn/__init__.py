@@ -5,12 +5,12 @@ from .pool import Pool
 from .vae import VAE, Decoder, Encoder, binary_cross_entropy_with_logits, kl_divergence, vae_loss
 
 __all__ = [
-	"Pool",
-	"Buffer",
-	"Encoder",
-	"Decoder",
 	"VAE",
-	"kl_divergence",
+	"Buffer",
+	"Decoder",
+	"Encoder",
+	"Pool",
 	"binary_cross_entropy_with_logits",
+	"kl_divergence",
 	"vae_loss",
 ]

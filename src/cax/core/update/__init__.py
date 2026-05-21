@@ -10,8 +10,8 @@ from .residual_update import ResidualUpdate
 from .update import Update
 
 __all__ = [
-	"Update",
 	"MLPUpdate",
-	"ResidualUpdate",
 	"NCAUpdate",
+	"ResidualUpdate",
+	"Update",
 ]

@@ -1,6 +1,7 @@
 """Pool module."""
 
 from functools import partial
+from typing import Self
 
 import jax
 from flax import struct
@@ -26,7 +27,7 @@ class Pool(struct.PyTreeNode):
 	data: PyTree
 
 	@classmethod
-	def create(cls, data: PyTree) -> "Pool":
+	def create(cls, data: PyTree) -> Self:
 		"""Create a new Pool instance.
 
 		Args:
@@ -40,7 +41,7 @@ class Pool(struct.PyTreeNode):
 		return cls(size=size, data=data)
 
 	@jax.jit
-	def update(self, idxs: Array, batch: PyTree) -> "Pool":
+	def update(self, idxs: Array, batch: PyTree) -> Self:
 		"""Update batch in the pool at the specified indices.
 
 		Args:

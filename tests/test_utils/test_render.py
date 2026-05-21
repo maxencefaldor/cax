@@ -15,7 +15,7 @@ from cax.utils.render import (
 
 
 @pytest.mark.parametrize(
-	"rgba_input, expected_rgb",
+	("rgba_input", "expected_rgb"),
 	[
 		# Simple case: Fully opaque red
 		(jnp.array([1.0, 0.0, 0.0, 1.0]), jnp.array([1.0, 0.0, 0.0])),
@@ -46,7 +46,7 @@ def test_rgba_to_rgb(rgba_input: Array, expected_rgb: Array) -> None:
 
 
 @pytest.mark.parametrize(
-	"rgb_input, expected_hsv",
+	("rgb_input", "expected_hsv"),
 	[
 		# Basic colors
 		(jnp.array([1.0, 0.0, 0.0]), jnp.array([0.0, 1.0, 1.0])),  # Red
@@ -86,7 +86,7 @@ def test_rgb_hsv_conversion(rgb_input: Array, expected_hsv: Array) -> None:
 
 
 @pytest.mark.parametrize(
-	"input_frame, expected_output",
+	("input_frame", "expected_output"),
 	[
 		# Values within range
 		(jnp.array([0.0, 0.5, 1.0]), jnp.array([0, 127, 255], dtype=jnp.uint8)),
@@ -109,7 +109,7 @@ def test_clip_and_uint8(input_frame: Array, expected_output: Array) -> None:
 
 
 @pytest.mark.parametrize(
-	"input_array, expected_rgb",
+	("input_array", "expected_rgb"),
 	[
 		# 1 channel -> grayscale repeated
 		(jnp.array([0.5]), jnp.array([0.5, 0.5, 0.5])),
@@ -146,7 +146,7 @@ def test_render_array_with_channels_to_rgb(input_array: Array, expected_rgb: Arr
 
 # === Test render_array_with_channels_to_rgba ===
 @pytest.mark.parametrize(
-	"input_array, expected_rgba",
+	("input_array", "expected_rgba"),
 	[
 		# 1 channel -> repeated RGBA
 		(jnp.array([0.5]), jnp.array([0.5, 0.5, 0.5, 0.5])),

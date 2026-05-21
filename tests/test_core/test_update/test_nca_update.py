@@ -70,7 +70,7 @@ def test_nca_update_call_with_input(nca_update_with_input):
 
 
 @pytest.mark.parametrize(
-	"channel_size, perception_size, hidden_layer_sizes, alive_threshold",
+	("channel_size", "perception_size", "hidden_layer_sizes", "alive_threshold"),
 	[
 		(2, 4, (16,), 0.05),
 		(4, 6, (32, 16), 0.1),

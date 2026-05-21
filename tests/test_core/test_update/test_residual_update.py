@@ -72,7 +72,7 @@ def test_residual_update_call_with_input(residual_update_with_input):
 
 
 @pytest.mark.parametrize(
-	"num_spatial_dims, channel_size, perception_size, hidden_layer_sizes, input_size",
+	("num_spatial_dims", "channel_size", "perception_size", "hidden_layer_sizes", "input_size"),
 	[
 		(1, 2, 3, (16,), 1),
 		(2, 4, 6, (32, 16), 2),

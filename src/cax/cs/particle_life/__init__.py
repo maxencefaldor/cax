@@ -9,7 +9,7 @@ from .update import ParticleLifeUpdate
 __all__ = [
 	"ParticleLife",
 	"ParticleLifePerceive",
-	"ParticleLifeUpdate",
 	"ParticleLifePerception",
 	"ParticleLifeState",
+	"ParticleLifeUpdate",
 ]
