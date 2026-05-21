@@ -45,20 +45,18 @@ class VonNeumannPerceive(Perceive):
 			The Von Neumann neighborhood for each state.
 
 		"""
-		# Init neighbors
-		neighbors = [state]
-
-		# Get Moore shifts
-		moore_shifts = product(range(-self.radius, self.radius + 1), repeat=self.num_spatial_dims)
-
 		# Get Von Neumann shifts by filtering Moore shifts with Manhattan distance <= radius
+		moore_shifts = product(range(-self.radius, self.radius + 1), repeat=self.num_spatial_dims)
 		von_neumann_shifts = [
 			shift for shift in moore_shifts if 0 < sum(map(abs, shift)) <= self.radius
 		]
 
-		# Compute the neighbors
-		for shift in von_neumann_shifts:
-			neighbors.append(
+		neighbors = [
+			state,
+			*[
 				jnp.roll(state, shift, axis=tuple(range(-self.num_spatial_dims - 1, -1)))
-			)
+				for shift in von_neumann_shifts
+			],
+		]
+
 		return jnp.concatenate(neighbors, axis=-1)

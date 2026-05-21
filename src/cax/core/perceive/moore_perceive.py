@@ -44,9 +44,6 @@ class MoorePerceive(Perceive):
 			The Moore neighborhood for each state, with the central cell first.
 
 		"""
-		# Init neighbors
-		neighbors = [state]
-
 		# Get Moore shifts
 		moore_shifts = [
 			shift
@@ -54,10 +51,12 @@ class MoorePerceive(Perceive):
 			if shift != (0,) * self.num_spatial_dims
 		]
 
-		# Compute the neighbors
-		for shift in moore_shifts:
-			neighbors.append(
+		neighbors = [
+			state,
+			*[
 				jnp.roll(state, shift, axis=tuple(range(-self.num_spatial_dims - 1, -1)))
-			)
+				for shift in moore_shifts
+			],
+		]
 
 		return jnp.concatenate(neighbors, axis=-1)

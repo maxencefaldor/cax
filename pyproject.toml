@@ -68,7 +68,7 @@ target-version = "py314"
 line-length = 100
 
 [tool.ruff.lint]
-select = ["B", "D", "E", "F", "I", "N", "PT", "RUF", "SIM", "UP", "W"]
+select = ["B", "C4", "D", "E", "F", "I", "N", "PERF", "PT", "RUF", "SIM", "UP", "W"]
 ignore = [
 	"D203",  # incorrect-blank-line-before-class
 	"D206",  # docstring-tab-indentation
