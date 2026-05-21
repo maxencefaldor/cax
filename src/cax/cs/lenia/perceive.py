@@ -92,7 +92,7 @@ class LeniaPerceive(Perceive):
 
 	def _kernel_fft(self, rule_params: LeniaRuleParams) -> Array:
 		"""Compute the kernel fft based on the kernel function and rules parameters."""
-		x = jnp.mgrid[[slice(-dim // 2, dim // 2) for dim in self.spatial_dims]] / (
+		x = jnp.mgrid[[slice(-dim // 2, dim // 2) for dim in self.spatial_dims]] / (  # ty: ignore[invalid-argument-type]
 			self.state_scale * self.R
 		)
 		d = jnp.linalg.norm(x, axis=0)

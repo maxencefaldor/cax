@@ -37,7 +37,7 @@ dev = [
 	"pytest-cov>=5.0.0",
 	"pytest-xdist>=3.5.0",
 	"ruff>=0.15.0",
-	"mypy>=1.11.0",
+	"ty>=0.0.38",
 ]
 docs = [
 	"mkdocs",
@@ -90,15 +90,18 @@ ignore = [
 [tool.ruff.format]
 indent-style = "tab"
 
-[tool.mypy]
-python_version = "3.14"
-disallow_untyped_defs = "True"
-disallow_any_unimported = "True"
-no_implicit_optional = "True"
-check_untyped_defs = "True"
-warn_return_any = "True"
-show_error_codes = "True"
-warn_unused_ignores = "True"
+[tool.ty.environment]
+python-version = "3.14"
+
+[tool.ty.src]
+include = ["src", "tests"]
+
+[tool.ty.rules]
+all = "error"
+
+[tool.ty.analysis]
+# JAX's type stubs are imprecise — e.g., jnp.roll, jnp.mgrid, nnx.Param arithmetic
+replace-imports-with-any = ["flax.**"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

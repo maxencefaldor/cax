@@ -167,8 +167,8 @@ class FlowLeniaUpdate(Update):
 
 		# Define step function for each displacement
 		def step(dy: Array, dx: Array) -> Array:
-			Xr = jnp.roll(state, (dy, dx), axis=(0, 1))  # (SY, SX, C)
-			mur = jnp.roll(mu, (dy, dx), axis=(0, 1))  # (SY, SX, 2, C)
+			Xr = jnp.roll(state, (dy, dx), axis=(0, 1))  # ty: ignore[invalid-argument-type]
+			mur = jnp.roll(mu, (dy, dx), axis=(0, 1))  # ty: ignore[invalid-argument-type]
 
 			shifts_y = [-SY, 0, SY]
 			shifts_x = [-SX, 0, SX]
