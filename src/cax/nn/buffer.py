@@ -1,6 +1,5 @@
 """Buffer module."""
 
-from functools import partial
 from typing import Self
 
 import jax
@@ -78,7 +77,7 @@ class Buffer(struct.PyTreeNode):
 
 		return self.replace(data=data, is_full=is_full, idx=new_idx)
 
-	@partial(jax.jit, static_argnames=("batch_size",))
+	@jax.jit(static_argnames=("batch_size",))
 	def sample(self, key: Array, *, batch_size: int) -> PyTree:
 		"""Sample a batch from the buffer.
 

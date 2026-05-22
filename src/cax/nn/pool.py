@@ -1,6 +1,5 @@
 """Pool module."""
 
-from functools import partial
 from typing import Self
 
 import jax
@@ -57,7 +56,7 @@ class Pool(struct.PyTreeNode):
 		)
 		return self.replace(data=data)
 
-	@partial(jax.jit, static_argnames=("batch_size",))
+	@jax.jit(static_argnames=("batch_size",))
 	def sample(self, key: Array, *, batch_size: int) -> tuple[Array, PyTree]:
 		"""Sample a batch from the pool.
 
