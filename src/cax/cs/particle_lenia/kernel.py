@@ -4,17 +4,18 @@
 """
 
 import jax.numpy as jnp
-from flax import struct
+from flax import nnx
 from jax import Array
 
 
-@struct.dataclass
-class KernelParams:
+class KernelParams(nnx.Pytree):
 	"""Kernel parameters."""
 
-	weight: Array
-	mean: Array
-	std: Array
+	def __init__(self, weight: Array, mean: Array, std: Array):
+		"""Initialize kernel parameters."""
+		self.weight = weight
+		self.mean = mean
+		self.std = std
 
 
 def bell(x: Array, mean: Array, std: Array) -> Array:

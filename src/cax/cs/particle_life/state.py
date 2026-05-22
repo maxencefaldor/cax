@@ -1,15 +1,14 @@
 """Particle Life state module."""
 
-from flax import struct
+from flax import nnx
 from jax import Array
 
-from cax.core import State
 
-
-@struct.dataclass
-class ParticleLifeState(State):
+class ParticleLifeState(nnx.Pytree):
 	"""Particle Life state class."""
 
-	class_: Array  # (num_particles,)
-	position: Array  # (num_particles, num_spatial_dims)
-	velocity: Array  # (num_particles, num_spatial_dims)
+	def __init__(self, class_: Array, position: Array, velocity: Array):
+		"""Initialize Particle Life state."""
+		self.class_ = class_  # (num_particles,)
+		self.position = position  # (num_particles, num_spatial_dims)
+		self.velocity = velocity  # (num_particles, num_spatial_dims)

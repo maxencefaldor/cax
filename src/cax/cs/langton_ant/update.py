@@ -72,8 +72,7 @@ class LangtonAntUpdate(Update):
 		new_col = (col + delta[1]) % grid_width
 		new_position = jnp.array([new_row, new_col], dtype=jnp.float32)
 
-		return LangtonAntState(
-			grid=new_grid,
-			position=new_position,
-			direction=new_direction.astype(jnp.float32),
-		)
+		state.grid = new_grid
+		state.position = new_position
+		state.direction = new_direction.astype(jnp.float32)
+		return state

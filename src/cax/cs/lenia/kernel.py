@@ -3,26 +3,28 @@
 from collections.abc import Callable
 
 import jax.numpy as jnp
-from flax import nnx, struct
+from flax import nnx
 from jax import Array
 
 
-@struct.dataclass
-class KernelParams:
+class KernelParams(nnx.Pytree):
 	"""Kernel parameters."""
 
-	r: Array
-	b: Array
+	def __init__(self, r: Array, b: Array):
+		"""Initialize kernel parameters."""
+		self.r = r
+		self.b = b
 
 
-@struct.dataclass
-class FreeKernelParams:
+class FreeKernelParams(nnx.Pytree):
 	"""Free kernel parameters from [2]."""
 
-	r: Array
-	b: Array
-	a: Array
-	w: Array
+	def __init__(self, r: Array, b: Array, a: Array, w: Array):
+		"""Initialize free kernel parameters."""
+		self.r = r
+		self.b = b
+		self.a = a
+		self.w = w
 
 
 def bell(x: Array, mean: Array | float, std: Array | float) -> Array:

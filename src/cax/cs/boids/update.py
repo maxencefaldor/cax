@@ -68,4 +68,6 @@ class BoidsUpdate(Update):
 		# Apply periodic boundary conditions
 		position = position % 1.0
 
-		return state.replace(position=position, velocity=velocity)
+		state.position = position
+		state.velocity = velocity
+		return state

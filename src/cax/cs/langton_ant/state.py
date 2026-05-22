@@ -1,13 +1,10 @@
 """Langton's Ant state module."""
 
-from flax import struct
+from flax import nnx
 from jax import Array
 
-from cax.core import State
 
-
-@struct.dataclass
-class LangtonAntState(State):
+class LangtonAntState(nnx.Pytree):
 	"""Langton's Ant state.
 
 	Combines a 2D grid of cell colors with the ant's position and heading direction.
@@ -21,6 +18,8 @@ class LangtonAntState(State):
 
 	"""
 
-	grid: Array
-	position: Array
-	direction: Array
+	def __init__(self, grid: Array, position: Array, direction: Array):
+		"""Initialize Langton's Ant state."""
+		self.grid = grid
+		self.position = position
+		self.direction = direction

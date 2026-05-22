@@ -1,11 +1,12 @@
 """Boids perception module."""
 
-from flax import struct
+from flax import nnx
 from jax import Array
 
 
-@struct.dataclass
-class BoidsPerception:
+class BoidsPerception(nnx.Pytree):
 	"""Boids perception class."""
 
-	acceleration: Array  # (num_boids, num_spatial_dims)
+	def __init__(self, acceleration: Array):
+		"""Initialize boids perception."""
+		self.acceleration = acceleration  # (num_boids, num_spatial_dims)

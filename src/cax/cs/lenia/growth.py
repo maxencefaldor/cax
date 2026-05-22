@@ -1,17 +1,18 @@
 """Lenia growth module."""
 
-from flax import struct
+from flax import nnx
 from jax import Array
 
 from .kernel import bell
 
 
-@struct.dataclass
-class GrowthParams:
+class GrowthParams(nnx.Pytree):
 	"""Growth parameters."""
 
-	mean: Array
-	std: Array
+	def __init__(self, mean: Array, std: Array):
+		"""Initialize growth parameters."""
+		self.mean = mean
+		self.std = std
 
 
 def exponential_growth_fn(u: Array, growth_params: GrowthParams) -> Array:
