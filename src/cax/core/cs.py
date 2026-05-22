@@ -10,7 +10,6 @@ evolution with JAX/Flax scanning utilities.
 
 """
 
-from functools import partial
 from typing import Any
 
 from flax import nnx
@@ -29,7 +28,14 @@ class ComplexSystem(nnx.Module):
 	Subclasses typically compose perception and update modules and may store hyperparameters
 	and learned parameters within the Flax `nnx.Module` state.
 
+	Attributes:
+		remat: If True, applies gradient checkpointing (rematerialization) to the scan body,
+			trading compute for memory during backpropagation through long step sequences.
+			Subclasses can set this as a class variable or instance attribute.
+
 	"""
+
+	remat: bool = False
 
 	def _step(self, state: State, input: Input | None = None, *, sow: bool = False) -> State:
 		"""Step the system by a single time step.
@@ -49,7 +55,7 @@ class ComplexSystem(nnx.Module):
 		"""
 		raise NotImplementedError
 
-	@partial(nnx.jit, static_argnames=("num_steps", "input_in_axis", "sow"))
+	@nnx.jit(static_argnames=("num_steps", "input_in_axis", "sow"))
 	def __call__(
 		self,
 		state: State,
@@ -65,6 +71,9 @@ class ComplexSystem(nnx.Module):
 		If `input` is time-varying, set `input_in_axis` to the axis containing the time
 		dimension so that each step receives the corresponding slice of input.
 
+		When `remat` is enabled, the scan body is wrapped with `nnx.remat` to reduce memory
+		usage during backpropagation at the cost of recomputing intermediates.
+
 		Args:
 			state: Current state.
 			input: Optional input.
@@ -76,9 +85,16 @@ class ComplexSystem(nnx.Module):
 			Final state after `num_steps` applications of `_step`.
 
 		"""
+
+		def step_fn(cs: ComplexSystem, state: State, input: Input | None) -> State:
+			return cs._step(state, input, sow=sow)
+
+		if self.remat:
+			step_fn = nnx.remat(step_fn)
+
 		state_axes = nnx.StateAxes({nnx.Intermediate: 0, ...: nnx.Carry})
 		state = nnx.scan(
-			lambda cs, state, input: cs._step(state, input, sow=sow),
+			step_fn,
 			in_axes=(state_axes, nnx.Carry, input_in_axis),
 			out_axes=nnx.Carry,
 			length=num_steps,

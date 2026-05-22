@@ -191,7 +191,7 @@ class FlowLeniaUpdate(Update):
 			return nX
 
 		# Apply step function over all displacements
-		nX = jax.vmap(step, in_axes=(0, 0))(dys, dxs)  # (num_displacements, SY, SX, C)
+		nX = nnx.vmap(step, in_axes=(0, 0))(dys, dxs)  # (num_displacements, SY, SX, C)
 		new_state = jnp.sum(nX, axis=0)  # (SY, SX, C)
 
 		return new_state
@@ -213,12 +213,12 @@ def get_sobel_kernels() -> tuple[Array, Array]:
 def sobel_x(A: Array, kx: Array) -> Array:
 	"""Compute horizontal Sobel filter per channel."""
 	# Apply convolve2d to each channel using vmap
-	return jax.vmap(lambda a: convolve2d(a, kx, mode="same"), in_axes=2, out_axes=2)(A)
+	return nnx.vmap(lambda a: convolve2d(a, kx, mode="same"), in_axes=2, out_axes=2)(A)
 
 
 def sobel_y(A: Array, ky: Array) -> Array:
 	"""Compute vertical Sobel filter per channel."""
-	return jax.vmap(lambda a: convolve2d(a, ky, mode="same"), in_axes=2, out_axes=2)(A)
+	return nnx.vmap(lambda a: convolve2d(a, ky, mode="same"), in_axes=2, out_axes=2)(A)
 
 
 def sobel(A: Array) -> Array:

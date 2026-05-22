@@ -88,7 +88,7 @@ class BoidPolicy(nnx.Module):
 	def separation(self, state: BoidsState, boid_idx: int) -> Array:
 		"""Calculate separation force for a boid."""
 		# Calculate distances to all other boids
-		distances = jax.vmap(
+		distances = nnx.vmap(
 			lambda position: self._toroidal_distance2(state.position[boid_idx], position)
 		)(state.position)
 
@@ -108,7 +108,7 @@ class BoidPolicy(nnx.Module):
 	def alignment(self, state: BoidsState, boid_idx: int) -> Array:
 		"""Calculate alignment force for a boid."""
 		# Calculate distances to all other boids
-		distances = jax.vmap(
+		distances = nnx.vmap(
 			lambda position: self._toroidal_distance2(state.position[boid_idx], position)
 		)(state.position)
 
@@ -128,7 +128,7 @@ class BoidPolicy(nnx.Module):
 	def cohesion(self, state: BoidsState, boid_idx: int) -> Array:
 		"""Calculate cohesion force for a boid."""
 		# Calculate distances to all other boids
-		distances = jax.vmap(
+		distances = nnx.vmap(
 			lambda position: self._toroidal_distance2(state.position[boid_idx], position)
 		)(state.position)
 
@@ -140,7 +140,7 @@ class BoidPolicy(nnx.Module):
 		perception_mask = ~is_self & is_in_perception
 
 		# Calculate steering force
-		position_avg = jax.vmap(
+		position_avg = nnx.vmap(
 			lambda position: self._toroidal_vector(state.position[boid_idx], position)
 		)(state.position)
 		steer = jnp.mean(position_avg, axis=0, where=perception_mask[..., None])

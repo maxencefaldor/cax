@@ -11,9 +11,7 @@ References:
 """
 
 from collections.abc import Callable
-from functools import partial
 
-import jax
 import jax.numpy as jnp
 from flax import nnx
 from jax import Array
@@ -75,7 +73,7 @@ class ParticleLenia(ComplexSystem):
 
 		return next_state
 
-	@partial(nnx.jit, static_argnames=("resolution", "extent", "particle_radius", "type"))
+	@nnx.jit(static_argnames=("resolution", "extent", "particle_radius", "type"))
 	def render(
 		self,
 		state: State,
@@ -123,7 +121,7 @@ class ParticleLenia(ComplexSystem):
 		flat_grid = grid.reshape(-1, 2)
 
 		# Vectorize the field computation over all grid points
-		flat_E, flat_U, flat_G = jax.vmap(self.perceive.compute_fields, in_axes=(None, 0))(
+		flat_E, flat_U, flat_G = nnx.vmap(self.perceive.compute_fields, in_axes=(None, 0))(
 			state, flat_grid
 		)
 

@@ -51,11 +51,12 @@ class BoidsPerceive(Perceive):
 		num_boids = state.position.shape[-2]
 
 		state_axes = nnx.StateAxes({nnx.RngState: 0, nnx.Intermediate: 0, ...: None})
-		acceleration = nnx.split_rngs(splits=num_boids)(
-			nnx.vmap(
-				lambda boid_policy, state, boid_idx: boid_policy(state, boid_idx),
-				in_axes=(state_axes, None, 0),
-			)
-		)(self.boid_policy, state, jnp.arange(num_boids))
+
+		@nnx.split_rngs(splits=num_boids)
+		@nnx.vmap(in_axes=(state_axes, None, 0))
+		def compute_acceleration(boid_policy, state, boid_idx):
+			return boid_policy(state, boid_idx)
+
+		acceleration = compute_acceleration(self.boid_policy, state, jnp.arange(num_boids))
 
 		return BoidsPerception(acceleration=acceleration)

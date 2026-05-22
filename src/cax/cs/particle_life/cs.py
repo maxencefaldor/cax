@@ -8,8 +8,6 @@ Particle Life uses distance-dependent forces that can be both attractive and rep
 enabling richer dynamics and pattern formation.
 """
 
-from functools import partial
-
 import jax.numpy as jnp
 from flax import nnx
 from jax import Array
@@ -82,7 +80,7 @@ class ParticleLife(ComplexSystem):
 
 		return next_state
 
-	@partial(nnx.jit, static_argnames=("resolution", "particle_radius"))
+	@nnx.jit(static_argnames=("resolution", "particle_radius"))
 	def render(
 		self,
 		state: ParticleLifeState,

@@ -77,7 +77,7 @@ class ParticleLeniaPerceive(Perceive):
 
 		"""
 		grad_E = jax.grad(lambda x: self.energy_field(state, x))
-		return -jax.vmap(grad_E)(state)
+		return -nnx.vmap(grad_E)(state)
 
 	def compute_fields(self, state: State, x: State) -> tuple[Array, Array, Array]:
 		"""Compute kernel, growth, and repulsion fields at a position.

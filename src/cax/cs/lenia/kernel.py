@@ -2,7 +2,6 @@
 
 from collections.abc import Callable
 
-import jax
 import jax.numpy as jnp
 from flax import nnx, struct
 from jax import Array
@@ -86,7 +85,7 @@ def free_kernel_fn(radius: Array, kernel_params: FreeKernelParams) -> Array:
 
 	return mask * jnp.sum(
 		kernel_params.b
-		* jax.vmap(bell, in_axes=(None, 0, 0), out_axes=-1)(
+		* nnx.vmap(bell, in_axes=(None, 0, 0), out_axes=-1)(
 			radius / kernel_params.r, kernel_params.a, kernel_params.w
 		),
 		axis=-1,
