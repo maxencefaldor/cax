@@ -9,7 +9,6 @@ from collections.abc import Callable
 
 import jax
 import jax.numpy as jnp
-from flax import nnx
 from jax import Array
 
 from cax.core.perceive import Perceive
@@ -98,7 +97,7 @@ class LeniaPerceive(Perceive[Array]):
 		d = jnp.linalg.norm(x, axis=0)
 
 		# Compute kernel
-		kernel = nnx.vmap(self.kernel_fn, in_axes=(None, 0), out_axes=-1)(
+		kernel = jax.vmap(self.kernel_fn, in_axes=(None, 0), out_axes=-1)(
 			d, rule_params.kernel_params
 		)
 
@@ -114,6 +113,6 @@ class LeniaPerceive(Perceive[Array]):
 
 	def _reshape_channel_to_kernel(self, rule_params: LeniaRuleParams) -> Array:
 		"""Compute array to reshape from channel to kernel."""
-		return nnx.vmap(lambda x: jax.nn.one_hot(x, num_classes=self.channel_size), out_axes=1)(
+		return jax.vmap(lambda x: jax.nn.one_hot(x, num_classes=self.channel_size), out_axes=1)(
 			rule_params.channel_source
 		)

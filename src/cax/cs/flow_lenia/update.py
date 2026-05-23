@@ -190,14 +190,14 @@ class FlowLeniaUpdate(Update[Array, Array]):
 			return nX
 
 		# Apply step function over all displacements
-		nX = nnx.vmap(step, in_axes=(0, 0))(dys, dxs)  # (num_displacements, SY, SX, C)
+		nX = jax.vmap(step, in_axes=(0, 0))(dys, dxs)  # (num_displacements, SY, SX, C)
 		new_state = jnp.sum(nX, axis=0)  # (SY, SX, C)
 
 		return new_state
 
 	def _reshape_kernel_to_channel(self, rule_params: LeniaRuleParams) -> Array:
 		"""Compute array to reshape from kernel to channel."""
-		return nnx.vmap(lambda x: jax.nn.one_hot(x, num_classes=self.channel_size))(
+		return jax.vmap(lambda x: jax.nn.one_hot(x, num_classes=self.channel_size))(
 			rule_params.channel_target
 		)
 
@@ -212,12 +212,12 @@ def get_sobel_kernels() -> tuple[Array, Array]:
 def sobel_x(A: Array, kx: Array) -> Array:
 	"""Compute horizontal Sobel filter per channel."""
 	# Apply convolve2d to each channel using vmap
-	return nnx.vmap(lambda a: convolve2d(a, kx, mode="same"), in_axes=2, out_axes=2)(A)
+	return jax.vmap(lambda a: convolve2d(a, kx, mode="same"), in_axes=2, out_axes=2)(A)
 
 
 def sobel_y(A: Array, ky: Array) -> Array:
 	"""Compute vertical Sobel filter per channel."""
-	return nnx.vmap(lambda a: convolve2d(a, ky, mode="same"), in_axes=2, out_axes=2)(A)
+	return jax.vmap(lambda a: convolve2d(a, ky, mode="same"), in_axes=2, out_axes=2)(A)
 
 
 def sobel(A: Array) -> Array:

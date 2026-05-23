@@ -99,6 +99,6 @@ class LeniaUpdate(Update[Array, Array]):
 			Array with shape `(K, C)` suitable for `jnp.dot(G_k, reshape)`.
 
 		"""
-		return nnx.vmap(lambda x: jax.nn.one_hot(x, num_classes=self.channel_size))(
+		return jax.vmap(lambda x: jax.nn.one_hot(x, num_classes=self.channel_size))(
 			rule_params.channel_target
 		)

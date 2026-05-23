@@ -27,6 +27,7 @@ nav:
   - Discrete Cellular Automata:
     - 10 - Elementary: examples/10_elementary.ipynb
     - 11 - Life: examples/11_life.ipynb
+    - 12 - Langton's Ant: examples/12_langton_ant.ipynb
   - Lenia:
     - 20 - Lenia: examples/20_lenia.ipynb
     - 21 - Flow Lenia: examples/21_flow_lenia.ipynb
@@ -41,8 +42,9 @@ nav:
     - 43 - Diffusing NCA: examples/43_diffusing_nca.ipynb
     - 44 - Self-classifying MNIST: examples/44_self_classifying_mnist.ipynb
     - 45 - Self-autoencoding MNIST: examples/45_self_autoencoding_mnist.ipynb
-    - 46 - 1D ARC NCA: examples/46_1d_arc_nca.ipynb
-    - 47 - Attention NCA: examples/47_attention_nca.ipynb
+    - 46 - Texture NCA: examples/46_texture_nca.ipynb
+    - 47 - 1D ARC NCA: examples/47_1d_arc_nca.ipynb
+    - 48 - Attention NCA: examples/48_attention_nca.ipynb
   - Other:
     - 50 - VAE: examples/50_vae.ipynb
     - 51 - RRCNN: examples/51_rrcnn.ipynb

@@ -6,8 +6,8 @@ in the Wolfram code lookup table.
 
 """
 
+import jax
 import jax.numpy as jnp
-from flax import nnx
 from jax import Array
 
 from cax.core.perceive.perceive import Perception
@@ -66,5 +66,5 @@ class ElementaryUpdate(Update[Array, Array]):
 		def update_pattern(pattern: Array, value: Array) -> Array:
 			return jnp.where(jnp.all(perception == pattern, axis=-1, keepdims=True), value, 0.0)
 
-		state = jnp.sum(nnx.vmap(update_pattern)(self.configurations, self.wolfram_code), axis=0)
+		state = jnp.sum(jax.vmap(update_pattern)(self.configurations, self.wolfram_code), axis=0)
 		return state
