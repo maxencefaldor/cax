@@ -63,11 +63,8 @@ class Sandpile(ComplexSystem[Array, Array]):
 		)
 
 	def _step(self, state: Array, input: Array | None = None, *, sow: bool = False) -> Array:
-		if input is not None:
-			state = state + input
-
 		perception = self.perceive(state)
-		next_state = self.update(state, perception)
+		next_state = self.update(state, perception, input)
 
 		if sow:
 			self.sow(nnx.Intermediate, "state", next_state)
