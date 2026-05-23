@@ -36,6 +36,8 @@ class LifePerceive(ConvPerceive):
 			rngs=rngs,
 		)
 
-		kernel = jnp.concatenate([identity_kernel(2), neighbors_kernel(2)], axis=-1)
+		kernel = jnp.concatenate(
+			[identity_kernel(num_dims=2), neighbors_kernel(num_dims=2)], axis=-1
+		)
 		kernel = jnp.expand_dims(kernel, axis=-2)
 		self.conv.kernel[...] = kernel
