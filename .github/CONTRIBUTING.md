@@ -105,7 +105,7 @@ In CAX, every complex system must inherit from the `ComplexSystem` class and imp
 - `_step`: Defines how the system evolves over one time step
 - `render`: Converts the system state into a visual representation
 
-The `_step` method can perform any computation, but it must follow this signature: take a `State` as input, an optional `Input`, and return an updated `State`. Many complex systems (like cellular automata or particle systems) follow a common pattern where individual components (e.g., cells, particles, etc.) first perceive their local neighborhood, then update their state based on this perception and current state. For this reason, we recommend structuring the `_step` method into two phases:
+The `_step` method can perform any computation, but it must follow this signature: take a state as input, an optional input, and return an updated state. Many complex systems (like cellular automata or particle systems) follow a common pattern where individual components (e.g., cells, particles, etc.) first perceive their local neighborhood, then update their state based on this perception and current state. For this reason, we recommend structuring the `_step` method into two phases:
 
 1. **Perceive**: Gather information from the neighborhood
 2. **Update**: Modify the state based on current state and perception
@@ -115,7 +115,7 @@ This structure is optional but helps organize the code clearly.
 You should design your perceive and update modules so that they are readily compatible with the core `ComplexSystem` class.
 
 ```python
-class CustomNCA(ComplexSystem):
+class CustomNCA(ComplexSystem[Array, Array]):
 	"""Custom neural cellular automaton."""
 
 	def __init__(self, *, rngs: nnx.Rngs):
@@ -131,7 +131,7 @@ class CustomNCA(ComplexSystem):
 		# CAX provides a set of update modules but you can define your own.
 		self.update = CustomUpdate(...)
 
-	def _step(self, state: State, input: Input | None = None, *, sow: bool = False) -> State:
+	def _step(self, state: Array, input: Array | None = None, *, sow: bool = False) -> Array:
 		perception = self.perceive(state)
 		next_state = self.update(state, perception, input)
 
@@ -141,7 +141,7 @@ class CustomNCA(ComplexSystem):
 		return next_state
 
 	@nnx.jit
-	def render(self, state):
+	def render(self, state: Array) -> Array:
 		"""Render state to RGB."""
 		rgba = state[..., -4:]
 		rgb = rgba_to_rgb(rgba)

@@ -4,6 +4,7 @@ This section documents the ready-to-use complex systems bundled with CAX. Each s
 
 - [Elementary Cellular Automata](cs/elementary.md)
 - [Conway's Game of Life](cs/life.md)
+- [Langton's Ant](cs/langton_ant.md)
 - [Lenia](cs/lenia.md)
 - [Flow Lenia](cs/flow_lenia.md)
 - [Particle Lenia](cs/particle_lenia.md)

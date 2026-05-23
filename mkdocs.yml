@@ -16,6 +16,7 @@ nav:
       - Overview: api/cs.md
       - Elementary: api/cs/elementary.md
       - Life: api/cs/life.md
+      - Langton's Ant: api/cs/langton_ant.md
       - Lenia: api/cs/lenia.md
       - Flow Lenia: api/cs/flow_lenia.md
       - Particle Lenia: api/cs/particle_lenia.md
