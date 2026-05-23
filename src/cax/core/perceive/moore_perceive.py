@@ -3,13 +3,14 @@
 from itertools import product
 
 import jax.numpy as jnp
+from jax import Array
 
-from cax.core import State
+from cax.types import Perception
 
-from .perceive import Perceive, Perception
+from .perceive import Perceive
 
 
-class MoorePerceive(Perceive):
+class MoorePerceive(Perceive[Array]):
 	"""Moore perceive class.
 
 	This class implements perception based on the Moore neighborhood.
@@ -28,7 +29,7 @@ class MoorePerceive(Perceive):
 		self.num_spatial_dims = num_spatial_dims
 		self.radius = radius
 
-	def __call__(self, state: State) -> Perception:
+	def __call__(self, state: Array) -> Perception:
 		"""Apply Moore perception to the input state.
 
 		The input is assumed to have shape `(..., *spatial_dims, channel_size)` where `spatial_dims`

@@ -2,11 +2,10 @@
 
 from flax import nnx
 
-from cax.core import Input, State
-from cax.core.perceive import Perception
+from cax.types import Perception
 
 
-class Update(nnx.Module):
+class Update[State, Input](nnx.Module):
 	"""Base class for update modules.
 
 	Subclasses implement transforms mapping a state and a perception (and optional input)

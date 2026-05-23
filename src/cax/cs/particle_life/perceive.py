@@ -8,13 +8,14 @@ from repulsion at short range to attraction at medium range according to the att
 import jax.numpy as jnp
 from jax import Array
 
-from cax.core import State
-from cax.core.perceive import Perceive, Perception
+from cax.core.perceive import Perceive
+from cax.types import Perception
 
 from .perception import ParticleLifePerception as ParticleLifePerception
+from .state import ParticleLifeState
 
 
-class ParticleLifePerceive(Perceive):
+class ParticleLifePerceive(Perceive[ParticleLifeState]):
 	"""Particle Life perception.
 
 	Computes interaction forces between all particle pairs based on their distances and
@@ -94,7 +95,7 @@ class ParticleLifePerceive(Perceive):
 		"""
 		return self.force_factor * jnp.sum(forces[..., None] * direction_norm, axis=-2)
 
-	def __call__(self, state: State) -> Perception:
+	def __call__(self, state: ParticleLifeState) -> Perception:
 		"""Process the current state to produce a perception.
 
 		Computes pairwise distances between all particles with periodic boundary conditions,

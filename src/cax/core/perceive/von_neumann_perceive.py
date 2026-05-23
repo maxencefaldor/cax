@@ -3,13 +3,14 @@
 from itertools import product
 
 import jax.numpy as jnp
+from jax import Array
 
-from cax.core import State
+from cax.types import Perception
 
-from .perceive import Perceive, Perception
+from .perceive import Perceive
 
 
-class VonNeumannPerceive(Perceive):
+class VonNeumannPerceive(Perceive[Array]):
 	"""Von Neumann perceive class.
 
 	This class implements perception based on the Von Neumann neighborhood.
@@ -28,7 +29,7 @@ class VonNeumannPerceive(Perceive):
 		self.num_spatial_dims = num_spatial_dims
 		self.radius = radius
 
-	def __call__(self, state: State) -> Perception:
+	def __call__(self, state: Array) -> Perception:
 		"""Apply Von Neumann perception to the state.
 
 		The input is assumed to have shape `(..., *spatial_dims, channel_size)` where `spatial_dims`

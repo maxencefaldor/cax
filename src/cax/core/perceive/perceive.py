@@ -2,13 +2,10 @@
 
 from flax import nnx
 
-from cax.core import State
-from cax.types import PyTree
-
-Perception = PyTree
+from cax.types import Perception
 
 
-class Perceive(nnx.Module):
+class Perceive[State](nnx.Module):
 	"""Base class for perception modules.
 
 	Subclasses implement neighborhood gathering or convolutional transforms that map a state

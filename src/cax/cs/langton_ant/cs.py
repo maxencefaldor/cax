@@ -11,7 +11,7 @@ import jax.numpy as jnp
 from flax import nnx
 from jax import Array
 
-from cax.core import ComplexSystem, Input
+from cax.core import ComplexSystem
 from cax.utils import clip_and_uint8, hsv_to_rgb
 
 from .perceive import LangtonAntPerceive
@@ -21,7 +21,7 @@ from .update import LangtonAntUpdate
 TURN_CHAR_TO_INT = {"N": 0, "R": 1, "U": 2, "L": 3}
 
 
-class LangtonAnt(ComplexSystem):
+class LangtonAnt(ComplexSystem[LangtonAntState, Array]):
 	"""Langton's Ant and multi-color generalizations.
 
 	A two-dimensional cellular automaton with a mobile agent that traverses a grid of colored
@@ -49,7 +49,7 @@ class LangtonAnt(ComplexSystem):
 		self.update = LangtonAntUpdate(turns=turns)
 
 	def _step(
-		self, state: LangtonAntState, input: Input | None = None, *, sow: bool = False
+		self, state: LangtonAntState, input: Array | None = None, *, sow: bool = False
 	) -> LangtonAntState:
 		perception = self.perceive(state)
 		next_state = self.update(state, perception, input)

@@ -16,7 +16,7 @@ import jax.numpy as jnp
 from flax import nnx
 from jax import Array
 
-from cax.core import ComplexSystem, Input, State
+from cax.core import ComplexSystem
 from cax.utils.render import clip_and_uint8
 
 from ..lenia.growth import exponential_growth_fn
@@ -26,7 +26,7 @@ from .rule import ParticleLeniaRuleParams
 from .update import ParticleLeniaUpdate
 
 
-class ParticleLenia(ComplexSystem):
+class ParticleLenia(ComplexSystem[Array, Array]):
 	"""Particle Lenia class."""
 
 	def __init__(
@@ -64,7 +64,7 @@ class ParticleLenia(ComplexSystem):
 			T=T,
 		)
 
-	def _step(self, state: State, input: Input | None = None, *, sow: bool = False) -> State:
+	def _step(self, state: Array, input: Array | None = None, *, sow: bool = False) -> Array:
 		perception = self.perceive(state)
 		next_state = self.update(state, perception, input)
 
@@ -76,7 +76,7 @@ class ParticleLenia(ComplexSystem):
 	@nnx.jit(static_argnames=("resolution", "extent", "particle_radius", "type"))
 	def render(
 		self,
-		state: State,
+		state: Array,
 		*,
 		resolution: int = 512,
 		extent: float = 15.0,

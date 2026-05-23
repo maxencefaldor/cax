@@ -6,12 +6,13 @@ of the cell at the ant's current position, which determines the turn direction.
 
 from jax import Array
 
-from cax.core.perceive import Perceive, Perception
+from cax.core.perceive import Perceive
+from cax.types import Perception
 
 from .state import LangtonAntState
 
 
-class LangtonAntPerceive(Perceive):
+class LangtonAntPerceive(Perceive[LangtonAntState]):
 	"""Langton's Ant perception.
 
 	Reads the cell color at the ant's current grid position. The perceived color is used

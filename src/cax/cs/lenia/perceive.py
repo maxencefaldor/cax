@@ -12,14 +12,14 @@ import jax.numpy as jnp
 from flax import nnx
 from jax import Array
 
-from cax.core import State
-from cax.core.perceive import Perceive, Perception
+from cax.core.perceive import Perceive
+from cax.types import Perception
 
 from .kernel import gaussian_kernel_fn
 from .rule import LeniaRuleParams
 
 
-class LeniaPerceive(Perceive):
+class LeniaPerceive(Perceive[Array]):
 	"""Lenia perception.
 
 	Computes the potential field for each kernel by convolving the state with parameterized
@@ -63,7 +63,7 @@ class LeniaPerceive(Perceive):
 		self.kernel_fn = kernel_fn
 		self.kernel_fft = self._kernel_fft(rule_params)
 
-	def __call__(self, state: State) -> Perception:
+	def __call__(self, state: Array) -> Perception:
 		"""Process the current state to produce a perception.
 
 		Convolves the state with parameterized kernels using FFT to compute the neighborhood

@@ -15,7 +15,7 @@ from .perception import BoidsPerception
 from .state import BoidsState
 
 
-class BoidsPerceive(Perceive):
+class BoidsPerceive(Perceive[BoidsState]):
 	"""Boids perception.
 
 	Computes steering accelerations for each boid by applying the boid policy. The policy

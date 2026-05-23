@@ -11,7 +11,7 @@ from collections.abc import Callable
 from flax import nnx
 from jax import Array
 
-from cax.core import ComplexSystem, Input, State
+from cax.core import ComplexSystem
 from cax.utils import clip_and_uint8, render_array_with_channels_to_rgb
 
 from .metrics import metrics_fn
@@ -20,7 +20,7 @@ from .rule import LeniaRuleParams
 from .update import LeniaUpdate, exponential_growth_fn
 
 
-class Lenia(ComplexSystem):
+class Lenia(ComplexSystem[Array, Array]):
 	"""Lenia class."""
 
 	def __init__(
@@ -68,7 +68,7 @@ class Lenia(ComplexSystem):
 			rule_params=rule_params,
 		)
 
-	def _step(self, state: State, input: Input | None = None, *, sow: bool = False) -> State:
+	def _step(self, state: Array, input: Array | None = None, *, sow: bool = False) -> Array:
 		perception = self.perceive(state)
 		next_state = self.update(state, perception, input)
 
@@ -80,7 +80,7 @@ class Lenia(ComplexSystem):
 		return next_state
 
 	@nnx.jit
-	def render(self, state: State) -> Array:
+	def render(self, state: Array) -> Array:
 		"""Render state to RGB image.
 
 		Converts the multi-channel Lenia state to an RGB visualization. Channels are

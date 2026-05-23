@@ -8,16 +8,15 @@ forward one step.
 import jax.numpy as jnp
 from jax import Array
 
-from cax.core import Input
-from cax.core.perceive import Perception
 from cax.core.update import Update
+from cax.types import Perception
 
 from .state import LangtonAntState
 
 DIRECTION_VECTORS = jnp.array([[-1, 0], [0, 1], [1, 0], [0, -1]], dtype=jnp.int32)
 
 
-class LangtonAntUpdate(Update):
+class LangtonAntUpdate(Update[LangtonAntState, Array]):
 	"""Langton's Ant update rule.
 
 	Applies the generalized Langton's Ant rule: the ant turns according to the current cell
@@ -38,7 +37,7 @@ class LangtonAntUpdate(Update):
 		self.turns = turns
 
 	def __call__(
-		self, state: LangtonAntState, perception: Perception, input: Input | None = None
+		self, state: LangtonAntState, perception: Perception, input: Array | None = None
 	) -> LangtonAntState:
 		"""Process the current state and perception to produce the next state.
 

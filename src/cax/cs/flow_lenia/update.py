@@ -14,15 +14,14 @@ from flax import nnx
 from jax import Array
 from jax.scipy.signal import convolve2d
 
-from cax.core import Input, State
-from cax.core.perceive import Perception
 from cax.core.update import Update
+from cax.types import Perception
 
 from ..lenia.growth import exponential_growth_fn
 from ..lenia.rule import LeniaRuleParams
 
 
-class FlowLeniaUpdate(Update):
+class FlowLeniaUpdate(Update[Array, Array]):
 	"""Flow Lenia update rule.
 
 	Extends the standard Lenia update with flow-based advection. Computes affinity fields
@@ -81,7 +80,7 @@ class FlowLeniaUpdate(Update):
 		self.dd = dd
 		self.sigma = sigma
 
-	def __call__(self, state: State, perception: Perception, input: Input | None = None) -> State:
+	def __call__(self, state: Array, perception: Perception, input: Array | None = None) -> Array:
 		"""Process the current state, perception, and input to produce a new state.
 
 		Computes affinity fields from perception, derives flow fields from affinity and
@@ -127,7 +126,7 @@ class FlowLeniaUpdate(Update):
 
 		return state
 
-	def apply_reintegration_tracking(self, state: State, F: Array) -> State:
+	def apply_reintegration_tracking(self, state: Array, F: Array) -> Array:
 		"""Apply reintegration tracking to transport matter according to flow fields.
 
 		Implements the reintegration tracking algorithm that transports matter from each

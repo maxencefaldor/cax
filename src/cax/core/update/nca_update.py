@@ -6,8 +6,7 @@ from functools import partial
 from flax import nnx
 from jax import Array
 
-from cax.core import Input, State
-from cax.core.perceive import Perception
+from cax.types import Perception
 
 from .residual_update import ResidualUpdate
 
@@ -61,7 +60,7 @@ class NCAUpdate(ResidualUpdate):
 		self.pool = partial(nnx.max_pool, window_shape=kernel_size, padding="SAME")
 		self.alive_threshold = alive_threshold
 
-	def __call__(self, state: State, perception: Perception, input: Input | None = None) -> State:
+	def __call__(self, state: Array, perception: Perception, input: Array | None = None) -> Array:
 		"""Process the current state, perception, and input to produce a new state.
 
 		Args:
@@ -78,7 +77,7 @@ class NCAUpdate(ResidualUpdate):
 		alive_mask &= self.get_alive_mask(state)
 		return alive_mask * state
 
-	def get_alive_mask(self, state: State) -> Array:
+	def get_alive_mask(self, state: Array) -> Array:
 		"""Generate a mask of alive cells based on the current state.
 
 		Args:
@@ -93,7 +92,7 @@ class NCAUpdate(ResidualUpdate):
 		return alive_mask
 
 
-def state_to_alive(state: State) -> State:
+def state_to_alive(state: Array) -> Array:
 	"""Extract the 'alive' component from the state.
 
 	Args:

@@ -13,15 +13,15 @@ import jax.numpy as jnp
 from flax import nnx
 from jax import Array
 
-from cax.core import State
-from cax.core.perceive import Perceive, Perception
+from cax.core.perceive import Perceive
+from cax.types import Perception
 
 from ..lenia.growth import exponential_growth_fn
 from .kernel import peak_kernel_fn
 from .rule import ParticleLeniaRuleParams
 
 
-class ParticleLeniaPerceive(Perceive):
+class ParticleLeniaPerceive(Perceive[Array]):
 	"""Particle Lenia perception.
 
 	Computes forces on particles by taking the gradient of an energy field. The energy
@@ -60,7 +60,7 @@ class ParticleLeniaPerceive(Perceive):
 
 		self.c_rep = rule_params.c_rep
 
-	def __call__(self, state: State) -> Perception:
+	def __call__(self, state: Array) -> Perception:
 		"""Process the current state to produce a perception.
 
 		Computes the force on each particle by taking the negative gradient of the energy
@@ -79,7 +79,7 @@ class ParticleLeniaPerceive(Perceive):
 		grad_E = jax.grad(lambda x: self.energy_field(state, x))
 		return -nnx.vmap(grad_E)(state)
 
-	def compute_fields(self, state: State, x: State) -> tuple[Array, Array, Array]:
+	def compute_fields(self, state: Array, x: Array) -> tuple[Array, Array, Array]:
 		"""Compute kernel, growth, and repulsion fields at a position.
 
 		Evaluates the kernel field (neighborhood density), growth field (desirability),
@@ -109,7 +109,7 @@ class ParticleLeniaPerceive(Perceive):
 		# Return energy field
 		return U, G, R
 
-	def energy_field(self, state: State, x: State) -> Array:
+	def energy_field(self, state: Array, x: Array) -> Array:
 		"""Compute energy field at a position.
 
 		The energy field combines repulsion (positive, increases near particles) and

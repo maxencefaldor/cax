@@ -5,14 +5,15 @@ forces to update particle velocities and positions. Includes velocity damping th
 friction and periodic boundary conditions.
 """
 
-from cax.core import Input
+from jax import Array
+
 from cax.core.update import Update
 
 from .perception import ParticleLifePerception
 from .state import ParticleLifeState
 
 
-class ParticleLifeUpdate(Update):
+class ParticleLifeUpdate(Update[ParticleLifeState, Array]):
 	"""Particle Life update rule.
 
 	Updates particle positions and velocities by integrating interaction forces. Applies
@@ -43,7 +44,7 @@ class ParticleLifeUpdate(Update):
 		self,
 		state: ParticleLifeState,
 		perception: ParticleLifePerception,
-		input: Input | None = None,
+		input: Array | None = None,
 	) -> ParticleLifeState:
 		"""Process the current state, perception, and input to produce a new state.
 

@@ -10,14 +10,14 @@ import jax.numpy as jnp
 from flax import nnx
 from jax import Array
 
-from cax.core import ComplexSystem, Input, State
+from cax.core import ComplexSystem
 from cax.utils import clip_and_uint8
 
 from .perceive import LifePerceive
 from .update import LifeUpdate
 
 
-class Life(ComplexSystem):
+class Life(ComplexSystem[Array, Array]):
 	"""Conway's Game of Life and Life-like cellular automata.
 
 	A two-dimensional cellular automaton where each cell evolves based on its current
@@ -47,7 +47,7 @@ class Life(ComplexSystem):
 		self.perceive = LifePerceive(rngs=rngs)
 		self.update = LifeUpdate(birth=birth, survival=survival)
 
-	def _step(self, state: State, input: Input | None = None, *, sow: bool = False) -> State:
+	def _step(self, state: Array, input: Array | None = None, *, sow: bool = False) -> Array:
 		perception = self.perceive(state)
 		next_state = self.update(state, perception, input)
 
@@ -107,7 +107,7 @@ class Life(ComplexSystem):
 		return birth, survival
 
 	@nnx.jit
-	def render(self, state: State) -> Array:
+	def render(self, state: Array) -> Array:
 		"""Render state to RGB image.
 
 		Converts the Life state to an RGB visualization by replicating the single-channel

@@ -6,14 +6,14 @@ import jax.numpy as jnp
 from flax import nnx
 from flax.nnx.nn import initializers
 from flax.nnx.nn.linear import default_kernel_init
+from jax import Array
 
-from cax.core import Input, State
-from cax.core.perceive import Perception
+from cax.types import Perception
 
 from .update import Update
 
 
-class MLPUpdate(Update):
+class MLPUpdate(Update[Array, Array]):
 	"""MLP update class.
 
 	Maps a perception (and optional input) to the next state using pointwise convolutional
@@ -65,7 +65,7 @@ class MLPUpdate(Update):
 		)
 		self.activation_fn = activation_fn
 
-	def __call__(self, state: State, perception: Perception, input: Input | None = None) -> State:
+	def __call__(self, state: Array, perception: Perception, input: Array | None = None) -> Array:
 		"""Process the current state, perception, and input to produce a new state.
 
 		If input is provided, it is concatenated to the perception along the channel axis

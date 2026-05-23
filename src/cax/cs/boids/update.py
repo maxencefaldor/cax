@@ -7,15 +7,15 @@ and periodic boundary conditions.
 """
 
 import jax.numpy as jnp
+from jax import Array
 
-from cax.core import Input
 from cax.core.update import Update
 
 from .perception import BoidsPerception
 from .state import BoidsState
 
 
-class BoidsUpdate(Update):
+class BoidsUpdate(Update[BoidsState, Array]):
 	"""Boids update rule.
 
 	Updates boid positions and velocities by integrating steering accelerations. Applies
@@ -44,7 +44,7 @@ class BoidsUpdate(Update):
 		self.friction_factor = 0.5 ** (dt / velocity_half_life)
 
 	def __call__(
-		self, state: BoidsState, perception: BoidsPerception, input: Input | None = None
+		self, state: BoidsState, perception: BoidsPerception, input: Array | None = None
 	) -> BoidsState:
 		"""Process the current state, perception, and input to produce a new state.
 

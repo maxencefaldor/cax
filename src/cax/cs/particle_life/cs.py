@@ -12,7 +12,7 @@ import jax.numpy as jnp
 from flax import nnx
 from jax import Array
 
-from cax.core import ComplexSystem, Input
+from cax.core import ComplexSystem
 from cax.utils.render import clip_and_uint8, hsv_to_rgb
 
 from .perceive import ParticleLifePerceive
@@ -20,7 +20,7 @@ from .state import ParticleLifeState
 from .update import ParticleLifeUpdate
 
 
-class ParticleLife(ComplexSystem):
+class ParticleLife(ComplexSystem[ParticleLifeState, Array]):
 	"""Particle Life class."""
 
 	def __init__(
@@ -70,7 +70,7 @@ class ParticleLife(ComplexSystem):
 		)
 
 	def _step(
-		self, state: ParticleLifeState, input: Input | None = None, *, sow: bool = False
+		self, state: ParticleLifeState, input: Array | None = None, *, sow: bool = False
 	) -> ParticleLifeState:
 		perception = self.perceive(state)
 		next_state = self.update(state, perception, input)

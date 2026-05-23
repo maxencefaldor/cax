@@ -10,12 +10,11 @@ import jax.numpy as jnp
 from flax import nnx
 from jax import Array
 
-from cax.core import Input, State
-from cax.core.perceive import Perception
 from cax.core.update import Update
+from cax.types import Perception
 
 
-class ElementaryUpdate(Update):
+class ElementaryUpdate(Update[Array, Array]):
 	"""Elementary Cellular Automata update rule.
 
 	Applies the Wolfram rule by matching each cell's three-cell neighborhood against all
@@ -47,7 +46,7 @@ class ElementaryUpdate(Update):
 		)
 		self.wolfram_code = wolfram_code
 
-	def __call__(self, state: State, perception: Perception, input: Input | None = None) -> State:
+	def __call__(self, state: Array, perception: Perception, input: Array | None = None) -> Array:
 		"""Process the current state, perception, and input to produce a new state.
 
 		Matches each cell's three-cell neighborhood configuration against the Wolfram code

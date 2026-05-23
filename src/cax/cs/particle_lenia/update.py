@@ -4,12 +4,13 @@ This module implements the update rule for Particle Lenia, which integrates forc
 update particle positions with temporal resolution T.
 """
 
-from cax.core import Input, State
-from cax.core.perceive import Perception
+from jax import Array
+
 from cax.core.update import Update
+from cax.types import Perception
 
 
-class ParticleLeniaUpdate(Update):
+class ParticleLeniaUpdate(Update[Array, Array]):
 	"""Particle Lenia update rule.
 
 	Updates particle positions by integrating forces derived from energy field gradients.
@@ -31,7 +32,7 @@ class ParticleLeniaUpdate(Update):
 		"""
 		self.T = T
 
-	def __call__(self, state: State, perception: Perception, input: Input | None = None) -> State:
+	def __call__(self, state: Array, perception: Perception, input: Array | None = None) -> Array:
 		"""Process the current state, perception, and input to produce a new state.
 
 		Integrates forces to update particle positions with temporal resolution T. Particles

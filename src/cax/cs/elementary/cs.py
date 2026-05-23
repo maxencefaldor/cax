@@ -10,14 +10,14 @@ import jax.numpy as jnp
 from flax import nnx
 from jax import Array
 
-from cax.core import ComplexSystem, Input, State
+from cax.core import ComplexSystem
 from cax.utils import clip_and_uint8
 
 from .perceive import ElementaryPerceive
 from .update import ElementaryUpdate
 
 
-class Elementary(ComplexSystem):
+class Elementary(ComplexSystem[Array, Array]):
 	"""Elementary Cellular Automata class.
 
 	A one-dimensional cellular automaton where each cell evolves based on its current state and the
@@ -43,7 +43,7 @@ class Elementary(ComplexSystem):
 		self.perceive = ElementaryPerceive(rngs=rngs)
 		self.update = ElementaryUpdate(wolfram_code=wolfram_code)
 
-	def _step(self, state: State, input: Input | None = None, *, sow: bool = False) -> State:
+	def _step(self, state: Array, input: Array | None = None, *, sow: bool = False) -> Array:
 		perception = self.perceive(state)
 		next_state = self.update(state, perception, input)
 
@@ -71,7 +71,7 @@ class Elementary(ComplexSystem):
 		return ((rule_number >> 7 - jnp.arange(8)) & 1).astype(jnp.float32)
 
 	@nnx.jit
-	def render(self, state: State) -> Array:
+	def render(self, state: Array) -> Array:
 		"""Render state to RGB image.
 
 		Converts the one-dimensional cellular automaton state to an RGB visualization

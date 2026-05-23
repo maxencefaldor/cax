@@ -12,15 +12,14 @@ import jax.numpy as jnp
 from flax import nnx
 from jax import Array
 
-from cax.core import Input, State
-from cax.core.perceive import Perception
 from cax.core.update import Update
+from cax.types import Perception
 
 from .growth import exponential_growth_fn
 from .rule import LeniaRuleParams
 
 
-class LeniaUpdate(Update):
+class LeniaUpdate(Update[Array, Array]):
 	"""Lenia update rule.
 
 	Applies the growth mapping to potential fields to determine how much each cell should
@@ -58,7 +57,7 @@ class LeniaUpdate(Update):
 		self.growth_fn = growth_fn
 		self.growth_params = nnx.data(rule_params.growth_params)
 
-	def __call__(self, state: State, perception: Perception, input: Input | None = None) -> State:
+	def __call__(self, state: Array, perception: Perception, input: Array | None = None) -> Array:
 		"""Process the current state, perception, and input to produce a new state.
 
 		Computes growth values from potential fields using the growth function, aggregates

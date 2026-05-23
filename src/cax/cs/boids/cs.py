@@ -10,7 +10,7 @@ import jax.numpy as jnp
 from flax import nnx
 from jax import Array
 
-from cax.core import ComplexSystem, Input
+from cax.core import ComplexSystem
 from cax.utils import clip_and_uint8
 
 from .perceive import BoidsPerceive
@@ -19,7 +19,7 @@ from .state import BoidsState
 from .update import BoidsUpdate
 
 
-class Boids(ComplexSystem):
+class Boids(ComplexSystem[BoidsState, Array]):
 	"""Boids class."""
 
 	def __init__(
@@ -49,7 +49,7 @@ class Boids(ComplexSystem):
 		)
 
 	def _step(
-		self, state: BoidsState, input: Input | None = None, *, sow: bool = False
+		self, state: BoidsState, input: Array | None = None, *, sow: bool = False
 	) -> BoidsState:
 		perception = self.perceive(state)
 		next_state = self.update(state, perception, input)

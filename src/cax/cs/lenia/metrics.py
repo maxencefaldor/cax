@@ -10,13 +10,13 @@ for analyzing the state and dynamics of the Lenia system.
 from typing import Any
 
 import jax.numpy as jnp
+from jax import Array
 
-from cax.core import State
 from cax.types import PyTree
 
 
 def metrics_fn(
-	state: State,
+	state: Array,
 	*,
 	R: int,
 	active_threshold: float = 0.1,
