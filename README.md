@@ -27,7 +27,7 @@ CAX supports discrete and continuous systems, including neural cellular automata
 
 ### Rich 🎨
 
-CAX provides a comprehensive collection of 17+ ready-to-use systems. From simulating one-dimensional [elementary cellular automata](examples/10_elementary.ipynb) to training three-dimensional [self-autoencoding neural cellular automata](examples/45_self_autoencoding_mnist.ipynb), or even creating beautiful [Lenia](examples/20_lenia.ipynb) simulations, CAX provides a versatile platform for exploring the rich world of self-organizing systems.
+CAX provides a comprehensive collection of 19+ ready-to-use systems. From simulating one-dimensional [elementary cellular automata](examples/10_elementary.ipynb) to training three-dimensional [self-autoencoding neural cellular automata](examples/45_self_autoencoding_mnist.ipynb), or even creating beautiful [Lenia](examples/20_lenia.ipynb) simulations, CAX provides a versatile platform for exploring the rich world of self-organizing systems.
 
 ### Flexible 🧩
 
@@ -48,9 +48,11 @@ The library is thoroughly tested and [documented](https://maxencefaldor.github.i
 | Elementary Cellular Automata | [Wolfram (2002)](https://www.wolframscience.com/nks/) | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/maxencefaldor/cax/blob/main/examples/10_elementary.ipynb) |
 | Conway's Game of Life | [Gardner (1970)](https://web.stanford.edu/class/sts145/Library/life.pdf) | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/maxencefaldor/cax/blob/main/examples/11_life.ipynb) |
 | Langton's Ant | [Langton (1986)](https://doi.org/10.1016/0167-2789(86)90237-X) | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/maxencefaldor/cax/blob/main/examples/12_langton_ant.ipynb) |
+| Abelian Sandpile | [Bak et al. (1987)](https://journals.aps.org/prl/abstract/10.1103/PhysRevLett.59.381) | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/maxencefaldor/cax/blob/main/examples/13_sandpile.ipynb) |
 | Lenia | [Chan (2020)](https://arxiv.org/abs/2005.03742) | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/maxencefaldor/cax/blob/main/examples/20_lenia.ipynb) |
 | Flow Lenia | [Plantec et al. (2022)](https://arxiv.org/abs/2212.07906) | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/maxencefaldor/cax/blob/main/examples/21_flow_lenia.ipynb) |
 | Particle Lenia | [Mordvintsev et al. (2022)](https://google-research.github.io/self-organising-systems/particle-lenia/) | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/maxencefaldor/cax/blob/main/examples/22_particle_lenia.ipynb) |
+| Reaction-Diffusion (Gray-Scott) | [Gray & Scott (1984)](https://doi.org/10.1016/0009-2509(84)87017-7) | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/maxencefaldor/cax/blob/main/examples/23_reaction_diffusion.ipynb) |
 | Particle Life | [Mohr (2018)](https://particle-life.com/) | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/maxencefaldor/cax/blob/main/examples/30_particle_life.ipynb) |
 | Boids | [Reynolds (1987)](https://www.red3d.com/cwr/boids/) | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/maxencefaldor/cax/blob/main/examples/31_boids.ipynb) |
 | Growing Neural Cellular Automata | [Mordvintsev et al. (2020)](https://distill.pub/2020/growing-ca/) |[![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/maxencefaldor/cax/blob/main/examples/40_growing_nca.ipynb) |

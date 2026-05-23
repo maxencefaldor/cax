@@ -17,9 +17,11 @@ nav:
       - Elementary: api/cs/elementary.md
       - Life: api/cs/life.md
       - Langton's Ant: api/cs/langton_ant.md
+      - Sandpile: api/cs/sandpile.md
       - Lenia: api/cs/lenia.md
       - Flow Lenia: api/cs/flow_lenia.md
       - Particle Lenia: api/cs/particle_lenia.md
+      - Reaction-Diffusion: api/cs/reaction_diffusion.md
       - Particle Life: api/cs/particle_life.md
       - Boids: api/cs/boids.md
     - Neural Network Utils: api/nn.md
@@ -29,10 +31,12 @@ nav:
     - 10 - Elementary: examples/10_elementary.ipynb
     - 11 - Life: examples/11_life.ipynb
     - 12 - Langton's Ant: examples/12_langton_ant.ipynb
+    - 13 - Sandpile: examples/13_sandpile.ipynb
   - Lenia:
     - 20 - Lenia: examples/20_lenia.ipynb
     - 21 - Flow Lenia: examples/21_flow_lenia.ipynb
     - 22 - Particle Lenia: examples/22_particle_lenia.ipynb
+    - 23 - Reaction-Diffusion: examples/23_reaction_diffusion.ipynb
   - Particle Systems:
     - 30 - Particle Life: examples/30_particle_life.ipynb
     - 31 - Boids: examples/31_boids.ipynb
