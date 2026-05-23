@@ -54,10 +54,12 @@ class Sandpile(ComplexSystem[Array, Array]):
 		self.num_spatial_dims = num_spatial_dims
 		self.threshold = threshold if threshold is not None else 2 * num_spatial_dims
 		self.perceive = SandpilePerceive(
-			num_spatial_dims=num_spatial_dims, padding=padding,
+			num_spatial_dims=num_spatial_dims,
+			padding=padding,
 		)
 		self.update = SandpileUpdate(
-			num_spatial_dims=num_spatial_dims, threshold=self.threshold,
+			num_spatial_dims=num_spatial_dims,
+			threshold=self.threshold,
 		)
 
 	def _step(self, state: Array, input: Array | None = None, *, sow: bool = False) -> Array:
@@ -91,15 +93,18 @@ class Sandpile(ComplexSystem[Array, Array]):
 		chips = state[..., 0]
 
 		r = jnp.where(
-			chips == 0, 0.1,
+			chips == 0,
+			0.1,
 			jnp.where(chips == 1, 0.0, jnp.where(chips == 2, 0.9, jnp.where(chips == 3, 1.0, 0.8))),
 		)
 		g = jnp.where(
-			chips == 0, 0.1,
+			chips == 0,
+			0.1,
 			jnp.where(chips == 1, 0.7, jnp.where(chips == 2, 0.9, jnp.where(chips == 3, 0.5, 0.0))),
 		)
 		b = jnp.where(
-			chips == 0, 0.4,
+			chips == 0,
+			0.4,
 			jnp.where(chips == 1, 0.8, jnp.where(chips == 2, 0.1, jnp.where(chips == 3, 0.0, 0.0))),
 		)
 
