@@ -15,10 +15,8 @@ from typing import Any
 from flax import nnx
 from jax import Array
 
-from cax.types import Input, State
 
-
-class ComplexSystem(nnx.Module):
+class ComplexSystem[State, Input](nnx.Module):
 	"""Base class for complex systems.
 
 	This class specifies the minimal interface for systems that evolve a `State` over time.
