@@ -12,18 +12,18 @@ from jax import Array
 class KernelParams(nnx.Pytree):
 	"""Kernel parameters."""
 
-	r: Array
-	b: Array
+	r: Array = nnx.data()
+	b: Array = nnx.data()
 
 
 @nnx.dataclass
 class FreeKernelParams(nnx.Pytree):
 	"""Free kernel parameters from [2]."""
 
-	r: Array
-	b: Array
-	a: Array
-	w: Array
+	r: Array = nnx.data()
+	b: Array = nnx.data()
+	a: Array = nnx.data()
+	w: Array = nnx.data()
 
 
 def bell(x: Array, mean: Array | float, std: Array | float) -> Array:

@@ -11,5 +11,5 @@ class ParticleLeniaRuleParams(nnx.Pytree):
 	"""Particle Lenia rule parameters class."""
 
 	c_rep: float = nnx.static()
-	kernel_params: KernelParams
-	growth_params: GrowthParams
+	kernel_params: KernelParams = nnx.data()
+	growth_params: GrowthParams = nnx.data()

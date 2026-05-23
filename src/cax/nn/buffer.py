@@ -26,8 +26,8 @@ class Buffer(nnx.Pytree):
 
 	size: int = nnx.static()
 	data: Any = nnx.data()
-	is_full: Array
-	idx: Array
+	is_full: Array = nnx.data()
+	idx: Array = nnx.data()
 
 	@classmethod
 	def create(cls, size: int, datum: Any) -> Self:

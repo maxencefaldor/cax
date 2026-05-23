@@ -8,5 +8,5 @@ from jax import Array
 class BoidsState(nnx.Pytree):
 	"""Boids state class."""
 
-	position: Array
-	velocity: Array
+	position: Array = nnx.data()
+	velocity: Array = nnx.data()

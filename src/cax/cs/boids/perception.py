@@ -8,4 +8,4 @@ from jax import Array
 class BoidsPerception(nnx.Pytree):
 	"""Boids perception class."""
 
-	acceleration: Array
+	acceleration: Array = nnx.data()

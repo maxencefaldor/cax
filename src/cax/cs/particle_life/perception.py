@@ -8,4 +8,4 @@ from jax import Array
 class ParticleLifePerception(nnx.Pytree):
 	"""Particle Life perception class."""
 
-	acceleration: Array
+	acceleration: Array = nnx.data()

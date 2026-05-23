@@ -19,6 +19,6 @@ class LangtonAntState(nnx.Pytree):
 
 	"""
 
-	grid: Array
-	position: Array
-	direction: Array
+	grid: Array = nnx.data()
+	position: Array = nnx.data()
+	direction: Array = nnx.data()

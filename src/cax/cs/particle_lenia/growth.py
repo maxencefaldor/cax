@@ -8,5 +8,5 @@ from jax import Array
 class GrowthParams(nnx.Pytree):
 	"""Growth parameters."""
 
-	mean: Array
-	std: Array
+	mean: Array = nnx.data()
+	std: Array = nnx.data()

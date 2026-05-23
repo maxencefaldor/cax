@@ -10,8 +10,8 @@ from .kernel import bell
 class GrowthParams(nnx.Pytree):
 	"""Growth parameters."""
 
-	mean: Array
-	std: Array
+	mean: Array = nnx.data()
+	std: Array = nnx.data()
 
 
 def exponential_growth_fn(u: Array, growth_params: GrowthParams) -> Array:

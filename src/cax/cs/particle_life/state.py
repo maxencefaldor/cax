@@ -8,6 +8,6 @@ from jax import Array
 class ParticleLifeState(nnx.Pytree):
 	"""Particle Life state class."""
 
-	class_: Array
-	position: Array
-	velocity: Array
+	class_: Array = nnx.data()
+	position: Array = nnx.data()
+	velocity: Array = nnx.data()

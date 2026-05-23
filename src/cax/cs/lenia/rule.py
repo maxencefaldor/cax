@@ -11,8 +11,8 @@ from .kernel import KernelParams
 class LeniaRuleParams(nnx.Pytree):
 	"""Lenia rule parameters class."""
 
-	channel_source: Array
-	channel_target: Array
-	weight: Array
-	kernel_params: KernelParams
-	growth_params: GrowthParams
+	channel_source: Array = nnx.data()
+	channel_target: Array = nnx.data()
+	weight: Array = nnx.data()
+	kernel_params: KernelParams = nnx.data()
+	growth_params: GrowthParams = nnx.data()

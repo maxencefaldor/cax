@@ -12,9 +12,9 @@ from jax import Array
 class KernelParams(nnx.Pytree):
 	"""Kernel parameters."""
 
-	weight: Array
-	mean: Array
-	std: Array
+	weight: Array = nnx.data()
+	mean: Array = nnx.data()
+	std: Array = nnx.data()
 
 
 def bell(x: Array, mean: Array, std: Array) -> Array:
