@@ -4,10 +4,9 @@ from flax import nnx
 from jax import Array
 
 
+@nnx.dataclass
 class GrowthParams(nnx.Pytree):
 	"""Growth parameters."""
 
-	def __init__(self, mean: Array, std: Array):
-		"""Initialize growth parameters."""
-		self.mean = mean
-		self.std = std
+	mean: Array
+	std: Array

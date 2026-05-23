@@ -4,6 +4,7 @@ from flax import nnx
 from jax import Array
 
 
+@nnx.dataclass
 class LangtonAntState(nnx.Pytree):
 	"""Langton's Ant state.
 
@@ -18,8 +19,6 @@ class LangtonAntState(nnx.Pytree):
 
 	"""
 
-	def __init__(self, grid: Array, position: Array, direction: Array):
-		"""Initialize Langton's Ant state."""
-		self.grid = grid
-		self.position = position
-		self.direction = direction
+	grid: Array
+	position: Array
+	direction: Array

@@ -6,13 +6,12 @@ from jax import Array
 from .kernel import bell
 
 
+@nnx.dataclass
 class GrowthParams(nnx.Pytree):
 	"""Growth parameters."""
 
-	def __init__(self, mean: Array, std: Array):
-		"""Initialize growth parameters."""
-		self.mean = mean
-		self.std = std
+	mean: Array
+	std: Array
 
 
 def exponential_growth_fn(u: Array, growth_params: GrowthParams) -> Array:

@@ -7,6 +7,7 @@ from flax import nnx
 from jax import Array
 
 
+@nnx.dataclass
 class Pool(nnx.Pytree):
 	"""A container for PyTree arrays supporting in-place updates and random sampling.
 
@@ -20,16 +21,8 @@ class Pool(nnx.Pytree):
 
 	"""
 
-	def __init__(self, size: int, data: Any):
-		"""Initialize pool.
-
-		Args:
-			size: Number of items in the pool.
-			data: PyTree whose leaves are arrays with shape `(size, ...)`.
-
-		"""
-		self.size = size
-		self.data = nnx.data(data)
+	size: int = nnx.static()
+	data: Any = nnx.data()
 
 	@classmethod
 	def create(cls, data: Any) -> Self:

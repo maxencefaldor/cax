@@ -8,6 +8,7 @@ from flax import nnx
 from jax import Array
 
 
+@nnx.dataclass
 class Buffer(nnx.Pytree):
 	"""A container for PyTree arrays with circular writes and random sampling.
 
@@ -23,20 +24,10 @@ class Buffer(nnx.Pytree):
 
 	"""
 
-	def __init__(self, size: int, data: Any, is_full: Array, idx: Array):
-		"""Initialize buffer.
-
-		Args:
-			size: Maximum number of items stored.
-			data: PyTree of arrays with leading dimension `size`.
-			is_full: Boolean mask of shape `(size,)` indicating which entries are initialized.
-			idx: Current write pointer (modulo `size`).
-
-		"""
-		self.size = size
-		self.data = nnx.data(data)
-		self.is_full = is_full
-		self.idx = idx
+	size: int = nnx.static()
+	data: Any = nnx.data()
+	is_full: Array
+	idx: Array
 
 	@classmethod
 	def create(cls, size: int, datum: Any) -> Self:

@@ -8,24 +8,22 @@ from flax import nnx
 from jax import Array
 
 
+@nnx.dataclass
 class KernelParams(nnx.Pytree):
 	"""Kernel parameters."""
 
-	def __init__(self, r: Array, b: Array):
-		"""Initialize kernel parameters."""
-		self.r = r
-		self.b = b
+	r: Array
+	b: Array
 
 
+@nnx.dataclass
 class FreeKernelParams(nnx.Pytree):
 	"""Free kernel parameters from [2]."""
 
-	def __init__(self, r: Array, b: Array, a: Array, w: Array):
-		"""Initialize free kernel parameters."""
-		self.r = r
-		self.b = b
-		self.a = a
-		self.w = w
+	r: Array
+	b: Array
+	a: Array
+	w: Array
 
 
 def bell(x: Array, mean: Array | float, std: Array | float) -> Array:

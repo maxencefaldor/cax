@@ -4,9 +4,8 @@ from flax import nnx
 from jax import Array
 
 
+@nnx.dataclass
 class BoidsPerception(nnx.Pytree):
 	"""Boids perception class."""
 
-	def __init__(self, acceleration: Array):
-		"""Initialize boids perception."""
-		self.acceleration = acceleration  # (num_boids, num_spatial_dims)
+	acceleration: Array
