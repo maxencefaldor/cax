@@ -6,7 +6,7 @@ from functools import partial
 from flax import nnx
 from jax import Array
 
-from cax.types import Perception
+from cax.core.perceive.perceive import Perception
 
 from .residual_update import ResidualUpdate
 

@@ -1,13 +1,11 @@
 """Buffer module."""
 
-from typing import Self
+from typing import Any, Self
 
 import jax
 import jax.numpy as jnp
 from flax import nnx
 from jax import Array
-
-from cax.types import PyTree
 
 
 class Buffer(nnx.Pytree):
@@ -25,7 +23,7 @@ class Buffer(nnx.Pytree):
 
 	"""
 
-	def __init__(self, size: int, data: PyTree, is_full: Array, idx: Array):
+	def __init__(self, size: int, data: Any, is_full: Array, idx: Array):
 		"""Initialize buffer.
 
 		Args:
@@ -41,7 +39,7 @@ class Buffer(nnx.Pytree):
 		self.idx = idx
 
 	@classmethod
-	def create(cls, size: int, datum: PyTree) -> Self:
+	def create(cls, size: int, datum: Any) -> Self:
 		"""Create a new Buffer instance.
 
 		Args:
@@ -64,7 +62,7 @@ class Buffer(nnx.Pytree):
 		)
 
 	@nnx.jit
-	def add(self, batch: PyTree) -> Self:
+	def add(self, batch: Any) -> Self:
 		"""Add a batch to the buffer.
 
 		Args:
@@ -84,7 +82,7 @@ class Buffer(nnx.Pytree):
 		return self
 
 	@nnx.jit(static_argnames=("batch_size",))
-	def sample(self, key: Array, *, batch_size: int) -> PyTree:
+	def sample(self, key: Array, *, batch_size: int) -> Any:
 		"""Sample a batch from the buffer.
 
 		Args:
@@ -96,5 +94,5 @@ class Buffer(nnx.Pytree):
 
 		"""
 		idxs = jax.random.choice(key, self.size, shape=(batch_size,), p=self.is_full)
-		batch: PyTree = jax.tree.map(lambda leaf: leaf[idxs], self.data)
+		batch: Any = jax.tree.map(lambda leaf: leaf[idxs], self.data)
 		return batch

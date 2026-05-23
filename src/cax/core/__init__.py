@@ -1,19 +1,15 @@
 """Core abstractions for complex systems.
 
-Exposes the base `ComplexSystem`, `Perceive`, and `Update` interfaces, along with the
-backward-compatible `State` and `Input` type aliases.
+Exposes the base `ComplexSystem`, `Perceive`, and `Update` interfaces.
 """
 
-from cax.types import Input, State
-
 from .cs import ComplexSystem
-from .perceive import Perceive
+from .perceive import Perceive, Perception
 from .update import Update
 
 __all__ = [
 	"ComplexSystem",
-	"Input",
 	"Perceive",
-	"State",
+	"Perception",
 	"Update",
 ]

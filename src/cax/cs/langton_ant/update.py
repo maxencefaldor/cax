@@ -8,8 +8,8 @@ forward one step.
 import jax.numpy as jnp
 from jax import Array
 
+from cax.core.perceive.perceive import Perception
 from cax.core.update import Update
-from cax.types import Perception
 
 from .state import LangtonAntState
 

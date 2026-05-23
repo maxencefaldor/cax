@@ -14,7 +14,7 @@ from flax import nnx
 from jax import Array
 
 from cax.core.perceive import Perceive
-from cax.types import Perception
+from cax.core.perceive.perceive import Perception
 
 from ..lenia.growth import exponential_growth_fn
 from .kernel import peak_kernel_fn

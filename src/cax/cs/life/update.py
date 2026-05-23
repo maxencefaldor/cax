@@ -8,8 +8,8 @@ automata based on birth/survival conditions. Cells become alive (birth) or stay 
 import jax.numpy as jnp
 from jax import Array
 
+from cax.core.perceive.perceive import Perception
 from cax.core.update import Update
-from cax.types import Perception
 
 
 class LifeUpdate(Update[Array, Array]):

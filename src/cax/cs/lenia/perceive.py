@@ -13,7 +13,7 @@ from flax import nnx
 from jax import Array
 
 from cax.core.perceive import Perceive
-from cax.types import Perception
+from cax.core.perceive.perceive import Perception
 
 from .kernel import gaussian_kernel_fn
 from .rule import LeniaRuleParams

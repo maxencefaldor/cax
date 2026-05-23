@@ -12,8 +12,6 @@ from typing import Any
 import jax.numpy as jnp
 from jax import Array
 
-from cax.types import PyTree
-
 
 def metrics_fn(
 	state: Array,
@@ -22,7 +20,7 @@ def metrics_fn(
 	active_threshold: float = 0.1,
 	empty_fraction: float = 0.01,
 	full_fraction: float = 0.5,
-) -> PyTree:
+) -> Any:
 	"""Metrics function for Lenia."""
 	spatial_dims = state.shape[:-1]
 	num_spatial_dims = len(spatial_dims)

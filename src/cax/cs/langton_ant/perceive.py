@@ -7,7 +7,7 @@ of the cell at the ant's current position, which determines the turn direction.
 from jax import Array
 
 from cax.core.perceive import Perceive
-from cax.types import Perception
+from cax.core.perceive.perceive import Perception
 
 from .state import LangtonAntState
 

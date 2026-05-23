@@ -5,9 +5,7 @@ from itertools import product
 import jax.numpy as jnp
 from jax import Array
 
-from cax.types import Perception
-
-from .perceive import Perceive
+from .perceive import Perceive, Perception
 
 
 class VonNeumannPerceive(Perceive[Array]):

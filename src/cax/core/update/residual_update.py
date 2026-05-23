@@ -5,7 +5,7 @@ from collections.abc import Callable
 from flax import nnx
 from jax import Array
 
-from cax.types import Perception
+from cax.core.perceive.perceive import Perception
 
 from .mlp_update import MLPUpdate
 

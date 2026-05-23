@@ -6,8 +6,8 @@ update particle positions with temporal resolution T.
 
 from jax import Array
 
+from cax.core.perceive.perceive import Perception
 from cax.core.update import Update
-from cax.types import Perception
 
 
 class ParticleLeniaUpdate(Update[Array, Array]):

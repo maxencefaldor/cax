@@ -8,7 +8,7 @@ from flax.nnx.nn import initializers
 from flax.nnx.nn.linear import default_kernel_init
 from jax import Array
 
-from cax.types import Perception
+from cax.core.perceive.perceive import Perception
 
 from .update import Update
 

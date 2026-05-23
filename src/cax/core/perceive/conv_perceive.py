@@ -5,9 +5,7 @@ from collections.abc import Callable
 from flax import nnx
 from jax import Array
 
-from cax.types import Perception
-
-from .perceive import Perceive
+from .perceive import Perceive, Perception
 
 
 class ConvPerceive(Perceive[Array]):

@@ -9,7 +9,7 @@ import jax.numpy as jnp
 from jax import Array
 
 from cax.core.perceive import Perceive
-from cax.types import Perception
+from cax.core.perceive.perceive import Perception
 
 from .perception import ParticleLifePerception as ParticleLifePerception
 from .state import ParticleLifeState

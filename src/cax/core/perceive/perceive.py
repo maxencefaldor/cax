@@ -1,8 +1,10 @@
 """Perceive base module."""
 
+from typing import Any
+
 from flax import nnx
 
-from cax.types import Perception
+Perception = Any
 
 
 class Perceive[State](nnx.Module):

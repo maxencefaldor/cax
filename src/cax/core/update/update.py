@@ -2,7 +2,7 @@
 
 from flax import nnx
 
-from cax.types import Perception
+from cax.core.perceive.perceive import Perception
 
 
 class Update[State, Input](nnx.Module):

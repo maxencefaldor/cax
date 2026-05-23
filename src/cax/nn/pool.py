@@ -1,12 +1,10 @@
 """Pool module."""
 
-from typing import Self
+from typing import Any, Self
 
 import jax
 from flax import nnx
 from jax import Array
-
-from cax.types import PyTree
 
 
 class Pool(nnx.Pytree):
@@ -22,7 +20,7 @@ class Pool(nnx.Pytree):
 
 	"""
 
-	def __init__(self, size: int, data: PyTree):
+	def __init__(self, size: int, data: Any):
 		"""Initialize pool.
 
 		Args:
@@ -34,7 +32,7 @@ class Pool(nnx.Pytree):
 		self.data = nnx.data(data)
 
 	@classmethod
-	def create(cls, data: PyTree) -> Self:
+	def create(cls, data: Any) -> Self:
 		"""Create a new Pool instance.
 
 		Args:
@@ -48,7 +46,7 @@ class Pool(nnx.Pytree):
 		return cls(size=size, data=data)
 
 	@nnx.jit
-	def update(self, idxs: Array, batch: PyTree) -> Self:
+	def update(self, idxs: Array, batch: Any) -> Self:
 		"""Update batch in the pool at the specified indices.
 
 		Args:
@@ -65,7 +63,7 @@ class Pool(nnx.Pytree):
 		return self
 
 	@nnx.jit(static_argnames=("batch_size",))
-	def sample(self, key: Array, *, batch_size: int) -> tuple[Array, PyTree]:
+	def sample(self, key: Array, *, batch_size: int) -> tuple[Array, Any]:
 		"""Sample a batch from the pool.
 
 		Args:
