@@ -4,13 +4,13 @@ from typing import Self
 
 import jax
 import jax.numpy as jnp
-from flax import struct
+from flax import nnx
 from jax import Array
 
 from cax.types import PyTree
 
 
-class Buffer(struct.PyTreeNode):
+class Buffer(nnx.Pytree):
 	"""A container for PyTree arrays with circular writes and random sampling.
 
 	The buffer stores a PyTree of arrays with a fixed capacity along the leading dimension.
@@ -25,10 +25,20 @@ class Buffer(struct.PyTreeNode):
 
 	"""
 
-	size: int = struct.field(pytree_node=False)
-	data: PyTree
-	is_full: Array
-	idx: Array
+	def __init__(self, size: int, data: PyTree, is_full: Array, idx: Array):
+		"""Initialize buffer.
+
+		Args:
+			size: Maximum number of items stored.
+			data: PyTree of arrays with leading dimension `size`.
+			is_full: Boolean mask of shape `(size,)` indicating which entries are initialized.
+			idx: Current write pointer (modulo `size`).
+
+		"""
+		self.size = size
+		self.data = nnx.data(data)
+		self.is_full = is_full
+		self.idx = idx
 
 	@classmethod
 	def create(cls, size: int, datum: PyTree) -> Self:
@@ -53,7 +63,7 @@ class Buffer(struct.PyTreeNode):
 			idx=jnp.array(0, dtype=jnp.int32),
 		)
 
-	@jax.jit
+	@nnx.jit
 	def add(self, batch: PyTree) -> Self:
 		"""Add a batch to the buffer.
 
@@ -61,23 +71,19 @@ class Buffer(struct.PyTreeNode):
 			batch: PyTree whose leaves have shape `(B, ...)`, where `B` is the batch size.
 
 		Returns:
-			A new Buffer instance with the batch written at consecutive indices (with wrap-around).
+			Buffer with the batch written at consecutive indices (with wrap-around).
 
 		"""
 		batch_size = jax.tree.leaves(batch)[0].shape[0]
 		idxs = self.idx + jnp.arange(batch_size)
 		idxs = idxs % self.size
 
-		# Update data
-		data = jax.tree.map(lambda data, batch: data.at[idxs].set(batch), self.data, batch)
+		self.data = jax.tree.map(lambda data, batch: data.at[idxs].set(batch), self.data, batch)
+		self.is_full = self.is_full.at[idxs].set(True)
+		self.idx = (self.idx + batch_size) % self.size
+		return self
 
-		# Update is_full and idx
-		is_full = self.is_full.at[idxs].set(True)
-		new_idx = (self.idx + batch_size) % self.size
-
-		return self.replace(data=data, is_full=is_full, idx=new_idx)
-
-	@jax.jit(static_argnames=("batch_size",))
+	@nnx.jit(static_argnames=("batch_size",))
 	def sample(self, key: Array, *, batch_size: int) -> PyTree:
 		"""Sample a batch from the buffer.
 

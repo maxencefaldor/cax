@@ -244,7 +244,7 @@ class VAE(nnx.Module):
 		return logits, mean, logvar
 
 
-@jax.jit
+@nnx.jit
 def kl_divergence(mean: Array, logvar: Array) -> Array:
 	"""Compute KL divergence between latent distribution and standard normal.
 
@@ -259,7 +259,7 @@ def kl_divergence(mean: Array, logvar: Array) -> Array:
 	return -0.5 * jnp.sum(1 + logvar - jnp.square(mean) - jnp.exp(logvar))
 
 
-@jax.jit
+@nnx.jit
 def binary_cross_entropy_with_logits(logits: Array, labels: Array) -> Array:
 	"""Compute binary cross-entropy loss with logits.
 
@@ -275,7 +275,7 @@ def binary_cross_entropy_with_logits(logits: Array, labels: Array) -> Array:
 	return -jnp.sum(labels * logits + (1.0 - labels) * jnp.log(-jnp.expm1(logits)))
 
 
-@jax.jit
+@nnx.jit
 def vae_loss(logits: Array, labels: Array, mean: Array, logvar: Array) -> Array:
 	"""Compute VAE loss.
 

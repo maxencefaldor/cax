@@ -3,13 +3,13 @@
 from typing import Self
 
 import jax
-from flax import struct
+from flax import nnx
 from jax import Array
 
 from cax.types import PyTree
 
 
-class Pool(struct.PyTreeNode):
+class Pool(nnx.Pytree):
 	"""A container for PyTree arrays supporting in-place updates and random sampling.
 
 	The pool holds a PyTree of arrays whose first dimension is the pool size. It can be created
@@ -22,8 +22,16 @@ class Pool(struct.PyTreeNode):
 
 	"""
 
-	size: int = struct.field(pytree_node=False)
-	data: PyTree
+	def __init__(self, size: int, data: PyTree):
+		"""Initialize pool.
+
+		Args:
+			size: Number of items in the pool.
+			data: PyTree whose leaves are arrays with shape `(size, ...)`.
+
+		"""
+		self.size = size
+		self.data = nnx.data(data)
 
 	@classmethod
 	def create(cls, data: PyTree) -> Self:
@@ -39,7 +47,7 @@ class Pool(struct.PyTreeNode):
 		size = jax.tree.leaves(data)[0].shape[0]
 		return cls(size=size, data=data)
 
-	@jax.jit
+	@nnx.jit
 	def update(self, idxs: Array, batch: PyTree) -> Self:
 		"""Update batch in the pool at the specified indices.
 
@@ -48,15 +56,15 @@ class Pool(struct.PyTreeNode):
 			batch: PyTree matching `data` leaves sliced to `(B, ...)`.
 
 		Returns:
-			A new Pool instance with the updated batch applied at `idxs` across all leaves.
+			Pool with the updated batch applied at `idxs` across all leaves.
 
 		"""
-		data = jax.tree.map(
+		self.data = jax.tree.map(
 			lambda data_leaf, batch_leaf: data_leaf.at[idxs].set(batch_leaf), self.data, batch
 		)
-		return self.replace(data=data)
+		return self
 
-	@jax.jit(static_argnames=("batch_size",))
+	@nnx.jit(static_argnames=("batch_size",))
 	def sample(self, key: Array, *, batch_size: int) -> tuple[Array, PyTree]:
 		"""Sample a batch from the pool.
 
