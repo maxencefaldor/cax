@@ -44,7 +44,7 @@ class Life(ComplexSystem[Array, Array]):
 			rngs: rng key.
 
 		"""
-		self.perceive = LifePerceive(rngs=rngs)
+		self.perceive = LifePerceive()
 		self.update = LifeUpdate(birth=birth, survival=survival)
 
 	def _step(self, state: Array, input: Array | None = None, *, sow: bool = False) -> Array:

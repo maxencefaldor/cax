@@ -1,61 +1,61 @@
 """Von Neumann perceive module."""
 
+from collections.abc import Callable
 from itertools import product
 
-import jax.numpy as jnp
 from jax import Array
 
-from .perceive import Perceive, Perception
+from .neighborhood_perceive import NeighborhoodPerceive
 
 
-class VonNeumannPerceive(Perceive[Array]):
+class VonNeumannPerceive(NeighborhoodPerceive):
 	"""Von Neumann perceive class.
 
 	This class implements perception based on the Von Neumann neighborhood.
-	The Von Neumann neighborhood includes cells within a specified Manhattan distance of the central
-	cell.
+	The Von Neumann neighborhood includes all cells within Manhattan distance `radius`
+	of the central cell.
 	"""
 
-	def __init__(self, num_spatial_dims: int, radius: int):
+	def __init__(
+		self,
+		num_spatial_dims: int,
+		radius: int,
+		*,
+		padding: str = "CIRCULAR",
+		include_center: bool = True,
+		reduce_fn: Callable[..., Array] | None = None,
+	):
 		"""Initialize Von Neumann perceive.
 
 		Args:
 			num_spatial_dims: Number of spatial dimensions.
-			radius: Radius for Manhattan distance to compute the Von Neumann neighborhood.
+			radius: Manhattan distance defining the Von Neumann neighborhood extent.
+			padding: Boundary condition mode. One of "CIRCULAR" (periodic/torus),
+				"ZERO" (zero-padded), "REFLECT" (mirror), or "EDGE" (clamp to boundary).
+			include_center: Whether to include the center cell in the output.
+			reduce_fn: Optional reduction function applied over the neighbor axis. If None,
+				neighbors are concatenated along the channel axis. If provided, it is called
+				as `reduce_fn(stacked_neighbors, axis=0)` and the result is concatenated
+				with the center (if `include_center` is True).
 
 		"""
-		self.num_spatial_dims = num_spatial_dims
-		self.radius = radius
+		super().__init__(
+			num_spatial_dims=num_spatial_dims,
+			radius=radius,
+			padding=padding,
+			include_center=include_center,
+			reduce_fn=reduce_fn,
+		)
 
-	def __call__(self, state: Array) -> Perception:
-		"""Apply Von Neumann perception to the state.
-
-		The input is assumed to have shape `(..., *spatial_dims, channel_size)` where `spatial_dims`
-		is a tuple of `num_spatial_dims` dimensions and `channel_size` is the number of channels.
-		This method concatenates the central cell and all neighbors within the Von Neumann
-		neighborhood (Manhattan distance `<= radius`) along the channel axis. The number of
-		concatenated positions equals:
-			`1 + sum_{k=1..radius} 2 * num_spatial_dims * binom(num_spatial_dims + k - 1, k)`.
-
-		Args:
-			state: State of the cellular automaton.
+	def _get_shifts(self) -> list[tuple[int, ...]]:
+		"""Return all shifts in the Von Neumann neighborhood (excluding center).
 
 		Returns:
-			The Von Neumann neighborhood for each state.
+			List of shift tuples with Manhattan distance <= radius, excluding the origin.
 
 		"""
-		# Get Von Neumann shifts by filtering Moore shifts with Manhattan distance <= radius
-		moore_shifts = product(range(-self.radius, self.radius + 1), repeat=self.num_spatial_dims)
-		von_neumann_shifts = [
-			shift for shift in moore_shifts if 0 < sum(map(abs, shift)) <= self.radius
+		return [
+			shift
+			for shift in product(range(-self.radius, self.radius + 1), repeat=self.num_spatial_dims)
+			if 0 < sum(map(abs, shift)) <= self.radius
 		]
-
-		neighbors = [
-			state,
-			*[
-				jnp.roll(state, shift, axis=tuple(range(-self.num_spatial_dims - 1, -1)))
-				for shift in von_neumann_shifts
-			],
-		]
-
-		return jnp.concatenate(neighbors, axis=-1)

@@ -40,7 +40,7 @@ class Elementary(ComplexSystem[Array, Array]):
 			rngs: rng key.
 
 		"""
-		self.perceive = ElementaryPerceive(rngs=rngs)
+		self.perceive = ElementaryPerceive()
 		self.update = ElementaryUpdate(wolfram_code=wolfram_code)
 
 	def _step(self, state: Array, input: Array | None = None, *, sow: bool = False) -> Array:

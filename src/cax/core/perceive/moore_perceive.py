@@ -1,61 +1,62 @@
 """Moore perceive module."""
 
+from collections.abc import Callable
 from itertools import product
 
-import jax.numpy as jnp
 from jax import Array
 
-from .perceive import Perceive, Perception
+from .neighborhood_perceive import NeighborhoodPerceive
 
 
-class MoorePerceive(Perceive[Array]):
+class MoorePerceive(NeighborhoodPerceive):
 	"""Moore perceive class.
 
 	This class implements perception based on the Moore neighborhood.
-	The Moore neighborhood includes cells that are within a certain distance from the central cell
-	in all dimensions simultaneously.
+	The Moore neighborhood includes all cells within Chebyshev distance `radius` of the
+	central cell — i.e., the full hypercube of side length `2 * radius + 1` excluding
+	the center.
 	"""
 
-	def __init__(self, num_spatial_dims: int, radius: int):
+	def __init__(
+		self,
+		num_spatial_dims: int,
+		radius: int,
+		*,
+		padding: str = "CIRCULAR",
+		include_center: bool = True,
+		reduce_fn: Callable[..., Array] | None = None,
+	):
 		"""Initialize Moore perceive.
 
 		Args:
 			num_spatial_dims: Number of spatial dimensions.
-			radius: Radius for Manhattan distance to compute the Moore neighborhood.
+			radius: Chebyshev distance defining the Moore neighborhood extent.
+			padding: Boundary condition mode. One of "CIRCULAR" (periodic/torus),
+				"ZERO" (zero-padded), "REFLECT" (mirror), or "EDGE" (clamp to boundary).
+			include_center: Whether to include the center cell in the output.
+			reduce_fn: Optional reduction function applied over the neighbor axis. If None,
+				neighbors are concatenated along the channel axis. If provided, it is called
+				as `reduce_fn(stacked_neighbors, axis=0)` and the result is concatenated
+				with the center (if `include_center` is True).
 
 		"""
-		self.num_spatial_dims = num_spatial_dims
-		self.radius = radius
+		super().__init__(
+			num_spatial_dims=num_spatial_dims,
+			radius=radius,
+			padding=padding,
+			include_center=include_center,
+			reduce_fn=reduce_fn,
+		)
 
-	def __call__(self, state: Array) -> Perception:
-		"""Apply Moore perception to the input state.
-
-		The input is assumed to have shape `(..., *spatial_dims, channel_size)` where `spatial_dims`
-		is a tuple of `num_spatial_dims` dimensions and `channel_size` is the number of channels.
-		This method concatenates the central cell and all neighbors within the Moore neighborhood
-		along the channel axis, yielding an output with shape `(..., *spatial, channel_size * N)`,
-		where `N = (2 * radius + 1) ** num_spatial_dims`.
-
-		Args:
-			state: State of the cellular automaton.
+	def _get_shifts(self) -> list[tuple[int, ...]]:
+		"""Return all shifts in the Moore neighborhood (excluding center).
 
 		Returns:
-			The Moore neighborhood for each state, with the central cell first.
+			List of shift tuples covering the full hypercube minus the origin.
 
 		"""
-		# Get Moore shifts
-		moore_shifts = [
+		return [
 			shift
 			for shift in product(range(-self.radius, self.radius + 1), repeat=self.num_spatial_dims)
 			if shift != (0,) * self.num_spatial_dims
 		]
-
-		neighbors = [
-			state,
-			*[
-				jnp.roll(state, shift, axis=tuple(range(-self.num_spatial_dims - 1, -1)))
-				for shift in moore_shifts
-			],
-		]
-
-		return jnp.concatenate(neighbors, axis=-1)

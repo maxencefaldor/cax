@@ -1,12 +1,11 @@
 """Elementary Cellular Automata update module.
 
 This module implements the update rule for Elementary Cellular Automata based on Wolfram codes.
-Each cell's next state is determined by looking up its three-cell neighborhood configuration
-in the Wolfram code lookup table.
+Each cell's next state is determined by converting its three-cell neighborhood to a 3-bit
+index and looking up the result in the Wolfram code table.
 
 """
 
-import jax
 import jax.numpy as jnp
 from jax import Array
 
@@ -17,8 +16,8 @@ from cax.core.update import Update
 class ElementaryUpdate(Update[Array, Array]):
 	"""Elementary Cellular Automata update rule.
 
-	Applies the Wolfram rule by matching each cell's three-cell neighborhood against all
-	possible configurations and selecting the corresponding output value from the Wolfram code.
+	Applies the Wolfram rule by converting each cell's three-cell neighborhood to a
+	binary index and looking up the corresponding output in the rule table.
 
 	"""
 
@@ -31,40 +30,25 @@ class ElementaryUpdate(Update[Array, Array]):
 				configurations (111, 110, 101, 100, 011, 010, 001, 000).
 
 		"""
-		self.configurations = jnp.array(
-			[
-				[1, 1, 1],
-				[1, 1, 0],
-				[1, 0, 1],
-				[1, 0, 0],
-				[0, 1, 1],
-				[0, 1, 0],
-				[0, 0, 1],
-				[0, 0, 0],
-			],
-			dtype=jnp.float32,
-		)
-		self.wolfram_code = wolfram_code
+		self.lut = wolfram_code[::-1]
 
 	def __call__(self, state: Array, perception: Perception, input: Array | None = None) -> Array:
 		"""Process the current state, perception, and input to produce a new state.
 
-		Matches each cell's three-cell neighborhood configuration against the Wolfram code
-		lookup table to determine the next state.
+		Converts each cell's three-cell neighborhood to a 3-bit index (left*4 + self*2 + right)
+		and looks up the corresponding output in the Wolfram rule table.
 
 		Args:
 			state: Current state (unused, next state computed solely from perception).
 			perception: Array with shape (..., width, 3) containing the three-cell neighborhood
-				(left, self, right) for each cell.
+				in [self, right, left] order.
 			input: Optional input (unused in this implementation).
 
 		Returns:
 			Next state with shape (..., width, 1) containing the updated cell values.
 
 		"""
-
-		def update_pattern(pattern: Array, value: Array) -> Array:
-			return jnp.where(jnp.all(perception == pattern, axis=-1, keepdims=True), value, 0.0)
-
-		state = jnp.sum(jax.vmap(update_pattern)(self.configurations, self.wolfram_code), axis=0)
-		return state
+		index = (perception[..., 2:3] * 4 + perception[..., 0:1] * 2 + perception[..., 1:2]).astype(
+			jnp.int32
+		)
+		return self.lut[index[..., 0]][..., None]
