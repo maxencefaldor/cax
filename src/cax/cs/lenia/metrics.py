@@ -21,7 +21,19 @@ def metrics_fn(
 	empty_fraction: float = 0.01,
 	full_fraction: float = 0.5,
 ) -> Any:
-	"""Metrics function for Lenia."""
+	"""Metrics function for Lenia.
+
+	Args:
+		state: Lenia state array with shape `(*spatial_dims, channel_size)`.
+		R: Kernel radius in grid units.
+		active_threshold: Threshold for considering a cell active.
+		empty_fraction: Fraction of active cells below which the world is empty.
+		full_fraction: Fraction of active cells above which the world is full.
+
+	Returns:
+		Dictionary containing mass, center of mass, and degeneration flags.
+
+	"""
 	spatial_dims = state.shape[:-1]
 	num_spatial_dims = len(spatial_dims)
 
@@ -42,7 +54,7 @@ def metrics_fn(
 		center_of_mass_grid_list.append(center_i)
 	center_of_mass_grid = jnp.array(center_of_mass_grid_list)
 
-	# Computer center of mass in physical units
+	# Compute center of mass in physical units
 	center_of_mass = center_of_mass_grid / R
 
 	# Check if world is empty or full
@@ -59,3 +71,27 @@ def metrics_fn(
 		"is_empty": is_empty,
 		"is_full": is_full,
 	}
+
+
+def center_state(state: Array, *, R: int) -> Array:
+	"""Center a Lenia state on its center of mass assuming toroidal topology.
+
+	Uses the circular mean to find the center of mass in each spatial dimension,
+	then rolls the state so the center of mass is at the grid midpoint.
+
+	Args:
+		state: Lenia state array with shape `(*spatial_dims, channel_size)`.
+		R: Kernel radius in grid units.
+
+	Returns:
+		The state array rolled so that the center of mass is at the center of the grid.
+
+	"""
+	metrics = metrics_fn(state, R=R)
+	center_of_mass_lattice = metrics["center_of_mass_lattice"]
+	spatial_dims = state.shape[:-1]
+	shifts = tuple(
+		(spatial_dims[i] // 2 - center_of_mass_lattice[i]).astype(int)
+		for i in range(len(spatial_dims))
+	)
+	return jnp.roll(state, shifts, axis=tuple(range(len(spatial_dims))))

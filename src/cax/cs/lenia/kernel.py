@@ -39,10 +39,10 @@ def get_kernel_fn(kernel_core: Callable[[Array], Array]) -> Callable[[Array, Ker
 		mask = radius < kernel_params.r
 
 		# Compute segment index and position in segment
-		number_of_segments = jnp.count_nonzero(~jnp.isnan(kernel_params.b), axis=-1)
+		rank = jnp.count_nonzero(~jnp.isnan(kernel_params.b), axis=-1)
 
-		segment_position = radius * number_of_segments / kernel_params.r
-		segment_idx = jnp.minimum(segment_position.astype(int), number_of_segments - 1)
+		segment_position = radius * rank / kernel_params.r
+		segment_idx = jnp.minimum(segment_position.astype(int), rank - 1)
 		position_in_segment = segment_position % 1
 
 		return mask * kernel_params.b[segment_idx] * kernel_core(position_in_segment)

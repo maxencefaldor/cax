@@ -15,6 +15,7 @@ from .kernel import (
 	polynomial_kernel_fn,
 	rectangular_kernel_fn,
 )
+from .metrics import center_state
 from .perceive import LeniaPerceive
 from .rule import LeniaRuleParams
 from .update import LeniaUpdate
@@ -27,6 +28,7 @@ __all__ = [
 	"LeniaPerceive",
 	"LeniaRuleParams",
 	"LeniaUpdate",
+	"center_state",
 	"exponential_growth_fn",
 	"exponential_kernel_fn",
 	"free_kernel_fn",
