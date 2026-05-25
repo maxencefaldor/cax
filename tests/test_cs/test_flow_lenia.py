@@ -15,7 +15,7 @@ def test_flow_lenia_jit_init() -> None:
 
 	@jax.jit
 	def init_flow_lenia() -> FlowLenia:
-		kernel_params = KernelParams(r=jnp.array([1.0]), b=jnp.array([[1.0]]))
+		kernel_params = KernelParams(r=jnp.array([1.0]), beta=jnp.array([[1.0]]))
 		growth_params = GrowthParams(mean=jnp.array([0.5]), std=jnp.array([0.1]))
 		rule_params = LeniaRuleParams(
 			channel_source=jnp.array([0]),

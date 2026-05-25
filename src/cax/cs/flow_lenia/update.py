@@ -67,7 +67,7 @@ class FlowLeniaUpdate(Update[Array, Array]):
 		self.channel_size = channel_size
 		self.T = T
 
-		self.weight = rule_params.weight
+		self.normalized_weight = rule_params.weight / jnp.sum(rule_params.weight)
 		self.reshape_kernel_to_channel = self._reshape_kernel_to_channel(rule_params)
 
 		self.growth_fn = growth_fn
@@ -99,7 +99,7 @@ class FlowLeniaUpdate(Update[Array, Array]):
 
 		"""
 		# Compute growth
-		G_k = self.weight * self.growth_fn(
+		G_k = self.normalized_weight * self.growth_fn(
 			perception, self.growth_params
 		)  # (*spatial_dims, num_rules,)
 
