@@ -41,9 +41,9 @@ CAX is built on top of the JAX/Flax ecosystem for speed and scalability. The lib
 
 The library is thoroughly tested and [documented](https://maxencefaldor.github.io/cax/) with numerous examples to get you started! Our comprehensive guides walk you through everything from basic cellular automata to advanced neural implementations.
 
-## Implemented Systems 🦎
+## Zoo 🦎
 
-| Cellular Automata | Reference | Example |
+| Complex System | Reference | Example |
 | --- | --- | --- |
 | Elementary Cellular Automata | [Wolfram (2002)](https://www.wolframscience.com/nks/) | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/maxencefaldor/cax/blob/main/examples/10_elementary.ipynb) |
 | Conway's Game of Life | [Gardner (1970)](https://web.stanford.edu/class/sts145/Library/life.pdf) | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/maxencefaldor/cax/blob/main/examples/11_life.ipynb) |
