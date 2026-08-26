@@ -161,9 +161,9 @@ These are the decisions the codebase holds everywhere; new code follows them.
   `dataclasses.replace`, never mutated. States are values: mutating one aliases the
   caller's object, and `nnx.scan` carries graph nodes by reference. Modules hold the
   long-lived state; states flow through them.
-- **Trajectories are scan outputs.** `__call__` returns the final state; `rollout`
-  returns `(final_state, states)` with the per-step states stacked as the scan's
-  outputs, mirroring `jax.lax.scan`'s `(carry, ys)`. Nothing is sown onto the module
+- **Trajectories are scan outputs.** `__call__` returns the final state; under
+  `return_states=True` it returns `(final_state, states)` with the per-step states
+  stacked as the scan's outputs, mirroring `jax.lax.scan`'s `(carry, ys)`. Nothing is sown onto the module
   by the drivers. Per-step metrics are functions applied to the returned trajectory.
   `sow` is reserved for genuinely optional internals and is only ever called inside
   an active `nnx.capture`, named after the value at the sow site.

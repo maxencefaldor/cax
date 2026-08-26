@@ -6,8 +6,8 @@ to visualize states.
 
 Subclasses must implement `_step` for a single-step transition and `render` for converting
 a state to an RGB image representation. The public `__call__` method handles multi-step
-evolution with JAX/Flax scanning utilities and returns the final state; `rollout` also
-returns the per-step states as the scan's stacked outputs.
+evolution with JAX/Flax scanning utilities and returns the final state; under
+`return_states=True` it also returns the per-step states as the scan's stacked outputs.
 
 """
 
@@ -53,7 +53,7 @@ class ComplexSystem[State, Input](nnx.Module):
 		"""
 		raise NotImplementedError
 
-	@nnx.jit(static_argnames=("num_steps", "input_in_axis"))
+	@nnx.jit(static_argnames=("num_steps", "input_in_axis", "return_states"))
 	def __call__(
 		self,
 		state: State,
@@ -61,79 +61,46 @@ class ComplexSystem[State, Input](nnx.Module):
 		*,
 		num_steps: int = 1,
 		input_in_axis: int | None = None,
-	) -> State:
+		return_states: bool = False,
+	) -> State | tuple[State, State]:
 		"""Step the system for multiple time steps.
 
 		This method wraps `_step` inside a JAX scan for efficiency and JIT-compiles the loop.
 		If `input` is time-varying, set `input_in_axis` to the axis containing the time
 		dimension so that each step receives the corresponding slice of input.
 
-		Only the final state is returned; use `rollout` to also collect the per-step states.
+		Under `return_states=True`, the per-step states are also returned as the scan's
+		stacked outputs, mirroring the `(carry, ys)` convention of `jax.lax.scan`. The
+		trajectory holds the state *after* each step, stacked along a new leading axis of
+		size `num_steps` — its first element is the state after one step, its last equals
+		the final state, and the initial state is not included.
 
 		When `remat` is enabled, the scan body is wrapped with `nnx.remat` to reduce memory
 		usage during backpropagation at the cost of recomputing intermediates.
 
-		Note that `num_steps` and `input_in_axis` are static: each distinct combination
-		compiles once, so sweeps over horizons should batch their step counts.
+		Note that `num_steps`, `input_in_axis`, and `return_states` are static: each
+		distinct combination compiles once, so sweeps over horizons should batch their
+		step counts.
 
 		Args:
 			state: Current state.
 			input: Optional input.
 			num_steps: Number of steps.
 			input_in_axis: Axis for input if provided for each step.
+			return_states: Whether to also return the stacked per-step states.
 
 		Returns:
-			Final state after `num_steps` applications of `_step`.
+			Final state after `num_steps` applications of `_step`, or a
+				`(final_state, states)` tuple under `return_states=True`, where `states`
+				stacks the per-step states along a new leading axis of size `num_steps`.
 
 		"""
 
-		def step_fn(cs: ComplexSystem, state: State, input: Input | None) -> State:
-			return cs._step(state, input)
-
-		if self.remat:
-			step_fn = nnx.remat(step_fn)
-
-		state = nnx.scan(
-			step_fn,
-			in_axes=(nnx.StateAxes({...: nnx.Carry}), nnx.Carry, input_in_axis),
-			out_axes=nnx.Carry,
-			length=num_steps,
-		)(self, state, input)
-
-		return state
-
-	@nnx.jit(static_argnames=("num_steps", "input_in_axis"))
-	def rollout(
-		self,
-		state: State,
-		input: Input | None = None,
-		*,
-		num_steps: int = 1,
-		input_in_axis: int | None = None,
-	) -> tuple[State, State]:
-		"""Step the system for multiple time steps and collect the per-step states.
-
-		Like `__call__`, but the per-step states are also returned as the scan's stacked
-		outputs, mirroring the `(carry, ys)` convention of `jax.lax.scan`. The trajectory
-		holds the state *after* each step, stacked along a new leading axis of size
-		`num_steps` — its first element is the state after one step, its last equals the
-		final state, and the initial state is not included.
-
-		Args:
-			state: Current state.
-			input: Optional input.
-			num_steps: Number of steps.
-			input_in_axis: Axis for input if provided for each step.
-
-		Returns:
-			A `(final_state, states)` tuple, where `states` stacks the per-step states
-				along a new leading axis of size `num_steps`.
-
-		"""
-
-		def step_fn(cs: ComplexSystem, state: State, input: Input | None) -> tuple[State, State]:
+		def step_fn(
+			cs: ComplexSystem, state: State, input: Input | None
+		) -> tuple[State, State | None]:
 			next_state = cs._step(state, input)
-			return next_state, next_state
+			return next_state, (next_state if return_states else None)
 
 		if self.remat:
 			step_fn = nnx.remat(step_fn)
@@ -145,7 +112,7 @@ class ComplexSystem[State, Input](nnx.Module):
 			length=num_steps,
 		)(self, state, input)
 
-		return state, states
+		return (state, states) if return_states else state
 
 	@nnx.jit
 	def render(self, state: State, **kwargs: Any) -> Array:
