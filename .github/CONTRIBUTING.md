@@ -183,6 +183,14 @@ These are the decisions the codebase holds everywhere; new code follows them.
   reserved for internal invariants (and `python -O` removes it).
 - **Every module that cites `[n]` carries its own `References:` block** in its module
   docstring; entries give the work and, where useful, the URL.
+- **Symbols follow the cited reference's equations.** A single-letter or Greek
+  parameter name (`R`, `T`, `beta`, `theta_A`) is kept exactly when the system's
+  canonical reference uses that symbol in its equations — reading the code against
+  the paper is the use case — and is spelled out otherwise (`attraction_matrix`,
+  `feed_rate`). The docstring expands every kept symbol. This is why `T` exists in
+  the Lenia family while Gray-Scott keeps `dt`: each system reads like its own
+  reference, and that rule — not surface-identical names — is the library's
+  uniformity.
 - **Reference fidelity is load-bearing.** Each system mirrors its reference
   implementation's formulas exactly — including where references disagree with each
   other (grid Lenia's Gaussian carries a 1/2 factor, Particle Lenia's does not).
