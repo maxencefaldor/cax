@@ -40,7 +40,7 @@ jobs:
       - name: Build (strict)
         run: uv run mkdocs build --clean
 
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@v5
         if: github.event_name == 'push'
         with:
           path: ./site
