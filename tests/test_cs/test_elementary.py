@@ -33,7 +33,7 @@ def test_rule_110_known_rows() -> None:
 	)
 	state = jnp.zeros((8, 1)).at[5].set(1.0)
 
-	_, states = elementary(state, num_steps=2, trajectory=True)
+	_, states = elementary.rollout(state, num_steps=2)
 
 	# Rule 110 from ...00000100...: one step grows left (00001100), two steps (00011100).
 	assert jnp.array_equal(states[0][:, 0], jnp.array([0, 0, 0, 0, 1, 1, 0, 0], dtype=jnp.float32))

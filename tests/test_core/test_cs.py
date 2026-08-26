@@ -1,5 +1,7 @@
 """Tests for the ComplexSystem multi-step driver."""
 
+import warnings
+
 import jax.numpy as jnp
 import pytest
 from flax import nnx
@@ -20,10 +22,10 @@ def state_init(width: int = 32) -> Array:
 	return jnp.zeros((width, 1)).at[width // 2].set(1.0)
 
 
-def test_trajectory_matches_final_state(elementary: Elementary) -> None:
-	"""Test that the trajectory stacks per-step states and ends at the final state."""
+def test_rollout_matches_final_state(elementary: Elementary) -> None:
+	"""Test that the rollout stacks per-step states and ends at the final state."""
 	num_steps = 8
-	state_final, states = elementary(state_init(), num_steps=num_steps, trajectory=True)
+	state_final, states = elementary.rollout(state_init(), num_steps=num_steps)
 
 	assert states.shape == (num_steps, 32, 1)
 	assert jnp.array_equal(states[-1], state_final)
@@ -32,25 +34,33 @@ def test_trajectory_matches_final_state(elementary: Elementary) -> None:
 	assert jnp.array_equal(states[0], state_one)
 
 
-def test_trajectory_leaves_no_module_state(elementary: Elementary) -> None:
-	"""Test that requesting a trajectory leaves nothing behind on the module.
+def test_rollout_leaves_no_module_state(elementary: Elementary) -> None:
+	"""Test that a rollout leaves nothing behind on the module.
 
-	The scan returns the trajectory as stacked outputs, so consecutive calls with
-	different step counts must be independent — no stale intermediates.
+	The trajectory is a scan output, so consecutive rollouts with different step
+	counts must be independent — no stale intermediates.
 	"""
-	elementary(state_init(), num_steps=5, trajectory=True)
-	_, states = elementary(state_init(), num_steps=7, trajectory=True)
+	elementary.rollout(state_init(), num_steps=5)
+	_, states = elementary.rollout(state_init(), num_steps=7)
 	assert states.shape[0] == 7
 
 	intermediates = nnx.state(elementary, nnx.Intermediate)
 	assert not nnx.to_flat_state(intermediates)
 
 
-def test_final_only_call_matches_trajectory_call(elementary: Elementary) -> None:
-	"""Test that trajectory=False returns the same final state as trajectory=True."""
+def test_driver_emits_no_warning(elementary: Elementary) -> None:
+	"""Test that neither driver hits a deprecation path (e.g. sow outside nnx.capture)."""
+	with warnings.catch_warnings():
+		warnings.simplefilter("error", DeprecationWarning)
+		elementary(state_init(), num_steps=4)
+		elementary.rollout(state_init(), num_steps=4)
+
+
+def test_call_matches_rollout_final_state(elementary: Elementary) -> None:
+	"""Test that `__call__` returns the same final state as `rollout`."""
 	state_final = elementary(state_init(), num_steps=6)
-	state_final_trajectory, _ = elementary(state_init(), num_steps=6, trajectory=True)
-	assert jnp.array_equal(state_final, state_final_trajectory)
+	state_final_rollout, _ = elementary.rollout(state_init(), num_steps=6)
+	assert jnp.array_equal(state_final, state_final_rollout)
 
 
 def test_vmap_over_shared_module(elementary: Elementary) -> None:

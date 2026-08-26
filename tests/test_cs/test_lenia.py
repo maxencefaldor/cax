@@ -87,7 +87,7 @@ def test_lenia_runs_in_3d() -> None:
 
 	key = jax.random.key(0)
 	state = jax.random.uniform(key, (16, 16, 16, 1))
-	state_final, states = lenia(state, num_steps=4, trajectory=True)
+	state_final, states = lenia.rollout(state, num_steps=4)
 
 	assert state_final.shape == (16, 16, 16, 1)
 	assert states.shape == (4, 16, 16, 16, 1)

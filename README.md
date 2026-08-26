@@ -93,8 +93,7 @@ cs = Life(birth=birth, survival=survival, rngs=rngs)
 state_init = jax.random.bernoulli(key, p=0.5, shape=(*spatial_dims, channel_size)).astype(
 	jnp.float32
 )
-state_final = cs(state_init, num_steps=num_steps, sow=True)
-states = nnx.pop(cs, nnx.Intermediate)
+state_final, states = cs.rollout(state_init, num_steps=num_steps)
 ```
 
 For a more detailed overview, get started with this notebook [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/maxencefaldor/cax/blob/main/examples/00_getting_started.ipynb)
