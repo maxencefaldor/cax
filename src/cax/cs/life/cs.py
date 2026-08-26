@@ -72,7 +72,7 @@ class Life(ComplexSystem[Array, Array]):
 		"""
 		if "/" not in rule_golly:
 			raise ValueError(
-				f"Invalid rule string format: {rule_golly}. "
+				f"Invalid rule string format: {rule_golly!r}. "
 				f"Expected format: B{{digits}}/S{{digits}}"
 			)
 
@@ -81,7 +81,7 @@ class Life(ComplexSystem[Array, Array]):
 
 		if not birth_string.startswith("B") or not survival_string.startswith("S"):
 			raise ValueError(
-				f"Invalid rule string format: {rule_golly}. "
+				f"Invalid rule string format: {rule_golly!r}. "
 				f"Expected format: B{{digits}}/S{{digits}}"
 			)
 
@@ -90,7 +90,7 @@ class Life(ComplexSystem[Array, Array]):
 		survival_numbers = [int(digit) for digit in survival_string[1:]]
 
 		if not all(0 <= num <= 8 for num in birth_numbers + survival_numbers):
-			raise ValueError("Numbers in rule string must be between 0 and 8.")
+			raise ValueError(f"Numbers in rule string must be between 0 and 8, got {rule_golly!r}")
 
 		# Create birth and survival rules
 		birth = jnp.array(

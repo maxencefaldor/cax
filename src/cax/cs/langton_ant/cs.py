@@ -72,13 +72,13 @@ class LangtonAnt(ComplexSystem[LangtonAntState, Array]):
 
 		"""
 		if len(rule_string) < 2:
-			raise ValueError(f"rule_string must have at least 2 characters, got: '{rule_string}'")
+			raise ValueError(f"rule_string must have at least 2 characters, got {rule_string!r}")
 
 		valid_chars = set(TURN_CHAR_TO_INT.keys())
 		for char in rule_string:
 			if char not in valid_chars:
 				raise ValueError(
-					f"Invalid character '{char}' in rule string '{rule_string}'. "
+					f"Invalid character {char!r} in rule string {rule_string!r}. "
 					f"Valid characters are: {sorted(valid_chars)}"
 				)
 

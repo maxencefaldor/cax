@@ -63,7 +63,7 @@ class Elementary(ComplexSystem[Array, Array]):
 
 		"""
 		if not 0 <= rule_number < 256:
-			raise ValueError(f"rule_number must be in [0, 255], got {rule_number}")
+			raise ValueError(f"rule_number must be in [0, 255], got {rule_number!r}")
 		return ((rule_number >> 7 - jnp.arange(8)) & 1).astype(jnp.float32)
 
 	@nnx.jit
