@@ -48,14 +48,9 @@ class LangtonAnt(ComplexSystem[LangtonAntState, Array]):
 		self.perceive = LangtonAntPerceive()
 		self.update = LangtonAntUpdate(turns=turns)
 
-	def _step(
-		self, state: LangtonAntState, input: Array | None = None, *, sow: bool = False
-	) -> LangtonAntState:
+	def _step(self, state: LangtonAntState, input: Array | None = None) -> LangtonAntState:
 		perception = self.perceive(state)
 		next_state = self.update(state, perception, input)
-
-		if sow:
-			self.sow(nnx.Intermediate, "state", next_state)
 
 		return next_state
 

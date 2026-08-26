@@ -11,9 +11,11 @@ from jax import Array
 from cax.core import ComplexSystem
 from cax.utils import clip_and_uint8, render_array_with_channels_to_rgb
 
-from ..lenia.perceive import LeniaPerceive, gaussian_kernel_fn
+from ..lenia.growth import exponential_growth_fn
+from ..lenia.kernel import gaussian_kernel_fn
+from ..lenia.perceive import LeniaPerceive
 from ..lenia.rule import LeniaRuleParams
-from .update import FlowLeniaUpdate, exponential_growth_fn
+from .update import FlowLeniaUpdate
 
 
 class FlowLenia(ComplexSystem[Array, Array]):
@@ -81,12 +83,9 @@ class FlowLenia(ComplexSystem[Array, Array]):
 			sigma=sigma,
 		)
 
-	def _step(self, state: Array, input: Array | None = None, *, sow: bool = False) -> Array:
+	def _step(self, state: Array, input: Array | None = None) -> Array:
 		perception = self.perceive(state)
 		next_state = self.update(state, perception, input)
-
-		if sow:
-			self.sow(nnx.Intermediate, "state", next_state)
 
 		return next_state
 

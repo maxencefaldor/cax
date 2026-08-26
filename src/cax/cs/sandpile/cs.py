@@ -62,12 +62,9 @@ class Sandpile(ComplexSystem[Array, Array]):
 			threshold=self.threshold,
 		)
 
-	def _step(self, state: Array, input: Array | None = None, *, sow: bool = False) -> Array:
+	def _step(self, state: Array, input: Array | None = None) -> Array:
 		perception = self.perceive(state)
 		next_state = self.update(state, perception, input)
-
-		if sow:
-			self.sow(nnx.Intermediate, "state", next_state)
 
 		return next_state
 

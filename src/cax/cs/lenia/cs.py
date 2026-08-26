@@ -14,10 +14,11 @@ from jax import Array
 from cax.core import ComplexSystem
 from cax.utils import clip_and_uint8, render_array_with_channels_to_rgb
 
-from .metrics import metrics_fn
-from .perceive import LeniaPerceive, gaussian_kernel_fn
+from .growth import exponential_growth_fn
+from .kernel import gaussian_kernel_fn
+from .perceive import LeniaPerceive
 from .rule import LeniaRuleParams
-from .update import LeniaUpdate, exponential_growth_fn
+from .update import LeniaUpdate
 
 
 class Lenia(ComplexSystem[Array, Array]):
@@ -68,14 +69,9 @@ class Lenia(ComplexSystem[Array, Array]):
 			rule_params=rule_params,
 		)
 
-	def _step(self, state: Array, input: Array | None = None, *, sow: bool = False) -> Array:
+	def _step(self, state: Array, input: Array | None = None) -> Array:
 		perception = self.perceive(state)
 		next_state = self.update(state, perception, input)
-
-		if sow:
-			metrics = metrics_fn(next_state, R=self.perceive.R)
-			self.sow(nnx.Intermediate, "state", next_state)
-			self.sow(nnx.Intermediate, "metrics", metrics)
 
 		return next_state
 

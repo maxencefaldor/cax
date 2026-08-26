@@ -48,14 +48,9 @@ class Boids(ComplexSystem[BoidsState, Array]):
 			velocity_half_life=velocity_half_life,
 		)
 
-	def _step(
-		self, state: BoidsState, input: Array | None = None, *, sow: bool = False
-	) -> BoidsState:
+	def _step(self, state: BoidsState, input: Array | None = None) -> BoidsState:
 		perception = self.perceive(state)
 		next_state = self.update(state, perception, input)
-
-		if sow:
-			self.sow(nnx.Intermediate, "state", next_state)
 
 		return next_state
 
