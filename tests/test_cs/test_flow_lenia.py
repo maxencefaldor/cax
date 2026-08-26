@@ -92,6 +92,51 @@ def test_sobel_matches_analytic_gradient_in_3d() -> None:
 	assert jnp.allclose(gradients[interior][..., 0], slopes * scale, atol=1e-3)
 
 
+@pytest.mark.parametrize("spatial_dims", [(64,), (32, 47), (12, 13, 14)])
+def test_sobel_commutes_with_translation(spatial_dims: tuple[int, ...]) -> None:
+	"""Test the torus property: differentiation commutes with translation, bitwise.
+
+	The official implementation zero-pads the Sobel while its perception and
+	reintegration wrap; cax deliberately wraps the Sobel too (a stated deviation),
+	and this exact equivariance is what that buys.
+	"""
+	from cax.cs.flow_lenia.update import sobel
+
+	num_spatial_dims = len(spatial_dims)
+	key = jax.random.key(0)
+	field = jax.random.uniform(key, (*spatial_dims, 2))
+
+	axes = tuple(range(num_spatial_dims))
+	shift = tuple(range(1, num_spatial_dims + 1))
+	assert jnp.array_equal(
+		sobel(jnp.roll(field, shift, axis=axes)), jnp.roll(sobel(field), shift, axis=axes)
+	)
+
+
+def test_sobel_matches_official_zero_padded_gradients_in_the_interior() -> None:
+	"""Test bitwise identity with the official convolve2d Sobel away from the boundary."""
+	from jax.scipy.signal import convolve2d
+
+	from cax.cs.flow_lenia.update import sobel
+
+	key = jax.random.key(0)
+	field = jax.random.uniform(key, (33, 47, 3))
+
+	# The official implementation's Sobel: convolve2d(mode="same"), zero-padded.
+	kx = jnp.array([[1.0, 0.0, -1.0], [2.0, 0.0, -2.0], [1.0, 0.0, -1.0]])
+	ky = jnp.transpose(kx)
+
+	def per_channel(a, k):
+		return jax.vmap(
+			lambda channel: convolve2d(channel, k, mode="same"), in_axes=-1, out_axes=-1
+		)(a)
+
+	official = jnp.stack([per_channel(field, ky), per_channel(field, kx)], axis=-2)
+
+	interior = (slice(1, -1), slice(1, -1))
+	assert jnp.array_equal(sobel(field)[interior], official[interior])
+
+
 def test_flow_lenia_is_isotropic_in_3d() -> None:
 	"""Test that a radially symmetric blob stays symmetric under symmetric flow."""
 	flow_lenia = FlowLenia(

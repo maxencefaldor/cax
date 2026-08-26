@@ -8,7 +8,8 @@ References:
 	[1] Flow-Lenia: Towards open-ended evolution in cellular automata through mass
 		conservation and parameter localization, Plantec et al. 2023. arXiv:2212.07906.
 		Official implementation: https://github.com/erwanplantec/FlowLenia (flowlenia.py
-		is the variant mirrored here; verified bitwise-identical on shared configs).
+		is the variant mirrored here; verified bitwise-identical on shared configs
+		away from the grid boundary — see the boundary note below).
 
 """
 
@@ -39,6 +40,10 @@ class FlowLeniaUpdate(LeniaUpdate):
 		density instead. The two coincide for channel_size 1.
 	- The official implementation hardcodes theta_A = channel_size and n = 2; both are
 		parameters here, with defaults reproducing the official behavior.
+	- The Sobel gradients wrap the torus, consistent with the perception and the
+		reintegration; the official implementation zero-pads them at the boundary,
+		contradicting its own periodic domain. Away from the boundary the two are
+		bitwise identical.
 	- Kernel weights are normalized to sum to one (Chan's Lenia convention, inherited
 		from LeniaUpdate's _growth); the reference uses raw h. Identical when sum(h) is
 		one. In Flow Lenia the scale of h is a real degree of freedom — it sets the
@@ -236,15 +241,16 @@ def sobel(A: Array) -> Array:
 	Args:
 		A: Input array of shape (*spatial_dims, c), where c is the number of channels.
 
-	`jax.scipy.signal.convolve` is the n-dimensional sibling of the reference's
-	`convolve2d` and lowers to `lax.conv_general_dilated`, adding only the kernel flip
-	and SAME padding. Two properties make it the right primitive here rather than the
-	alternatives used elsewhere in the library: it zero-pads, as the reference does,
-	where an FFT convolution (Lenia's perception) would wrap the torus and change the
-	gradient at the boundary; and the stencil is fixed physics, so it stays a plain
-	constant rather than an `nnx.Conv`'s trainable weights. Packing every axis into one
-	grouped convolution is measurably faster but reorders the float32 summation, which
-	costs bitwise agreement with the reference.
+	The domain is a torus, so the input is wrap-padded before the stencil is applied:
+	differentiation then commutes with translation exactly. This is a stated deviation
+	from the official implementation, whose `convolve2d(mode="same")` zero-pads the
+	boundary while its perception and reintegration both wrap — away from the boundary
+	the two are bitwise identical. `jax.scipy.signal.convolve` is the n-dimensional
+	sibling of the reference's `convolve2d` and lowers to `lax.conv_general_dilated`;
+	the stencil is fixed physics, so it stays a plain constant rather than an
+	`nnx.Conv`'s trainable weights. Packing every axis into one grouped convolution is
+	measurably faster but reorders the float32 summation, which costs bitwise
+	agreement with the reference.
 
 	Returns:
 		Gradients of shape (*spatial_dims, num_spatial_dims, c), where axis -2 orders the
@@ -256,9 +262,13 @@ def sobel(A: Array) -> Array:
 	num_spatial_dims = A.ndim - 1
 	kernels = get_sobel_kernels(num_spatial_dims)
 
+	# Wrap-pad the spatial axes so every stencil window lives on the torus
+	pad_widths = [(1, 1)] * num_spatial_dims + [(0, 0)]
+	A = jnp.pad(A, pad_widths, mode="wrap")
+
 	# Compute gradients per channel and per axis (+d/daxis up to the Sobel scale)
 	def convolve_channel(a: Array, kernel: Array) -> Array:
-		return convolve(a, kernel, mode="same")
+		return convolve(a, kernel, mode="valid")
 
 	grads = [
 		jax.vmap(convolve_channel, in_axes=(-1, None), out_axes=-1)(A, kernel) for kernel in kernels
