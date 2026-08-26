@@ -33,7 +33,7 @@ class ParticleLenia(ComplexSystem[Array, Array]):
 		self,
 		num_spatial_dims: int,
 		*,
-		T: int,
+		T: float,
 		kernel_fn: Callable = peak_kernel_fn,
 		growth_fn: Callable = peak_growth_fn,
 		rule_params: ParticleLeniaRuleParams,

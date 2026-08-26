@@ -76,3 +76,20 @@ def test_orbium_survives() -> None:
 
 	assert jnp.allclose(metrics_final["mass"], mass_before, rtol=0.1)
 	assert metrics_final["concentration"] > 0.5
+
+
+def test_lenia_runs_in_3d() -> None:
+	"""Test that Lenia constructs, steps, and measures in three spatial dimensions."""
+	from cax.cs.lenia import load_pattern, metrics_fn
+
+	_, rule_params = load_pattern("Orbium")
+	lenia = Lenia(spatial_dims=(16, 16, 16), channel_size=1, R=5, T=10, rule_params=rule_params)
+
+	key = jax.random.key(0)
+	state = jax.random.uniform(key, (16, 16, 16, 1))
+	state_final, states = lenia(state, num_steps=4, trajectory=True)
+
+	assert state_final.shape == (16, 16, 16, 1)
+	assert states.shape == (4, 16, 16, 16, 1)
+	metrics = metrics_fn(state_final, R=5)
+	assert metrics["center_of_mass"].shape == (3,)

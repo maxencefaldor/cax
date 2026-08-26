@@ -22,3 +22,19 @@ def test_elementary_jit_init() -> None:
 		init_elementary()
 	except Exception as e:
 		pytest.fail(f"Elementary instantiation failed under jit: {e}")
+
+
+def test_rule_110_known_rows() -> None:
+	"""Test rule 110 against hand-computed rows from a single seed."""
+	from flax import nnx
+
+	elementary = Elementary(
+		wolfram_code=Elementary.wolfram_code_from_rule_number(110), rngs=nnx.Rngs(0)
+	)
+	state = jnp.zeros((8, 1)).at[5].set(1.0)
+
+	_, states = elementary(state, num_steps=2, trajectory=True)
+
+	# Rule 110 from ...00000100...: one step grows left (00001100), two steps (00011100).
+	assert jnp.array_equal(states[0][:, 0], jnp.array([0, 0, 0, 0, 1, 1, 0, 0], dtype=jnp.float32))
+	assert jnp.array_equal(states[1][:, 0], jnp.array([0, 0, 0, 1, 1, 1, 0, 0], dtype=jnp.float32))

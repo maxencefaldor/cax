@@ -32,7 +32,7 @@ class FlowLeniaUpdate(LeniaUpdate):
 		self,
 		channel_size: int,
 		*,
-		T: int,
+		T: float,
 		growth_fn: Callable = exponential_growth_fn,
 		rule_params: LeniaRuleParams,
 		# Flow Lenia parameters

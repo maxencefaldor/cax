@@ -27,7 +27,7 @@ class FlowLenia(ComplexSystem[Array, Array]):
 		channel_size: int,
 		*,
 		R: int,
-		T: int,
+		T: float,
 		state_scale: float = 1.0,
 		kernel_fn: Callable = gaussian_kernel_fn,
 		growth_fn: Callable = exponential_growth_fn,

@@ -51,3 +51,17 @@ def test_final_only_call_matches_trajectory_call(elementary: Elementary) -> None
 	state_final = elementary(state_init(), num_steps=6)
 	state_final_trajectory, _ = elementary(state_init(), num_steps=6, trajectory=True)
 	assert jnp.array_equal(state_final, state_final_trajectory)
+
+
+def test_vmap_over_shared_module(elementary: Elementary) -> None:
+	"""Test that a batch of states rolls out under one shared module via nnx.vmap."""
+	import jax
+
+	batch = jax.random.bernoulli(jax.random.key(0), 0.5, (4, 32, 1)).astype(jnp.float32)
+	batch_final = nnx.vmap(lambda cs, state: cs(state, num_steps=3), in_axes=(None, 0))(
+		elementary, batch
+	)
+	assert batch_final.shape == (4, 32, 1)
+
+	state_final = elementary(batch[0], num_steps=3)
+	assert jnp.array_equal(batch_final[0], state_final)

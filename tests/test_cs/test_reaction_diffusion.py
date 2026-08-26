@@ -102,3 +102,16 @@ def test_reaction_diffusion_stencil_is_not_trainable() -> None:
 	reaction_diffusion = ReactionDiffusion(rngs=nnx.Rngs(0))
 	params = nnx.state(reaction_diffusion, nnx.Param)
 	assert not nnx.to_flat_state(params)
+
+
+def test_gray_scott_state_stays_in_unit_interval() -> None:
+	"""Test that concentrations remain in [0, 1] over many steps."""
+	from cax.cs.reaction_diffusion import ReactionDiffusion
+
+	reaction_diffusion = ReactionDiffusion(rngs=nnx.Rngs(0))
+	key = jax.random.key(0)
+	state = jax.random.uniform(key, (32, 32, 2))
+
+	state_final = reaction_diffusion(state, num_steps=200)
+	assert jnp.min(state_final) >= 0.0
+	assert jnp.max(state_final) <= 1.0

@@ -20,7 +20,7 @@ class ParticleLeniaUpdate(Update[Array, Array, Array]):
 	def __init__(
 		self,
 		*,
-		T: int,
+		T: float,
 	):
 		"""Initialize Particle Lenia update.
 
