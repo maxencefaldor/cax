@@ -5,8 +5,8 @@ import jax.numpy as jnp
 import pytest
 
 from cax.cs.particle_lenia import ParticleLenia, ParticleLeniaRuleParams
-from cax.cs.particle_lenia.growth import GrowthParams
-from cax.cs.particle_lenia.kernel import KernelParams
+from cax.cs.particle_lenia.growth import ParticleLeniaGrowthParams
+from cax.cs.particle_lenia.kernel import ParticleLeniaKernelParams
 
 
 def test_particle_lenia_jit_init() -> None:
@@ -14,10 +14,10 @@ def test_particle_lenia_jit_init() -> None:
 
 	@jax.jit
 	def init_particle_lenia() -> ParticleLenia:
-		kernel_params = KernelParams(
+		kernel_params = ParticleLeniaKernelParams(
 			weight=jnp.array([1.0]), mean=jnp.array([0.5]), std=jnp.array([0.1])
 		)
-		growth_params = GrowthParams(mean=jnp.array([0.5]), std=jnp.array([0.1]))
+		growth_params = ParticleLeniaGrowthParams(mean=jnp.array([0.5]), std=jnp.array([0.1]))
 		rule_params = ParticleLeniaRuleParams(
 			c_rep=1.0,
 			kernel_params=kernel_params,
@@ -44,10 +44,10 @@ def test_particle_lenia_fields_match_reference() -> None:
 	mu_k, sigma_k, w_k = 4.0, 1.0, 0.022
 	mu_g, sigma_g, c_rep = 0.6, 0.15, 1.0
 
-	kernel_params = KernelParams(
+	kernel_params = ParticleLeniaKernelParams(
 		weight=jnp.array(w_k), mean=jnp.array(mu_k), std=jnp.array(sigma_k)
 	)
-	growth_params = GrowthParams(mean=jnp.array(mu_g), std=jnp.array(sigma_g))
+	growth_params = ParticleLeniaGrowthParams(mean=jnp.array(mu_g), std=jnp.array(sigma_g))
 	rule_params = ParticleLeniaRuleParams(
 		c_rep=c_rep, kernel_params=kernel_params, growth_params=growth_params
 	)
@@ -73,8 +73,8 @@ def test_particle_lenia_fields_match_reference() -> None:
 
 def test_particle_lenia_render_modes_differ() -> None:
 	"""Test that the three render modes run and produce distinct images."""
-	kernel_params = KernelParams(weight=jnp.array(0.022), mean=jnp.array(4.0), std=jnp.array(1.0))
-	growth_params = GrowthParams(mean=jnp.array(0.6), std=jnp.array(0.15))
+	kernel_params = ParticleLeniaKernelParams(weight=jnp.array(0.022), mean=jnp.array(4.0), std=jnp.array(1.0))
+	growth_params = ParticleLeniaGrowthParams(mean=jnp.array(0.6), std=jnp.array(0.15))
 	rule_params = ParticleLeniaRuleParams(
 		c_rep=1.0, kernel_params=kernel_params, growth_params=growth_params
 	)

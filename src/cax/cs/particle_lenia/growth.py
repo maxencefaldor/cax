@@ -13,14 +13,14 @@ from .kernel import bell
 
 
 @nnx.dataclass
-class GrowthParams(nnx.Pytree):
+class ParticleLeniaGrowthParams(nnx.Pytree):
 	"""Growth parameters."""
 
 	mean: Array = nnx.data()
 	std: Array = nnx.data()
 
 
-def peak_growth_fn(u: Array, growth_params: GrowthParams) -> Array:
+def peak_growth_fn(u: Array, growth_params: ParticleLeniaGrowthParams) -> Array:
 	"""Growth function introduced in [1].
 
 	The reference defines growth as `G = peak_f(U, mu_g, sigma_g)` — the same Gaussian

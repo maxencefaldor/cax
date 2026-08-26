@@ -5,8 +5,8 @@ import jax.numpy as jnp
 import pytest
 
 from cax.cs.lenia import Lenia, LeniaRuleParams
-from cax.cs.lenia.growth import GrowthParams
-from cax.cs.lenia.kernel import KernelParams
+from cax.cs.lenia.growth import LeniaGrowthParams
+from cax.cs.lenia.kernel import LeniaKernelParams
 
 
 def test_lenia_jit_init() -> None:
@@ -14,8 +14,8 @@ def test_lenia_jit_init() -> None:
 
 	@jax.jit
 	def init_lenia() -> Lenia:
-		kernel_params = KernelParams(r=jnp.array([1.0]), beta=jnp.array([[1.0]]))
-		growth_params = GrowthParams(mean=jnp.array([0.5]), std=jnp.array([0.1]))
+		kernel_params = LeniaKernelParams(r=jnp.array([1.0]), beta=jnp.array([[1.0]]))
+		growth_params = LeniaGrowthParams(mean=jnp.array([0.5]), std=jnp.array([0.1]))
 		rule_params = LeniaRuleParams(
 			channel_source=jnp.array([0]),
 			channel_target=jnp.array([0]),

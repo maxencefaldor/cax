@@ -10,10 +10,10 @@ References:
 
 """
 
-from ..lenia.growth import GrowthParams, exponential_growth_fn
+from ..lenia.growth import LeniaGrowthParams, exponential_growth_fn
 from ..lenia.kernel import (
 	FreeKernelParams,
-	KernelParams,
+	LeniaKernelParams,
 	exponential_kernel_fn,
 	free_kernel_fn,
 	gaussian_kernel_fn,
@@ -29,8 +29,8 @@ __all__ = [
 	"FlowLenia",
 	"FlowLeniaUpdate",
 	"FreeKernelParams",
-	"GrowthParams",
-	"KernelParams",
+	"LeniaGrowthParams",
+	"LeniaKernelParams",
 	"LeniaPerceive",
 	"LeniaRuleParams",
 	"exponential_growth_fn",

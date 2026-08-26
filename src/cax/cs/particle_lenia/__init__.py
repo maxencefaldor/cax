@@ -7,15 +7,15 @@ References:
 """
 
 from .cs import ParticleLenia
-from .growth import GrowthParams, peak_growth_fn
-from .kernel import KernelParams, bell, peak_kernel_fn
+from .growth import ParticleLeniaGrowthParams, peak_growth_fn
+from .kernel import ParticleLeniaKernelParams, bell, peak_kernel_fn
 from .perceive import ParticleLeniaPerceive
 from .rule import ParticleLeniaRuleParams
 from .update import ParticleLeniaUpdate
 
 __all__ = [
-	"GrowthParams",
-	"KernelParams",
+	"ParticleLeniaGrowthParams",
+	"ParticleLeniaKernelParams",
 	"ParticleLenia",
 	"ParticleLeniaPerceive",
 	"ParticleLeniaRuleParams",

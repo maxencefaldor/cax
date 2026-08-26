@@ -12,7 +12,7 @@ from jax import Array
 
 
 @nnx.dataclass
-class KernelParams(nnx.Pytree):
+class ParticleLeniaKernelParams(nnx.Pytree):
 	"""Kernel parameters."""
 
 	weight: Array = nnx.data()
@@ -29,6 +29,6 @@ def bell(x: Array, mean: Array, std: Array) -> Array:
 	return jnp.exp(-(((x - mean) / std) ** 2))
 
 
-def peak_kernel_fn(radius: Array, kernel_params: KernelParams) -> Array:
+def peak_kernel_fn(radius: Array, kernel_params: ParticleLeniaKernelParams) -> Array:
 	"""Peak kernel function introduced in [1]."""
 	return kernel_params.weight * bell(radius, kernel_params.mean, kernel_params.std)

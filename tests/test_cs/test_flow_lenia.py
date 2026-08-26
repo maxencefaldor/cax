@@ -6,8 +6,8 @@ import pytest
 
 from cax.cs.flow_lenia import FlowLenia
 from cax.cs.lenia import LeniaRuleParams
-from cax.cs.lenia.growth import GrowthParams
-from cax.cs.lenia.kernel import KernelParams
+from cax.cs.lenia.growth import LeniaGrowthParams
+from cax.cs.lenia.kernel import LeniaKernelParams
 
 
 def test_flow_lenia_jit_init() -> None:
@@ -15,8 +15,8 @@ def test_flow_lenia_jit_init() -> None:
 
 	@jax.jit
 	def init_flow_lenia() -> FlowLenia:
-		kernel_params = KernelParams(r=jnp.array([1.0]), beta=jnp.array([[1.0]]))
-		growth_params = GrowthParams(mean=jnp.array([0.5]), std=jnp.array([0.1]))
+		kernel_params = LeniaKernelParams(r=jnp.array([1.0]), beta=jnp.array([[1.0]]))
+		growth_params = LeniaGrowthParams(mean=jnp.array([0.5]), std=jnp.array([0.1]))
 		rule_params = LeniaRuleParams(
 			channel_source=jnp.array([0]),
 			channel_target=jnp.array([0]),
@@ -41,8 +41,8 @@ def test_flow_lenia_jit_init() -> None:
 
 def test_flow_lenia_rejects_non_2d() -> None:
 	"""Test that a non-2D spatial_dims is refused at construction."""
-	kernel_params = KernelParams(r=jnp.array([1.0]), beta=jnp.array([[1.0]]))
-	growth_params = GrowthParams(mean=jnp.array([0.5]), std=jnp.array([0.1]))
+	kernel_params = LeniaKernelParams(r=jnp.array([1.0]), beta=jnp.array([[1.0]]))
+	growth_params = LeniaGrowthParams(mean=jnp.array([0.5]), std=jnp.array([0.1]))
 	rule_params = LeniaRuleParams(
 		channel_source=jnp.array([0]),
 		channel_target=jnp.array([0]),
@@ -60,10 +60,10 @@ def test_flow_lenia_theta_a_defaults_to_channel_size() -> None:
 		channel_source=jnp.array([0, 1, 2]),
 		channel_target=jnp.array([0, 1, 2]),
 		weight=jnp.array([1.0, 1.0, 1.0]),
-		kernel_params=KernelParams(
+		kernel_params=LeniaKernelParams(
 			r=jnp.array([1.0, 1.0, 1.0]), beta=jnp.array([[1.0], [1.0], [1.0]])
 		),
-		growth_params=GrowthParams(mean=jnp.array([0.5, 0.5, 0.5]), std=jnp.array([0.1, 0.1, 0.1])),
+		growth_params=LeniaGrowthParams(mean=jnp.array([0.5, 0.5, 0.5]), std=jnp.array([0.1, 0.1, 0.1])),
 	)
 	flow_lenia = FlowLenia(
 		spatial_dims=(32, 32), channel_size=3, R=5, T=10, rule_params=rule_params
@@ -78,8 +78,8 @@ def test_flow_lenia_theta_a_defaults_to_channel_size() -> None:
 
 def test_flow_lenia_conserves_mass() -> None:
 	"""Test that total mass is conserved over many steps up to float32 accumulation."""
-	kernel_params = KernelParams(r=jnp.array([1.0]), beta=jnp.array([[1.0]]))
-	growth_params = GrowthParams(mean=jnp.array([0.15]), std=jnp.array([0.015]))
+	kernel_params = LeniaKernelParams(r=jnp.array([1.0]), beta=jnp.array([[1.0]]))
+	growth_params = LeniaGrowthParams(mean=jnp.array([0.15]), std=jnp.array([0.015]))
 	rule_params = LeniaRuleParams(
 		channel_source=jnp.array([0]),
 		channel_target=jnp.array([0]),

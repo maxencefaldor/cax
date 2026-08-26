@@ -12,8 +12,8 @@ import jax.numpy as jnp
 import numpy as np
 from jax import Array
 
-from ..growth import GrowthParams
-from ..kernel import KernelParams
+from ..growth import LeniaGrowthParams
+from ..kernel import LeniaKernelParams
 from ..rule import LeniaRuleParams
 
 PATTERN_NAMES = ("5N7KKM", "5N7KKM_gyrating", "5N7KKM_twin", "Gyrorbium", "Orbium", "VT049W")
@@ -47,11 +47,11 @@ def load_pattern(name: str) -> tuple[Array, LeniaRuleParams]:
 			channel_source=jnp.asarray(archive["channel_source"]),
 			channel_target=jnp.asarray(archive["channel_target"]),
 			weight=jnp.asarray(archive["weight"]),
-			kernel_params=KernelParams(
+			kernel_params=LeniaKernelParams(
 				r=jnp.asarray(archive["kernel_r"]),
 				beta=jnp.asarray(archive["kernel_beta"]),
 			),
-			growth_params=GrowthParams(
+			growth_params=LeniaGrowthParams(
 				mean=jnp.asarray(archive["growth_mean"]),
 				std=jnp.asarray(archive["growth_std"]),
 			),

@@ -16,7 +16,7 @@ from jax import Array
 
 
 @nnx.dataclass
-class KernelParams(nnx.Pytree):
+class LeniaKernelParams(nnx.Pytree):
 	"""Kernel parameters."""
 
 	r: Array = nnx.data()
@@ -42,10 +42,10 @@ def bell(x: Array, mean: Array | float, std: Array | float) -> Array:
 	return jnp.exp(-0.5 * ((x - mean) / std) ** 2)
 
 
-def get_kernel_fn(kernel_core: Callable[[Array], Array]) -> Callable[[Array, KernelParams], Array]:
+def get_kernel_fn(kernel_core: Callable[[Array], Array]) -> Callable[[Array, LeniaKernelParams], Array]:
 	"""Get kernel function."""
 
-	def kernel_fn(radius: Array, kernel_params: KernelParams) -> Array:
+	def kernel_fn(radius: Array, kernel_params: LeniaKernelParams) -> Array:
 		"""Kernel function."""
 		mask = radius < kernel_params.r
 

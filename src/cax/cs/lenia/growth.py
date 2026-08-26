@@ -12,13 +12,13 @@ from .kernel import bell
 
 
 @nnx.dataclass
-class GrowthParams(nnx.Pytree):
+class LeniaGrowthParams(nnx.Pytree):
 	"""Growth parameters."""
 
 	mean: Array = nnx.data()
 	std: Array = nnx.data()
 
 
-def exponential_growth_fn(u: Array, growth_params: GrowthParams) -> Array:
+def exponential_growth_fn(u: Array, growth_params: LeniaGrowthParams) -> Array:
 	"""Growth mapping function introduced in [1]."""
 	return 2 * bell(u, growth_params.mean, growth_params.std) - 1

@@ -8,10 +8,10 @@ References:
 """
 
 from .cs import Lenia
-from .growth import GrowthParams, exponential_growth_fn
+from .growth import LeniaGrowthParams, exponential_growth_fn
 from .kernel import (
 	FreeKernelParams,
-	KernelParams,
+	LeniaKernelParams,
 	exponential_kernel_fn,
 	free_kernel_fn,
 	gaussian_kernel_fn,
@@ -27,8 +27,8 @@ from .update import LeniaUpdate
 __all__ = [
 	"PATTERN_NAMES",
 	"FreeKernelParams",
-	"GrowthParams",
-	"KernelParams",
+	"LeniaGrowthParams",
+	"LeniaKernelParams",
 	"Lenia",
 	"LeniaPerceive",
 	"LeniaRuleParams",
