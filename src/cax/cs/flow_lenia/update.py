@@ -38,8 +38,7 @@ class FlowLeniaUpdate(LeniaUpdate):
 		implementation ([1], flowlenia.py); the paper's Eq. 5 gates by the channel-sum
 		density instead. The two coincide for channel_size 1.
 	- The official implementation hardcodes theta_A = channel_size and n = 2; both are
-		parameters here. Pass ``theta_A=channel_size`` to reproduce official behavior
-		for multi-channel systems.
+		parameters here, with defaults reproducing the official behavior.
 	- Kernel weights are normalized to sum to one (Chan's Lenia convention, inherited
 		from LeniaUpdate's _growth); the reference uses raw h. Identical when sum(h) is
 		one. In Flow Lenia the scale of h is a real degree of freedom — it sets the
@@ -56,7 +55,7 @@ class FlowLeniaUpdate(LeniaUpdate):
 		growth_fn: Callable = exponential_growth_fn,
 		rule_params: LeniaRuleParams,
 		# Flow Lenia parameters
-		theta_A: float = 1.0,
+		theta_A: float | None = None,
 		n: int = 2,
 		dd: int = 5,
 		sigma: float = 0.65,
@@ -72,7 +71,8 @@ class FlowLeniaUpdate(LeniaUpdate):
 			rule_params: Instance of LeniaRuleParams containing kernel and growth parameters
 				for each channel.
 			theta_A: Threshold value for computing the flow activation alpha. Higher values
-				make flow less sensitive to local density.
+				make flow less sensitive to local density. Defaults to ``channel_size``,
+				matching the official implementation.
 			n: Exponent controlling the nonlinearity of flow activation. Higher values create
 				sharper transitions between flow and no-flow regions.
 			dd: Maximum displacement distance in pixels that flow can induce per time step.
@@ -84,7 +84,7 @@ class FlowLeniaUpdate(LeniaUpdate):
 		super().__init__(channel_size, T=T, growth_fn=growth_fn, rule_params=rule_params)
 
 		# Flow Lenia parameters
-		self.theta_A = theta_A
+		self.theta_A = channel_size if theta_A is None else theta_A
 		self.n = n
 		self.dt = 1 / self.T
 		self.dd = dd

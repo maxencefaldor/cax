@@ -54,6 +54,28 @@ def test_flow_lenia_rejects_non_2d() -> None:
 		FlowLenia(spatial_dims=(16, 16, 16), channel_size=1, R=5, T=10, rule_params=rule_params)
 
 
+def test_flow_lenia_theta_a_defaults_to_channel_size() -> None:
+	"""Test that theta_A defaults to channel_size, the official implementation's value."""
+	rule_params = LeniaRuleParams(
+		channel_source=jnp.array([0, 1, 2]),
+		channel_target=jnp.array([0, 1, 2]),
+		weight=jnp.array([1.0, 1.0, 1.0]),
+		kernel_params=KernelParams(
+			r=jnp.array([1.0, 1.0, 1.0]), beta=jnp.array([[1.0], [1.0], [1.0]])
+		),
+		growth_params=GrowthParams(mean=jnp.array([0.5, 0.5, 0.5]), std=jnp.array([0.1, 0.1, 0.1])),
+	)
+	flow_lenia = FlowLenia(
+		spatial_dims=(32, 32), channel_size=3, R=5, T=10, rule_params=rule_params
+	)
+	assert flow_lenia.update.theta_A == 3
+
+	flow_lenia_explicit = FlowLenia(
+		spatial_dims=(32, 32), channel_size=3, R=5, T=10, rule_params=rule_params, theta_A=2.5
+	)
+	assert flow_lenia_explicit.update.theta_A == 2.5
+
+
 def test_flow_lenia_conserves_mass() -> None:
 	"""Test that total mass is conserved over many steps up to float32 accumulation."""
 	kernel_params = KernelParams(r=jnp.array([1.0]), beta=jnp.array([[1.0]]))

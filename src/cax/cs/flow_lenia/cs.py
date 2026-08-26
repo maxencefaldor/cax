@@ -33,7 +33,7 @@ class FlowLenia(ComplexSystem[Array, Array]):
 		growth_fn: Callable = exponential_growth_fn,
 		rule_params: LeniaRuleParams,
 		# Flow Lenia parameters
-		theta_A: float = 1.0,
+		theta_A: float | None = None,
 		n: int = 2,
 		dd: int = 5,
 		sigma: float = 0.65,
@@ -56,7 +56,8 @@ class FlowLenia(ComplexSystem[Array, Array]):
 			rule_params: Instance of LeniaRuleParams containing kernel and growth parameters
 				for each channel.
 			theta_A: Threshold value for computing the flow activation alpha. Higher values
-				make flow less sensitive to local density.
+				make flow less sensitive to local density. Defaults to ``channel_size``,
+				matching the official implementation.
 			n: Exponent controlling the nonlinearity of flow activation. Higher values create
 				sharper transitions between flow and no-flow regions.
 			dd: Maximum displacement distance in pixels that flow can induce per time step.
