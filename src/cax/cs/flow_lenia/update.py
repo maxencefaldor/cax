@@ -86,7 +86,6 @@ class FlowLeniaUpdate(LeniaUpdate):
 		# Flow Lenia parameters
 		self.theta_A = channel_size if theta_A is None else theta_A
 		self.n = n
-		self.dt = 1 / self.T
 		self.dd = dd
 		self.sigma = sigma
 
@@ -150,6 +149,7 @@ class FlowLeniaUpdate(LeniaUpdate):
 
 		"""
 		SY, SX, _C = state.shape
+		dt = 1 / self.T  # The reference's symbol; T is the stored convention family-wide
 
 		# Generate all possible displacements
 		dys = jnp.arange(-self.dd, self.dd + 1)
@@ -165,7 +165,7 @@ class FlowLeniaUpdate(LeniaUpdate):
 
 		# Compute target positions (mu)
 		ma = self.dd - self.sigma  # Maximum allowed displacement
-		F_clipped = jnp.clip(self.dt * F, -ma, ma)  # (SY, SX, 2, C)
+		F_clipped = jnp.clip(dt * F, -ma, ma)  # (SY, SX, 2, C)
 		mu = pos[..., None] + F_clipped  # (SY, SX, 2, C)
 
 		# Define step function for each displacement
