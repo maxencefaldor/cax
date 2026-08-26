@@ -1,4 +1,9 @@
-"""Elementary Cellular Automata module."""
+"""Elementary Cellular Automata module.
+
+References:
+	[1] A New Kind of Science, Stephen Wolfram. 2002.
+
+"""
 
 from .cs import Elementary
 from .perceive import ElementaryPerceive

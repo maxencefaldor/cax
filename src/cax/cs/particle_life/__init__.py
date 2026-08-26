@@ -1,4 +1,9 @@
-"""Particle Life module."""
+"""Particle Life module.
+
+References:
+	[1] Particle Life, Tom Mohr. 2018. https://particle-life.com/
+
+"""
 
 from .cs import ParticleLife
 from .perceive import ParticleLifePerceive
