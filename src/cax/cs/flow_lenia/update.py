@@ -10,17 +10,15 @@ from collections.abc import Callable
 
 import jax
 import jax.numpy as jnp
-from flax import nnx
 from jax import Array
 from jax.scipy.signal import convolve2d
 
-from cax.core.update import Update
-
 from ..lenia.growth import exponential_growth_fn
 from ..lenia.rule import LeniaRuleParams
+from ..lenia.update import LeniaUpdate
 
 
-class FlowLeniaUpdate(Update[Array, Array, Array]):
+class FlowLeniaUpdate(LeniaUpdate):
 	"""Flow Lenia update rule.
 
 	Extends the standard Lenia update with flow-based advection. Computes affinity fields
@@ -63,14 +61,7 @@ class FlowLeniaUpdate(Update[Array, Array, Array]):
 				localized flow, larger values produce smoother displacement fields.
 
 		"""
-		self.channel_size = channel_size
-		self.T = T
-
-		self.normalized_weight = rule_params.weight / jnp.sum(rule_params.weight)
-		self.reshape_kernel_to_channel = self._reshape_kernel_to_channel(rule_params)
-
-		self.growth_fn = growth_fn
-		self.growth_params = nnx.data(rule_params.growth_params)
+		super().__init__(channel_size, T=T, growth_fn=growth_fn, rule_params=rule_params)
 
 		# Flow Lenia parameters
 		self.theta_A = theta_A
@@ -97,14 +88,8 @@ class FlowLeniaUpdate(Update[Array, Array, Array]):
 				advection and mass redistribution.
 
 		"""
-		# Compute growth
-		G_k = self.normalized_weight * self.growth_fn(
-			perception, self.growth_params
-		)  # (*spatial_dims, num_rules,)
-
-		# Aggregate growth to channels
-		# Affinity map U, previously called growth in Lenia
-		U = jnp.dot(G_k, self.reshape_kernel_to_channel)  # (*spatial_dims, channel_size,)
+		# Affinity map U: Lenia's aggregated growth, reused from the parent update
+		U = self._growth(perception)  # (*spatial_dims, channel_size)
 
 		# Affinity gradient
 		nabla_U = sobel(U)  # (*spatial_dims, 2, c)
@@ -193,13 +178,6 @@ class FlowLeniaUpdate(Update[Array, Array, Array]):
 		new_state = jnp.sum(nX, axis=0)  # (SY, SX, C)
 
 		return new_state
-
-	def _reshape_kernel_to_channel(self, rule_params: LeniaRuleParams) -> Array:
-		"""Compute array to reshape from kernel to channel."""
-		return jax.vmap(lambda x: jax.nn.one_hot(x, num_classes=self.channel_size))(
-			rule_params.channel_target
-		)
-
 
 def get_sobel_kernels() -> tuple[Array, Array]:
 	"""Define Sobel kernels exactly as in the reference Flow Lenia code."""

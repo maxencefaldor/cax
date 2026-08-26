@@ -74,16 +74,23 @@ class LeniaUpdate(Update[Array, Array, Array]):
 				clipping to [0, 1].
 
 		"""
-		# Compute growth
-		G_k = self.normalized_weight * self.growth_fn(perception, self.growth_params)
-
-		# Aggregate growth to channels
-		G = jnp.dot(G_k, self.reshape_kernel_to_channel)
-
-		# Update state and clip
-		state = jnp.clip(state + G / self.T, 0.0, 1.0)
+		# Update state with the aggregated growth and clip
+		state = jnp.clip(state + self._growth(perception) / self.T, 0.0, 1.0)
 
 		return state
+
+	def _growth(self, perception: Array) -> Array:
+		"""Compute per-kernel growth and aggregate it to channels.
+
+		Args:
+			perception: Array with shape (*spatial_dims, num_kernels) of potential fields.
+
+		Returns:
+			Array with shape (*spatial_dims, channel_size) of aggregated growth.
+
+		"""
+		G_k = self.normalized_weight * self.growth_fn(perception, self.growth_params)
+		return jnp.dot(G_k, self.reshape_kernel_to_channel)
 
 	def _reshape_kernel_to_channel(self, rule_params: LeniaRuleParams) -> Array:
 		"""Compute array to reshape from kernel to channel.
