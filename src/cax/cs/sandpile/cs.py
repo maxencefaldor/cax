@@ -30,7 +30,7 @@ class Sandpile(ComplexSystem[Array, Array]):
 
 	Two boundary modes are supported:
 		- "CIRCULAR": periodic (toroidal) boundaries conserving total mass.
-		- "OPEN": dissipative boundaries where sand falling off the edge is lost,
+		- "ZERO": dissipative boundaries where sand falling off the edge is lost,
 			which is required for proper self-organized criticality.
 	"""
 
@@ -39,7 +39,7 @@ class Sandpile(ComplexSystem[Array, Array]):
 		*,
 		num_spatial_dims: int = 2,
 		threshold: int | None = None,
-		padding: Literal["CIRCULAR", "OPEN"] = "CIRCULAR",
+		padding: Literal["CIRCULAR", "ZERO"] = "CIRCULAR",
 	):
 		"""Initialize Sandpile.
 
@@ -48,7 +48,7 @@ class Sandpile(ComplexSystem[Array, Array]):
 			threshold: Critical chip count for toppling. Defaults to
 				2 * num_spatial_dims (4 in 2D, 6 in 3D).
 			padding: Boundary condition mode. "CIRCULAR" for periodic boundaries,
-				"OPEN" for dissipative boundaries (required for SOC).
+				"ZERO" for dissipative boundaries (required for SOC).
 
 		"""
 		self.num_spatial_dims = num_spatial_dims

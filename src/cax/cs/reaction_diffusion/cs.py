@@ -7,6 +7,8 @@ two chemical species U and V that diffuse at different rates and interact throug
 a cubic autocatalytic reaction.
 """
 
+from typing import Literal
+
 import jax.numpy as jnp
 from flax import nnx
 from jax import Array
@@ -39,6 +41,7 @@ class ReactionDiffusion(ComplexSystem[Array, Array]):
 		feed_rate: float = 0.06,
 		kill_rate: float = 0.062,
 		dt: float = 1.0,
+		padding: Literal["CIRCULAR", "ZERO", "EDGE"] = "CIRCULAR",
 	):
 		"""Initialize Reaction-Diffusion.
 
@@ -49,9 +52,13 @@ class ReactionDiffusion(ComplexSystem[Array, Array]):
 			feed_rate: Feed rate f — controls how quickly U is replenished.
 			kill_rate: Kill rate k — controls how quickly V is removed.
 			dt: Time step size for the Euler integration.
+			padding: Boundary condition mode. "CIRCULAR" for periodic boundaries, "ZERO"
+				for an absorbing zero-concentration border, "EDGE" for a no-flux border.
 
 		"""
-		self.perceive = ReactionDiffusionPerceive(num_spatial_dims=num_spatial_dims)
+		self.perceive = ReactionDiffusionPerceive(
+			num_spatial_dims=num_spatial_dims, padding=padding
+		)
 		self.update = ReactionDiffusionUpdate(
 			diffusion_rate_u=diffusion_rate_u,
 			diffusion_rate_v=diffusion_rate_v,

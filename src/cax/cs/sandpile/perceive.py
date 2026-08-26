@@ -18,7 +18,7 @@ class SandpilePerceive(VonNeumannPerceive):
 
 	Supports two boundary modes:
 		- "CIRCULAR": periodic boundaries (sand wraps around edges).
-		- "OPEN": dissipative boundaries where neighbors outside the grid are zero
+		- "ZERO": dissipative boundaries where neighbors outside the grid are zero
 			(sand falls off the edge when boundary cells topple).
 	"""
 
@@ -26,15 +26,14 @@ class SandpilePerceive(VonNeumannPerceive):
 		self,
 		*,
 		num_spatial_dims: int = 2,
-		padding: Literal["CIRCULAR", "OPEN"] = "CIRCULAR",
+		padding: Literal["CIRCULAR", "ZERO"] = "CIRCULAR",
 	):
 		"""Initialize Sandpile perceive.
 
 		Args:
 			num_spatial_dims: Number of spatial dimensions (default 2).
 			padding: Boundary condition mode. "CIRCULAR" for periodic boundaries,
-				"OPEN" for dissipative boundaries where sand leaves the system.
+				"ZERO" for dissipative boundaries where sand leaves the system.
 
 		"""
-		neighborhood_padding = "CIRCULAR" if padding == "CIRCULAR" else "ZERO"
-		super().__init__(num_spatial_dims=num_spatial_dims, radius=1, padding=neighborhood_padding)
+		super().__init__(num_spatial_dims=num_spatial_dims, radius=1, padding=padding)

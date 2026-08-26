@@ -5,6 +5,8 @@ It computes the discrete Laplacian of each chemical species using a fixed convol
 which represents the spatial diffusion component of the PDE.
 """
 
+from typing import Literal
+
 import jax
 import jax.numpy as jnp
 from jax import Array
@@ -17,21 +19,28 @@ class ReactionDiffusionPerceive(Perceive[Array, Array]):
 
 	Computes the identity (current concentration) and the discrete Laplacian for each
 	chemical species. The state has 2 channels (species U and V), so the perception
-	produces 4 channels: [U, lap(U), V, lap(V)] via grouped convolution with circular
-	(periodic) boundaries.
+	produces 4 channels: [U, lap(U), V, lap(V)] via grouped convolution.
 
 	The stencil is physics, not weights: it is stored as a plain constant, applied with
 	`jax.lax.conv_general_dilated`, and never appears in the trainable parameters.
 	"""
 
-	def __init__(self, *, num_spatial_dims: int = 2):
+	def __init__(
+		self,
+		*,
+		num_spatial_dims: int = 2,
+		padding: Literal["CIRCULAR", "ZERO", "EDGE"] = "CIRCULAR",
+	):
 		"""Initialize Reaction-Diffusion perceive.
 
 		Args:
 			num_spatial_dims: Number of spatial dimensions (default 2).
+			padding: Boundary condition mode. "CIRCULAR" for periodic boundaries, "ZERO"
+				for an absorbing zero-concentration border, "EDGE" for a no-flux border.
 
 		"""
 		self.num_spatial_dims = num_spatial_dims
+		self.pad_mode = {"CIRCULAR": "wrap", "ZERO": "constant", "EDGE": "edge"}[padding]
 		self.channel_size = 2
 
 		# One (identity, Laplacian) pair per species, shape (*kernel_spatial, 1, 4):
@@ -61,9 +70,9 @@ class ReactionDiffusionPerceive(Perceive[Array, Array]):
 		spatial_dims = state.shape[-num_spatial_dims - 1 : -1]
 		batch_dims = state.shape[: -num_spatial_dims - 1]
 
-		# Periodic boundaries: wrap-pad the spatial axes, then convolve without padding.
+		# Pad the spatial axes per the boundary condition, then convolve without padding.
 		pad_widths = [(0, 0)] * len(batch_dims) + [(1, 1)] * num_spatial_dims + [(0, 0)]
-		padded = jnp.pad(state, pad_widths, mode="wrap")
+		padded = jnp.pad(state, pad_widths, mode=self.pad_mode)
 		padded = padded.reshape(-1, *[dim + 2 for dim in spatial_dims], self.channel_size)
 
 		# Channel-last layouts for any dimensionality: lhs (N, *spatial, C),

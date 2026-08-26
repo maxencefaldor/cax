@@ -6,6 +6,8 @@ each cell's next state depends on its current state and the number of alive neig
 in its Moore neighborhood (8 surrounding cells).
 """
 
+from typing import Literal
+
 import jax.numpy as jnp
 from flax import nnx
 from jax import Array
@@ -32,6 +34,7 @@ class Life(ComplexSystem[Array, Array]):
 		*,
 		birth: Array,
 		survival: Array,
+		padding: Literal["CIRCULAR", "ZERO"] = "CIRCULAR",
 	):
 		"""Initialize Life.
 
@@ -40,9 +43,11 @@ class Life(ComplexSystem[Array, Array]):
 				cell with i alive neighbors should become alive, 0.0 otherwise.
 			survival: Array of shape (9,) defining survival conditions. Element i is 1.0 if a
 				live cell with i alive neighbors should stay alive, 0.0 otherwise.
+			padding: Boundary condition mode. "CIRCULAR" for periodic boundaries,
+				"ZERO" for a border of permanently dead cells.
 
 		"""
-		self.perceive = LifePerceive()
+		self.perceive = LifePerceive(padding=padding)
 		self.update = LifeUpdate(birth=birth, survival=survival)
 
 	def _step(self, state: Array, input: Array | None = None) -> Array:

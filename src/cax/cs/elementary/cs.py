@@ -6,6 +6,8 @@ Cellular Automata are classified by Wolfram rule numbers (0-255), which define t
 function for all possible three-cell neighborhoods.
 """
 
+from typing import Literal
+
 import jax.numpy as jnp
 from flax import nnx
 from jax import Array
@@ -29,6 +31,7 @@ class Elementary(ComplexSystem[Array, Array]):
 		self,
 		*,
 		wolfram_code: Array,
+		padding: Literal["CIRCULAR", "ZERO"] = "CIRCULAR",
 	):
 		"""Initialize Elementary Cellular Automaton.
 
@@ -36,9 +39,11 @@ class Elementary(ComplexSystem[Array, Array]):
 			wolfram_code: Array of 8 binary values defining the Wolfram rule. Each element
 				corresponds to the output for one of the 8 possible three-cell neighborhood
 				configurations (111, 110, 101, 100, 011, 010, 001, 000).
+			padding: Boundary condition mode. "CIRCULAR" for periodic boundaries,
+				"ZERO" for a border of permanently dead cells.
 
 		"""
-		self.perceive = ElementaryPerceive()
+		self.perceive = ElementaryPerceive(padding=padding)
 		self.update = ElementaryUpdate(wolfram_code=wolfram_code)
 
 	def _step(self, state: Array, input: Array | None = None) -> Array:
