@@ -115,8 +115,14 @@ class ParticleLife(ComplexSystem[ParticleLifeState, Array]):
 		y = jnp.linspace(0, 1, resolution)
 		grid = jnp.stack(jnp.meshgrid(x, y), axis=-1)  # Shape: (resolution, resolution, 2)
 
-		# Compute squared distances to all particles
+		# Adjust coordinates for rendering
+		# - Simulation has y increasing upwards (y=0 bottom, y=1 top).
+		# - Image has y increasing downwards (y=0 top, y=1 bottom).
+		# - Flip position y: map simulation y to image y with (1 - y).
 		positions = state.position  # Shape: (num_particles, 2)
+		positions = positions.at[:, 1].set(1 - positions[:, 1])
+
+		# Compute squared distances to all particles
 		distance_sq = jnp.sum(
 			(grid[:, :, None, :] - positions[None, None, :, :]) ** 2, axis=-1
 		)  # Shape: (resolution, resolution, num_particles)
