@@ -3,12 +3,12 @@
 from .cs import Boids
 from .perceive import BoidsPerceive
 from .perception import BoidsPerception
-from .policy import BoidPolicy
+from .policy import BoidsPolicy
 from .state import BoidsState
 from .update import BoidsUpdate
 
 __all__ = [
-	"BoidPolicy",
+	"BoidsPolicy",
 	"Boids",
 	"BoidsPerceive",
 	"BoidsPerception",

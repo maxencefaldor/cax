@@ -12,6 +12,7 @@ import jax.numpy as jnp
 from jax import Array
 
 from cax.core.update import Update
+from cax.utils import damped_euler_step
 
 from .perception import BoidsPerception
 from .state import BoidsState
@@ -64,10 +65,12 @@ class BoidsUpdate(Update[BoidsState, BoidsPerception, Array]):
 			New BoidsState with updated positions and velocities.
 
 		"""
-		velocity = self.friction_factor * state.velocity + self.dt * perception.acceleration
-		position = state.position + self.dt * velocity
-
-		# Apply periodic boundary conditions
-		position = position % 1.0
+		position, velocity = damped_euler_step(
+			state.position,
+			state.velocity,
+			perception.acceleration,
+			dt=self.dt,
+			friction_factor=self.friction_factor,
+		)
 
 		return replace(state, position=position, velocity=velocity)

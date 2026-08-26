@@ -14,7 +14,7 @@ from cax.core import ComplexSystem
 from cax.utils import clip_and_uint8
 
 from .perceive import BoidsPerceive
-from .policy import BoidPolicy
+from .policy import BoidsPolicy
 from .state import BoidsState
 from .update import BoidsUpdate
 
@@ -27,7 +27,7 @@ class Boids(ComplexSystem[BoidsState, Array]):
 		*,
 		dt: float = 0.01,
 		velocity_half_life: float = jnp.inf,
-		boid_policy: BoidPolicy,
+		boid_policy: BoidsPolicy,
 	):
 		"""Initialize Boids.
 

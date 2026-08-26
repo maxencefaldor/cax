@@ -12,6 +12,7 @@ from flax import nnx
 from cax.core.perceive import Perceive
 
 from .perception import BoidsPerception
+from .policy import BoidsPolicy
 from .state import BoidsState
 
 
@@ -23,7 +24,7 @@ class BoidsPerceive(Perceive[BoidsState, BoidsPerception]):
 	to achieve flocking behaviors.
 	"""
 
-	def __init__(self, boid_policy: nnx.Module):
+	def __init__(self, boid_policy: BoidsPolicy):
 		"""Initialize Boids perceive.
 
 		Args:

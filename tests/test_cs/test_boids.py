@@ -4,7 +4,7 @@ import jax
 import pytest
 from flax import nnx
 
-from cax.cs.boids import BoidPolicy, Boids
+from cax.cs.boids import BoidsPolicy, Boids
 
 
 def test_boids_jit_init() -> None:
@@ -13,7 +13,7 @@ def test_boids_jit_init() -> None:
 	@jax.jit
 	def init_boids() -> Boids:
 		rngs = nnx.Rngs(0)
-		policy = BoidPolicy(rngs=rngs)
+		policy = BoidsPolicy(rngs=rngs)
 		boids = Boids(dt=0.01, velocity_half_life=0.1, boid_policy=policy)
 		return boids
 
@@ -28,9 +28,9 @@ def test_boid_policy_isolated_boid_is_finite() -> None:
 	import jax.numpy as jnp
 	from flax import nnx
 
-	from cax.cs.boids import BoidPolicy, BoidsState
+	from cax.cs.boids import BoidsPolicy, BoidsState
 
-	policy = BoidPolicy(perception_radius=0.01, noise_scale=0.0, rngs=nnx.Rngs(0))
+	policy = BoidsPolicy(perception_radius=0.01, noise_scale=0.0, rngs=nnx.Rngs(0))
 
 	# Two boids far apart on the torus: both are isolated.
 	position = jnp.array([[0.1, 0.1], [0.6, 0.6]])
@@ -43,7 +43,7 @@ def test_boid_policy_isolated_boid_is_finite() -> None:
 	# constructed inside the traced function: all of its state then lives at the
 	# inner trace level.
 	def loss(position: jax.Array) -> jax.Array:
-		inner_policy = BoidPolicy(perception_radius=0.01, noise_scale=0.0, rngs=nnx.Rngs(0))
+		inner_policy = BoidsPolicy(perception_radius=0.01, noise_scale=0.0, rngs=nnx.Rngs(0))
 		return jnp.sum(inner_policy(BoidsState(position=position, velocity=velocity), 0))
 
 	grad = jax.grad(loss)(position)

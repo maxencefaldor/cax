@@ -11,12 +11,12 @@ import jax.numpy as jnp
 from flax import nnx
 from jax import Array
 
-from cax.utils import safe_divide, safe_norm
+from cax.utils import safe_divide, safe_norm, toroidal_difference
 
 from .state import BoidsState
 
 
-class BoidPolicy(nnx.Module):
+class BoidsPolicy(nnx.Module):
 	"""Boid policy according to Craig Reynolds' paper.
 
 	The three behavior weights are `nnx.Param` on purpose: they are the knobs a
@@ -69,22 +69,8 @@ class BoidPolicy(nnx.Module):
 
 	def _toroidal_distance2(self, position_1: Array, position_2: Array) -> Array:
 		"""Calculate squared distance considering toroidal world in [0, 1]^n."""
-		# Calculate component-wise distances
-		vector = self._toroidal_vector(position_1, position_2)
-
-		# Return squared Euclidean distance
+		vector = toroidal_difference(position_1, position_2)
 		return jnp.sum(vector**2)
-
-	def _toroidal_vector(self, position_1: Array, position_2: Array) -> Array:
-		"""Get vector from position_1 to position_2 considering toroidal world in [0, 1]^n."""
-		# Calculate component-wise displacements
-		pos_diff = position_2 - position_1
-
-		# Apply periodic boundary conditions
-		pos_diff = jnp.where(pos_diff > 0.5, pos_diff - 1.0, pos_diff)
-		pos_diff = jnp.where(pos_diff < -0.5, pos_diff + 1.0, pos_diff)
-
-		return pos_diff
 
 	def _normalize(self, vector: Array) -> Array:
 		"""Normalize a vector, returning zero for the zero vector."""
@@ -134,7 +120,7 @@ class BoidPolicy(nnx.Module):
 		separation_mask = ~is_self & is_too_close
 
 		# Calculate steering force
-		separations = -self._toroidal_vector(state.position[boid_idx], state.position)
+		separations = -toroidal_difference(state.position[boid_idx], state.position)
 		steer = jnp.sum(separations, axis=0, where=separation_mask[..., None])
 
 		return self._normalize(steer)
@@ -175,7 +161,7 @@ class BoidPolicy(nnx.Module):
 
 		# Calculate steering force
 		position_avg = nnx.vmap(
-			lambda position: self._toroidal_vector(state.position[boid_idx], position)
+			lambda position: toroidal_difference(state.position[boid_idx], position)
 		)(state.position)
 		steer = self._masked_mean(position_avg, perception_mask)
 
