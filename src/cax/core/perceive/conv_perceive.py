@@ -5,10 +5,10 @@ from collections.abc import Callable
 from flax import nnx
 from jax import Array
 
-from .perceive import Perceive, Perception
+from .perceive import Perceive
 
 
-class ConvPerceive(Perceive[Array]):
+class ConvPerceive(Perceive[Array, Array]):
 	"""Convolution perceive class."""
 
 	def __init__(
@@ -47,7 +47,7 @@ class ConvPerceive(Perceive[Array]):
 		)
 		self.activation_fn = activation_fn
 
-	def __call__(self, state: Array) -> Perception:
+	def __call__(self, state: Array) -> Array:
 		"""Apply convolutional perception to the input state.
 
 		Inputs are expected to have shape `(..., *spatial_dims, channel_size)` where `spatial_dims`

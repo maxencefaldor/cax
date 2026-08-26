@@ -5,8 +5,6 @@ from collections.abc import Callable
 from flax import nnx
 from jax import Array
 
-from cax.core.perceive.perceive import Perception
-
 from .mlp_update import MLPUpdate
 
 
@@ -55,7 +53,7 @@ class ResidualUpdate(MLPUpdate):
 		self.dropout = nnx.Dropout(rate=cell_dropout_rate, broadcast_dims=(-1,), rngs=rngs)
 		self.step_size = step_size
 
-	def __call__(self, state: Array, perception: Perception, input: Array | None = None) -> Array:
+	def __call__(self, state: Array, perception: Array, input: Array | None = None) -> Array:
 		"""Process the current state, perception, and input to produce a new state.
 
 		Args:

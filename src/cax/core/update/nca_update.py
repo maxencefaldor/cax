@@ -6,8 +6,6 @@ from functools import partial
 from flax import nnx
 from jax import Array
 
-from cax.core.perceive.perceive import Perception
-
 from .residual_update import ResidualUpdate
 
 
@@ -60,7 +58,7 @@ class NCAUpdate(ResidualUpdate):
 		self.pool = partial(nnx.max_pool, window_shape=kernel_size, padding="SAME")
 		self.alive_threshold = alive_threshold
 
-	def __call__(self, state: Array, perception: Perception, input: Array | None = None) -> Array:
+	def __call__(self, state: Array, perception: Array, input: Array | None = None) -> Array:
 		"""Process the current state, perception, and input to produce a new state.
 
 		Args:

@@ -14,14 +14,13 @@ from flax import nnx
 from jax import Array
 
 from cax.core.perceive import Perceive
-from cax.core.perceive.perceive import Perception
 
 from .growth import peak_growth_fn
 from .kernel import peak_kernel_fn
 from .rule import ParticleLeniaRuleParams
 
 
-class ParticleLeniaPerceive(Perceive[Array]):
+class ParticleLeniaPerceive(Perceive[Array, Array]):
 	"""Particle Lenia perception.
 
 	Computes forces on particles by taking the gradient of an energy field. The energy
@@ -60,7 +59,7 @@ class ParticleLeniaPerceive(Perceive[Array]):
 
 		self.c_rep = rule_params.c_rep
 
-	def __call__(self, state: Array) -> Perception:
+	def __call__(self, state: Array) -> Array:
 		"""Process the current state to produce a perception.
 
 		Computes the force on each particle by taking the negative gradient of the energy

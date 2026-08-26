@@ -8,11 +8,10 @@ species U and V.
 import jax.numpy as jnp
 from jax import Array
 
-from cax.core.perceive.perceive import Perception
 from cax.core.update import Update
 
 
-class ReactionDiffusionUpdate(Update[Array, Array]):
+class ReactionDiffusionUpdate(Update[Array, Array, Array]):
 	"""Gray-Scott reaction-diffusion update rule.
 
 	Applies the Gray-Scott equations in discrete time:
@@ -48,7 +47,7 @@ class ReactionDiffusionUpdate(Update[Array, Array]):
 		self.kill_rate = kill_rate
 		self.dt = dt
 
-	def __call__(self, state: Array, perception: Perception, input: Array | None = None) -> Array:
+	def __call__(self, state: Array, perception: Array, input: Array | None = None) -> Array:
 		"""Process the current state, perception, and input to produce a new state.
 
 		Applies one Euler step of the Gray-Scott equations using the Laplacian computed

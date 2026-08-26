@@ -9,14 +9,13 @@ import jax.numpy as jnp
 from jax import Array
 
 from cax.core.perceive import Perceive
-from cax.core.perceive.perceive import Perception
 from cax.utils import safe_divide, safe_norm
 
 from .perception import ParticleLifePerception
 from .state import ParticleLifeState
 
 
-class ParticleLifePerceive(Perceive[ParticleLifeState]):
+class ParticleLifePerceive(Perceive[ParticleLifeState, ParticleLifePerception]):
 	"""Particle Life perception.
 
 	Computes interaction forces between all particle pairs based on their distances and
@@ -96,7 +95,7 @@ class ParticleLifePerceive(Perceive[ParticleLifeState]):
 		"""
 		return self.force_factor * jnp.sum(forces[..., None] * direction_norm, axis=-2)
 
-	def __call__(self, state: ParticleLifeState) -> Perception:
+	def __call__(self, state: ParticleLifeState) -> ParticleLifePerception:
 		"""Process the current state to produce a perception.
 
 		Computes pairwise distances between all particles with periodic boundary conditions,

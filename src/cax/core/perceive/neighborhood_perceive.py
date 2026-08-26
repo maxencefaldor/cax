@@ -10,7 +10,7 @@ from collections.abc import Callable
 import jax.numpy as jnp
 from jax import Array
 
-from .perceive import Perceive, Perception
+from .perceive import Perceive
 
 _PADDING_TO_PAD_MODE = {
 	"CIRCULAR": "wrap",
@@ -20,7 +20,7 @@ _PADDING_TO_PAD_MODE = {
 }
 
 
-class NeighborhoodPerceive(Perceive[Array]):
+class NeighborhoodPerceive(Perceive[Array, Array]):
 	"""Base class for neighborhood-based perception using pad-and-slice.
 
 	Subclasses implement `_get_shifts` to define which neighbor offsets belong to the
@@ -72,7 +72,7 @@ class NeighborhoodPerceive(Perceive[Array]):
 		"""
 		raise NotImplementedError
 
-	def __call__(self, state: Array) -> Perception:
+	def __call__(self, state: Array) -> Array:
 		"""Apply neighborhood perception to the input state.
 
 		The input is assumed to have shape `(..., *spatial_dims, channel_size)`.

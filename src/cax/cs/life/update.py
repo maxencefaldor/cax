@@ -8,11 +8,10 @@ automata based on birth/survival conditions. Cells become alive (birth) or stay 
 import jax.numpy as jnp
 from jax import Array
 
-from cax.core.perceive.perceive import Perception
 from cax.core.update import Update
 
 
-class LifeUpdate(Update[Array, Array]):
+class LifeUpdate(Update[Array, Array, Array]):
 	"""Life update rule.
 
 	Applies birth and survival rules to determine each cell's next state. Dead cells with
@@ -33,7 +32,7 @@ class LifeUpdate(Update[Array, Array]):
 		self.birth = birth
 		self.survival = survival
 
-	def __call__(self, state: Array, perception: Perception, input: Array | None = None) -> Array:
+	def __call__(self, state: Array, perception: Array, input: Array | None = None) -> Array:
 		"""Process the current state, perception, and input to produce a new state.
 
 		Determines each cell's next state by checking birth conditions for dead cells and

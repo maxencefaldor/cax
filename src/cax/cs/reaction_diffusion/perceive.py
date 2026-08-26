@@ -11,10 +11,9 @@ from flax import nnx
 from jax import Array
 
 from cax.core.perceive import Perceive, grad2_kernel, identity_kernel
-from cax.core.perceive.perceive import Perception
 
 
-class ReactionDiffusionPerceive(Perceive[Array]):
+class ReactionDiffusionPerceive(Perceive[Array, Array]):
 	"""Reaction-Diffusion perception.
 
 	Computes the identity (current concentration) and the discrete Laplacian for each
@@ -49,7 +48,7 @@ class ReactionDiffusionPerceive(Perceive[Array]):
 		)
 		self.kernel = jnp.expand_dims(kernel, axis=-2)
 
-	def __call__(self, state: Array) -> Perception:
+	def __call__(self, state: Array) -> Array:
 		"""Apply the fixed identity/Laplacian stencil to the input state.
 
 		Args:

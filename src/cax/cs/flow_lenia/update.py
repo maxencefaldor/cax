@@ -14,14 +14,13 @@ from flax import nnx
 from jax import Array
 from jax.scipy.signal import convolve2d
 
-from cax.core.perceive.perceive import Perception
 from cax.core.update import Update
 
 from ..lenia.growth import exponential_growth_fn
 from ..lenia.rule import LeniaRuleParams
 
 
-class FlowLeniaUpdate(Update[Array, Array]):
+class FlowLeniaUpdate(Update[Array, Array, Array]):
 	"""Flow Lenia update rule.
 
 	Extends the standard Lenia update with flow-based advection. Computes affinity fields
@@ -80,7 +79,7 @@ class FlowLeniaUpdate(Update[Array, Array]):
 		self.dd = dd
 		self.sigma = sigma
 
-	def __call__(self, state: Array, perception: Perception, input: Array | None = None) -> Array:
+	def __call__(self, state: Array, perception: Array, input: Array | None = None) -> Array:
 		"""Process the current state, perception, and input to produce a new state.
 
 		Computes affinity fields from perception, derives flow fields from affinity and

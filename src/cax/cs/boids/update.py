@@ -17,7 +17,7 @@ from .perception import BoidsPerception
 from .state import BoidsState
 
 
-class BoidsUpdate(Update[BoidsState, Array]):
+class BoidsUpdate(Update[BoidsState, BoidsPerception, Array]):
 	"""Boids update rule.
 
 	Updates boid positions and velocities by integrating steering accelerations. Applies

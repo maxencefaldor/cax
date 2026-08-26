@@ -10,7 +10,6 @@ from dataclasses import replace
 import jax.numpy as jnp
 from jax import Array
 
-from cax.core.perceive.perceive import Perception
 from cax.core.update import Update
 
 from .state import LangtonAntState
@@ -18,7 +17,7 @@ from .state import LangtonAntState
 DIRECTION_VECTORS = jnp.array([[-1, 0], [0, 1], [1, 0], [0, -1]], dtype=jnp.int32)
 
 
-class LangtonAntUpdate(Update[LangtonAntState, Array]):
+class LangtonAntUpdate(Update[LangtonAntState, Array, Array]):
 	"""Langton's Ant update rule.
 
 	Applies the generalized Langton's Ant rule: the ant turns according to the current cell
@@ -39,7 +38,7 @@ class LangtonAntUpdate(Update[LangtonAntState, Array]):
 		self.turns = turns
 
 	def __call__(
-		self, state: LangtonAntState, perception: Perception, input: Array | None = None
+		self, state: LangtonAntState, perception: Array, input: Array | None = None
 	) -> LangtonAntState:
 		"""Process the current state and perception to produce the next state.
 

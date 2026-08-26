@@ -8,11 +8,10 @@ distributing one chip to each face-adjacent neighbor.
 import jax.numpy as jnp
 from jax import Array
 
-from cax.core.perceive.perceive import Perception
 from cax.core.update import Update
 
 
-class SandpileUpdate(Update[Array, Array]):
+class SandpileUpdate(Update[Array, Array, Array]):
 	"""Sandpile toppling rule.
 
 	Applies a single parallel toppling step: all cells at or above the critical
@@ -32,7 +31,7 @@ class SandpileUpdate(Update[Array, Array]):
 		"""
 		self.threshold = threshold if threshold is not None else 2 * num_spatial_dims
 
-	def __call__(self, state: Array, perception: Perception, input: Array | None = None) -> Array:
+	def __call__(self, state: Array, perception: Array, input: Array | None = None) -> Array:
 		"""Process the current state, perception, and input to produce a new state.
 
 		Performs one parallel toppling step. Cells at or above the threshold topple,

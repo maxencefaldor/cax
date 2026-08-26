@@ -1,18 +1,16 @@
 """Perceive base module."""
 
-from typing import Any
-
 from flax import nnx
 
-Perception = Any
 
-
-class Perceive[State](nnx.Module):
+class Perceive[State, Perception](nnx.Module):
 	"""Base class for perception modules.
 
 	Subclasses implement neighborhood gathering or convolutional transforms that map a state
-	to a perception. Perceptions are PyTrees; commonly arrays shaped
-	`(..., *spatial_dims, perception_size)`.
+	to a perception. Perceptions are PyTrees — commonly arrays shaped
+	`(..., *spatial_dims, perception_size)`, or a dataclass of arrays — and the type
+	parameter names which one a subclass produces, so the perceive-update handoff is
+	checked instead of erased.
 	"""
 
 	def __call__(self, state: State) -> Perception:

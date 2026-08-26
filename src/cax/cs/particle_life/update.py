@@ -15,7 +15,7 @@ from .perception import ParticleLifePerception
 from .state import ParticleLifeState
 
 
-class ParticleLifeUpdate(Update[ParticleLifeState, Array]):
+class ParticleLifeUpdate(Update[ParticleLifeState, ParticleLifePerception, Array]):
 	"""Particle Life update rule.
 
 	Updates particle positions and velocities by integrating interaction forces. Applies

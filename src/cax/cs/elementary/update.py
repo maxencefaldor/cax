@@ -9,11 +9,10 @@ index and looking up the result in the Wolfram code table.
 import jax.numpy as jnp
 from jax import Array
 
-from cax.core.perceive.perceive import Perception
 from cax.core.update import Update
 
 
-class ElementaryUpdate(Update[Array, Array]):
+class ElementaryUpdate(Update[Array, Array, Array]):
 	"""Elementary Cellular Automata update rule.
 
 	Applies the Wolfram rule by converting each cell's three-cell neighborhood to a
@@ -32,7 +31,7 @@ class ElementaryUpdate(Update[Array, Array]):
 		"""
 		self.lut = wolfram_code[::-1]
 
-	def __call__(self, state: Array, perception: Perception, input: Array | None = None) -> Array:
+	def __call__(self, state: Array, perception: Array, input: Array | None = None) -> Array:
 		"""Process the current state, perception, and input to produce a new state.
 
 		Converts each cell's three-cell neighborhood to a 3-bit index (left*4 + self*2 + right)
