@@ -11,7 +11,7 @@
 	<a href="https://x.com/maxencefaldor/status/1842211478796918945"><img alt="X URL" src="https://img.shields.io/twitter/url?url=https%3A%2F%2Fx.com%2Fmaxencefaldor%2Fstatus%2F1842211478796918945"></img></a>
 </div>
 
-CAX is a high-performance and flexible open-source library designed to **accelerate artificial life research**. 🧬
+CAX is a high-performance and flexible open-source library designed to **accelerate artificial life research** — cellular automata, particle systems, and other self-organizing complex systems, all in JAX. 🧬
 
 ## Overview 🔎
 
