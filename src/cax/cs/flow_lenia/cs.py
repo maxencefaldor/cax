@@ -17,7 +17,8 @@ class FlowLenia(Lenia):
 	"""Flow Lenia class.
 
 	Subclasses Lenia: perception and rendering are Lenia's, while the update adds
-	flow-based advection with mass conservation.
+	flow-based advection with mass conservation. Like Lenia, Flow Lenia works in any
+	number of spatial dimensions.
 	"""
 
 	def __init__(
@@ -40,8 +41,9 @@ class FlowLenia(Lenia):
 		"""Initialize Flow Lenia.
 
 		Args:
-			spatial_dims: Spatial dimensions, e.g. (64, 64). Flow Lenia is two-dimensional:
-				the Sobel filters and reintegration tracking in the update are 2D.
+			spatial_dims: Spatial dimensions (e.g., (64, 64) for 2D or (32, 32, 32) for 3D).
+				Note that reintegration tracking considers (2 * dd + 1) ** num_spatial_dims
+				displacements per cell, which sets the memory and compute cost.
 			channel_size: Number of channels.
 			R: Space resolution defining the kernel radius. Larger values create wider
 				neighborhoods and smoother patterns.
@@ -65,12 +67,6 @@ class FlowLenia(Lenia):
 				localized flow, larger values produce smoother displacement fields.
 
 		"""
-		if len(spatial_dims) != 2:
-			raise ValueError(
-				f"Flow Lenia supports exactly 2 spatial dimensions, got {len(spatial_dims)}: "
-				f"the update's Sobel filters and reintegration tracking are 2D."
-			)
-
 		self.perceive = LeniaPerceive(
 			spatial_dims=spatial_dims,
 			channel_size=channel_size,

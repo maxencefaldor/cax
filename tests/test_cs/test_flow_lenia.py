@@ -39,19 +39,85 @@ def test_flow_lenia_jit_init() -> None:
 		pytest.fail(f"FlowLenia instantiation failed under jit: {e}")
 
 
-def test_flow_lenia_rejects_non_2d() -> None:
-	"""Test that a non-2D spatial_dims is refused at construction."""
-	kernel_params = LeniaKernelParams(r=jnp.array([1.0]), beta=jnp.array([[1.0]]))
-	growth_params = LeniaGrowthParams(mean=jnp.array([0.5]), std=jnp.array([0.1]))
-	rule_params = LeniaRuleParams(
+def single_channel_rule_params(mean: float = 0.15, std: float = 0.015) -> LeniaRuleParams:
+	"""Return single-channel, single-kernel rule parameters."""
+	return LeniaRuleParams(
 		channel_source=jnp.array([0]),
 		channel_target=jnp.array([0]),
 		weight=jnp.array([1.0]),
-		kernel_params=kernel_params,
-		growth_params=growth_params,
+		kernel_params=LeniaKernelParams(r=jnp.array([1.0]), beta=jnp.array([[1.0]])),
+		growth_params=LeniaGrowthParams(mean=jnp.array([mean]), std=jnp.array([std])),
 	)
-	with pytest.raises(ValueError, match="2 spatial dimensions"):
-		FlowLenia(spatial_dims=(16, 16, 16), channel_size=1, R=5, T=10, rule_params=rule_params)
+
+
+@pytest.mark.parametrize("spatial_dims", [(48,), (16, 16), (10, 10, 10)])
+def test_flow_lenia_conserves_mass_in_any_dimension(spatial_dims: tuple[int, ...]) -> None:
+	"""Test that mass is conserved and stays non-negative in 1D, 2D, and 3D."""
+	flow_lenia = FlowLenia(
+		spatial_dims=spatial_dims,
+		channel_size=1,
+		R=5,
+		T=5,
+		rule_params=single_channel_rule_params(),
+		dd=2,
+	)
+
+	key = jax.random.key(0)
+	state = jax.random.uniform(key, (*spatial_dims, 1))
+	mass_before = jnp.sum(state)
+
+	state_final = flow_lenia(state, num_steps=20)
+
+	assert jnp.allclose(mass_before, jnp.sum(state_final), rtol=1e-4)
+	assert jnp.min(state_final) >= 0.0
+
+
+def test_sobel_matches_analytic_gradient_in_3d() -> None:
+	"""Test the 3D Sobel gradients against the analytic gradient of a linear field."""
+	from cax.cs.flow_lenia.update import sobel
+
+	spatial_dims = (10, 11, 12)
+	coordinates = jnp.meshgrid(
+		*[jnp.arange(dim, dtype=jnp.float32) for dim in spatial_dims], indexing="ij"
+	)
+	slopes = jnp.array([3.0, 5.0, -2.0])
+	field = sum(slope * coordinate for slope, coordinate in zip(slopes, coordinates, strict=True))
+
+	gradients = sobel(field[..., None])
+	interior = tuple(slice(1, -1) for _ in spatial_dims)
+
+	# The kernel is a derivative stencil [1, 0, -1] along its axis and a smoothing
+	# stencil [1, 2, 1] along the others, so each component is scaled by 2 * 4^(D - 1).
+	scale = 2 * 4 ** (len(spatial_dims) - 1)
+	assert jnp.allclose(gradients[interior][..., 0], slopes * scale, atol=1e-3)
+
+
+def test_flow_lenia_is_isotropic_in_3d() -> None:
+	"""Test that a radially symmetric blob stays symmetric under symmetric flow."""
+	flow_lenia = FlowLenia(
+		spatial_dims=(16, 16, 16),
+		channel_size=1,
+		R=5,
+		T=5,
+		rule_params=single_channel_rule_params(),
+		dd=2,
+	)
+
+	axis = jnp.arange(16.0) - 7.5
+	radius = jnp.linalg.norm(
+		jnp.stack(jnp.meshgrid(axis, axis, axis, indexing="ij"), axis=-1), axis=-1
+	)
+	state = jnp.exp(-(radius**2) / 8.0)[..., None]
+
+	state_final = flow_lenia(state, num_steps=5)
+
+	# The dynamics are exactly isotropic; the residual is float32 FFT roundoff, which
+	# is ~1e-5 relative here (~1e-15 in float64) — orders of magnitude below any real
+	# axis bias, which would show up at the scale of the state itself.
+	for axes in [(1, 0, 2, 3), (2, 1, 0, 3), (0, 2, 1, 3)]:
+		assert jnp.allclose(state_final, jnp.transpose(state_final, axes), atol=1e-4)
+	for spatial_axis in range(3):
+		assert jnp.allclose(state_final, jnp.flip(state_final, axis=spatial_axis), atol=1e-4)
 
 
 def test_flow_lenia_theta_a_defaults_to_channel_size() -> None:

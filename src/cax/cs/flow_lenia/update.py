@@ -17,7 +17,7 @@ from collections.abc import Callable
 import jax
 import jax.numpy as jnp
 from jax import Array
-from jax.scipy.signal import convolve2d
+from jax.scipy.signal import convolve
 
 from ..lenia.growth import exponential_growth_fn
 from ..lenia.rule import LeniaRuleParams
@@ -99,13 +99,13 @@ class FlowLeniaUpdate(LeniaUpdate):
 		through space while preserving mass.
 
 		Args:
-			state: Array with shape (height, width, channel_size) representing the current state.
-			perception: Array with shape (height, width, num_kernels) containing potential fields
+			state: Array with shape (*spatial_dims, channel_size) representing the current state.
+			perception: Array with shape (*spatial_dims, num_kernels) containing potential fields
 				from the perception step.
 			input: Optional input (unused in this implementation).
 
 		Returns:
-			Next state with shape (height, width, channel_size) after applying flow-based
+			Next state with shape (*spatial_dims, channel_size) after applying flow-based
 				advection and mass redistribution.
 
 		"""
@@ -113,18 +113,20 @@ class FlowLeniaUpdate(LeniaUpdate):
 		U = self._growth(perception)  # (*spatial_dims, channel_size)
 
 		# Affinity gradient
-		nabla_U = sobel(U)  # (*spatial_dims, 2, c)
+		nabla_U = sobel(U)  # (*spatial_dims, num_spatial_dims, c)
 
 		# Concentration gradient - diffusion term
-		nabla_A = sobel(jnp.sum(state, axis=-1, keepdims=True))  # (*spatial_dims, 2, 1)
+		# (*spatial_dims, num_spatial_dims, 1)
+		nabla_A = sobel(jnp.sum(state, axis=-1, keepdims=True))
 
 		# Weight
 		alpha = jnp.clip(
-			(state[:, :, None, :] / self.theta_A) ** self.n, 0.0, 1.0
+			(state[..., None, :] / self.theta_A) ** self.n, 0.0, 1.0
 		)  # (*spatial_dims, 1, channel_size)
 
 		# Flow - instantaneous speed of matter
-		F = nabla_U * (1 - alpha) - nabla_A * alpha  # (*spatial_dims, 2, channel_size)
+		# (*spatial_dims, num_spatial_dims, channel_size)
+		F = nabla_U * (1 - alpha) - nabla_A * alpha
 
 		# Reintegration tracking
 		state = self.apply_reintegration_tracking(state, F)
@@ -137,105 +139,119 @@ class FlowLeniaUpdate(LeniaUpdate):
 		Implements the reintegration tracking algorithm that transports matter from each
 		cell to surrounding cells based on the flow field. Matter is distributed according
 		to how well each target cell matches the desired displacement, ensuring smooth and
-		mass-conservative transport.
+		mass-conservative transport. The number of candidate displacements grows as
+		``(2 * dd + 1) ** num_spatial_dims``, which sets the memory and compute cost.
 
 		Args:
-			state: Array with shape (height, width, channel_size) representing the current
+			state: Array with shape (*spatial_dims, channel_size) representing the current
 				state before advection.
-			F: Flow field with shape (height, width, 2, channel_size) specifying the desired
-				displacement for each cell in each channel, where axis -2 is [dy, dx].
+			F: Flow field with shape (*spatial_dims, num_spatial_dims, channel_size)
+				specifying the desired displacement for each cell in each channel, where
+				axis -2 orders the components by spatial axis.
 
 		Returns:
-			New state with shape (height, width, channel_size) after matter redistribution
+			New state with shape (*spatial_dims, channel_size) after matter redistribution
 				through flow-based advection.
 
 		"""
-		SY, SX, _C = state.shape
+		*spatial_dims, _channel_size = state.shape
+		num_spatial_dims = len(spatial_dims)
+		spatial_axes = tuple(range(num_spatial_dims))
 		dt = 1 / self.T  # The reference's symbol; T is the stored convention family-wide
 
-		# Generate all possible displacements
-		dys = jnp.arange(-self.dd, self.dd + 1)
-		dxs = jnp.arange(-self.dd, self.dd + 1)
-		dys, dxs = jnp.meshgrid(dys, dxs, indexing="ij")
-		dys = dys.flatten()
-		dxs = dxs.flatten()
+		# Generate all possible displacements, shape (num_displacements, num_spatial_dims)
+		steps = [jnp.arange(-self.dd, self.dd + 1)] * num_spatial_dims
+		displacements = jnp.stack(jnp.meshgrid(*steps, indexing="ij"), axis=-1)
+		displacements = displacements.reshape(-1, num_spatial_dims)
 
-		# Compute grid positions
-		y, x = jnp.arange(SY), jnp.arange(SX)
-		Y, X = jnp.meshgrid(y, x, indexing="ij")
-		pos = jnp.stack([Y, X], axis=-1) + 0.5  # (SY, SX, 2)
+		# Compute grid positions, shape (*spatial_dims, num_spatial_dims)
+		coordinates = [jnp.arange(dim) for dim in spatial_dims]
+		pos = jnp.stack(jnp.meshgrid(*coordinates, indexing="ij"), axis=-1) + 0.5
 
 		# Compute target positions (mu)
 		ma = self.dd - self.sigma  # Maximum allowed displacement
-		F_clipped = jnp.clip(dt * F, -ma, ma)  # (SY, SX, 2, C)
-		mu = pos[..., None] + F_clipped  # (SY, SX, 2, C)
+		F_clipped = jnp.clip(dt * F, -ma, ma)  # (*spatial_dims, num_spatial_dims, C)
+		mu = pos[..., None] + F_clipped  # (*spatial_dims, num_spatial_dims, C)
+
+		# Torus images: every combination of shifting each axis by -size, 0, or +size
+		images = [jnp.array([-dim, 0, dim]) for dim in spatial_dims]
+		shifts = jnp.stack(jnp.meshgrid(*images, indexing="ij"), axis=-1)
+		shifts = shifts.reshape(-1, num_spatial_dims)
 
 		# Define step function for each displacement
-		def step(dy: Array, dx: Array) -> Array:
-			Xr = jnp.roll(state, (dy, dx), axis=(0, 1))  # ty: ignore[invalid-argument-type]
-			mur = jnp.roll(mu, (dy, dx), axis=(0, 1))  # ty: ignore[invalid-argument-type]
+		def step(displacement: Array) -> Array:
+			Xr = jnp.roll(state, displacement, axis=spatial_axes)
+			mur = jnp.roll(mu, displacement, axis=spatial_axes)
 
-			shifts_y = [-SY, 0, SY]
-			shifts_x = [-SX, 0, SX]
 			dpmu = jnp.min(
 				jnp.stack(
-					[
-						jnp.abs(pos[..., None] - (mur + jnp.array([di, dj])[None, None, :, None]))
-						for di in shifts_y
-						for dj in shifts_x
-					],
+					[jnp.abs(pos[..., None] - (mur + shift[..., :, None])) for shift in shifts],
 					axis=0,
 				),
 				axis=0,
-			)  # (SY, SX, 2, C)
+			)  # (*spatial_dims, num_spatial_dims, C)
 
-			sz = 0.5 - dpmu + self.sigma  # (SY, SX, 2, C)
-			clipped_sz = jnp.clip(sz, 0, min(1, 2 * self.sigma))  # (SY, SX, 2, C)
-			area = jnp.prod(clipped_sz, axis=2) / (4 * self.sigma**2)  # (SY, SX, C)
-			nX = Xr * area  # (SY, SX, C)
+			sz = 0.5 - dpmu + self.sigma  # (*spatial_dims, num_spatial_dims, C)
+			clipped_sz = jnp.clip(sz, 0, min(1, 2 * self.sigma))
+			area = jnp.prod(clipped_sz, axis=-2) / (2 * self.sigma) ** num_spatial_dims
+			nX = Xr * area  # (*spatial_dims, C)
 			return nX
 
 		# Apply step function over all displacements
-		nX = jax.vmap(step, in_axes=(0, 0))(dys, dxs)  # (num_displacements, SY, SX, C)
-		new_state = jnp.sum(nX, axis=0)  # (SY, SX, C)
+		nX = jax.vmap(step)(displacements)  # (num_displacements, *spatial_dims, C)
+		new_state = jnp.sum(nX, axis=0)  # (*spatial_dims, C)
 
 		return new_state
 
 
-def get_sobel_kernels() -> tuple[Array, Array]:
-	"""Define Sobel kernels exactly as in the reference Flow Lenia code."""
-	kx = jnp.array([[1.0, 0.0, -1.0], [2.0, 0.0, -2.0], [1.0, 0.0, -1.0]], dtype=jnp.float32)
-	ky = jnp.transpose(kx)  # [[1., 2., 1.], [0., 0., 0.], [-1., -2., -1.]]
-	return kx, ky
+def get_sobel_kernels(num_spatial_dims: int) -> Array:
+	"""Build the n-dimensional Sobel kernels, one per spatial axis.
 
+	Each kernel is the outer product of the derivative stencil [1, 0, -1] along its
+	axis and the smoothing stencil [1, 2, 1] along every other axis. For two
+	dimensions this reproduces the reference Flow Lenia Sobel filters exactly.
 
-def sobel_x(A: Array, kx: Array) -> Array:
-	"""Compute horizontal Sobel filter per channel."""
-	# Apply convolve2d to each channel using vmap
-	return jax.vmap(lambda a: convolve2d(a, kx, mode="same"), in_axes=2, out_axes=2)(A)
+	Args:
+		num_spatial_dims: Number of spatial dimensions.
 
+	Returns:
+		Array of shape (num_spatial_dims, *(3,) * num_spatial_dims) stacking the kernel
+			for each spatial axis.
 
-def sobel_y(A: Array, ky: Array) -> Array:
-	"""Compute vertical Sobel filter per channel."""
-	return jax.vmap(lambda a: convolve2d(a, ky, mode="same"), in_axes=2, out_axes=2)(A)
+	"""
+	smooth = jnp.array([1.0, 2.0, 1.0], dtype=jnp.float32)
+	derivative = jnp.array([1.0, 0.0, -1.0], dtype=jnp.float32)
+	kernels = []
+	for axis in range(num_spatial_dims):
+		kernel = jnp.array(1.0, dtype=jnp.float32)
+		for d in range(num_spatial_dims):
+			kernel = kernel[..., None] * (derivative if d == axis else smooth)
+		kernels.append(kernel)
+	return jnp.stack(kernels)
 
 
 def sobel(A: Array) -> Array:
 	"""Compute gradients using Sobel filters, matching the reference Flow Lenia implementation.
 
 	Args:
-		A: Input array of shape (y, x, c), where c is the number of channels.
+		A: Input array of shape (*spatial_dims, c), where c is the number of channels.
 
 	Returns:
-		Gradients of shape (y, x, 2, c), where axis -3 is [sobel_y(A), sobel_x(A)].
-		`convolve2d` flips the kernel, so each component is +8 times the partial
-		derivative along its axis — matching the reference implementation exactly.
+		Gradients of shape (*spatial_dims, num_spatial_dims, c), where axis -2 orders the
+		components by spatial axis. `convolve` flips the kernel, so each component is
+		+2 * 4^(num_spatial_dims - 1) times the partial derivative along its axis — in two
+		dimensions, exactly the reference implementation's [sobel_y(A), sobel_x(A)].
 
 	"""
-	kx, ky = get_sobel_kernels()
+	num_spatial_dims = A.ndim - 1
+	kernels = get_sobel_kernels(num_spatial_dims)
 
-	# Compute gradients per channel (+d/drow, +d/dcol up to the Sobel scale)
-	grad_y = sobel_y(A, ky)
-	grad_x = sobel_x(A, kx)
+	# Compute gradients per channel and per axis (+d/daxis up to the Sobel scale)
+	def convolve_channel(a: Array, kernel: Array) -> Array:
+		return convolve(a, kernel, mode="same")
 
-	return jnp.stack([grad_y, grad_x], axis=2)  # (y, x, 2, c)
+	grads = [
+		jax.vmap(convolve_channel, in_axes=(-1, None), out_axes=-1)(A, kernel) for kernel in kernels
+	]
+
+	return jnp.stack(grads, axis=-2)  # (*spatial_dims, num_spatial_dims, c)
