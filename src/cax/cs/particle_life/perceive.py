@@ -29,7 +29,7 @@ class ParticleLifePerceive(Perceive[ParticleLifeState, ParticleLifePerception]):
 		force_factor: float = 1.0,
 		r_max: float = 0.15,
 		beta: float = 0.3,
-		A: Array,
+		attraction_matrix: Array,
 	):
 		"""Initialize Particle Life perceive.
 
@@ -41,15 +41,15 @@ class ParticleLifePerceive(Perceive[ParticleLifeState, ParticleLifePerception]):
 			beta: Distance threshold parameter controlling the transition from repulsion to
 				attraction. Typically in range [0, 1], where smaller values create stronger
 				short-range repulsion.
-			A: Attraction matrix of shape (num_classes, num_classes) where A[i, j] defines
-				the attraction strength from type i to type j. Positive values attract,
-				negative values repel. Values typically range from -1 to 1.
+			attraction_matrix: Attraction matrix of shape (num_classes, num_classes) where
+				entry (i, j) defines the attraction strength from type i to type j. Positive
+				values attract, negative values repel. Values typically range from -1 to 1.
 
 		"""
 		self.force_factor = force_factor
 		self.r_max = r_max
 		self.beta = beta
-		self.A = A
+		self.attraction_matrix = attraction_matrix
 
 	def _get_forces(self, distances: Array, attraction_factors: Array) -> Array:
 		"""Calculate interaction forces between particles based on distance.
@@ -61,7 +61,7 @@ class ParticleLifePerceive(Perceive[ParticleLifeState, ParticleLifePerception]):
 		Args:
 			distances: Array of normalized pairwise distances (scaled by r_max).
 			attraction_factors: Array of attraction coefficients for each particle pair
-				from the attraction matrix A.
+				from the attraction matrix.
 
 		Returns:
 			Array of scalar force magnitudes with the same shape as distances, where
@@ -112,7 +112,9 @@ class ParticleLifePerceive(Perceive[ParticleLifeState, ParticleLifePerception]):
 
 		"""
 		num_particles = state.class_.shape[-1]
-		attraction_factors = self.A[state.class_[..., :, None], state.class_[..., None, :]]
+		attraction_factors = self.attraction_matrix[
+			state.class_[..., :, None], state.class_[..., None, :]
+		]
 
 		pos_diff = toroidal_difference(
 			state.position[..., :, None, :], state.position[..., None, :, :]

@@ -32,7 +32,7 @@ class ParticleLife(ComplexSystem[ParticleLifeState, Array]):
 		velocity_half_life: float = 0.01,
 		r_max: float = 0.15,
 		beta: float = 0.3,
-		A: Array,
+		attraction_matrix: Array,
 	):
 		"""Initialize Particle Life.
 
@@ -51,9 +51,9 @@ class ParticleLife(ComplexSystem[ParticleLifeState, Array]):
 			beta: Distance threshold parameter controlling the transition from repulsion to
 				attraction. Typically in range [0, 1], where smaller values create stronger
 				short-range repulsion.
-			A: Attraction matrix of shape (num_classes, num_classes) where A[i, j] defines
-				the attraction strength from type i to type j. Positive values attract,
-				negative values repel. Values typically range from -1 to 1.
+			attraction_matrix: Attraction matrix of shape (num_classes, num_classes) where
+				entry (i, j) defines the attraction strength from type i to type j. Positive
+				values attract, negative values repel. Values typically range from -1 to 1.
 
 		"""
 		self.num_classes = num_classes
@@ -62,7 +62,7 @@ class ParticleLife(ComplexSystem[ParticleLifeState, Array]):
 			force_factor=force_factor,
 			r_max=r_max,
 			beta=beta,
-			A=A,
+			attraction_matrix=attraction_matrix,
 		)
 		self.update = ParticleLifeUpdate(
 			dt=dt,
@@ -110,17 +110,17 @@ class ParticleLife(ComplexSystem[ParticleLifeState, Array]):
 		if state.position.shape[-1] != 2:
 			raise ValueError("Particle Life only supports 2D visualization.")
 
-		# Create grid of pixel centers
-		x = jnp.linspace(0, 1, resolution)
-		y = jnp.linspace(0, 1, resolution)
-		grid = jnp.stack(jnp.meshgrid(x, y), axis=-1)  # Shape: (resolution, resolution, 2)
-
 		# Adjust coordinates for rendering
 		# - Simulation has y increasing upwards (y=0 bottom, y=1 top).
 		# - Image has y increasing downwards (y=0 top, y=1 bottom).
 		# - Flip position y: map simulation y to image y with (1 - y).
 		positions = state.position  # Shape: (num_particles, 2)
 		positions = positions.at[:, 1].set(1 - positions[:, 1])
+
+		# Create grid of pixel centers
+		x = jnp.linspace(0, 1, resolution)
+		y = jnp.linspace(0, 1, resolution)
+		grid = jnp.stack(jnp.meshgrid(x, y), axis=-1)  # Shape: (resolution, resolution, 2)
 
 		# Compute squared distances to all particles
 		distance_sq = jnp.sum(

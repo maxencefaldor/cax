@@ -13,11 +13,11 @@ def test_particle_life_jit_init() -> None:
 	def init_particle_life() -> ParticleLife:
 		num_classes = 3
 		key = jax.random.key(0)
-		A = jax.random.uniform(key, (num_classes, num_classes))
+		attraction_matrix = jax.random.uniform(key, (num_classes, num_classes))
 		particle_life = ParticleLife(
 			num_classes=num_classes,
 			dt=0.01,
-			A=A,
+			attraction_matrix=attraction_matrix,
 		)
 		return particle_life
 
@@ -33,8 +33,8 @@ def test_particle_life_gradient_is_finite() -> None:
 
 	from cax.cs.particle_life import ParticleLifePerceive, ParticleLifeState
 
-	A = jnp.array([[1.0, -0.5], [0.5, 1.0]])
-	perceive = ParticleLifePerceive(A=A)
+	attraction_matrix = jnp.array([[1.0, -0.5], [0.5, 1.0]])
+	perceive = ParticleLifePerceive(attraction_matrix=attraction_matrix)
 
 	key = jax.random.key(0)
 	position = jax.random.uniform(key, (16, 2))
