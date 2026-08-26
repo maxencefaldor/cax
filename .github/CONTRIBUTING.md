@@ -191,6 +191,10 @@ These are the decisions the codebase holds everywhere; new code follows them.
   the Lenia family while Gray-Scott keeps `dt`: each system reads like its own
   reference, and that rule — not surface-identical names — is the library's
   uniformity.
+- **`spatial_dims` is a shape; `num_spatial_dims` is a rank.** Grid systems take
+  the full spatial shape — Lenia's FFT kernels are precomputed at grid size — while
+  particle systems take only the dimensionality. The similar names carry a real
+  semantic difference and are deliberately not unified.
 - **Reference fidelity is load-bearing.** Each system mirrors its reference
   implementation's formulas exactly — including where references disagree with each
   other (grid Lenia's Gaussian carries a 1/2 factor, Particle Lenia's does not).
