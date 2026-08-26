@@ -39,10 +39,10 @@ dev = [
 	"ty>=0.0.38",
 ]
 docs = [
-	"mkdocs",
-	"mkdocs-material",
-	"mkdocstrings[python]",
-	"mkdocs-jupyter",
+	"mkdocs>=1.6.0",
+	"mkdocs-material>=9.7.0",
+	"mkdocstrings[python]>=1.0.0",
+	"mkdocs-jupyter>=0.26.0",
 ]
 examples = [
 	"torchvision>=0.21.0",
