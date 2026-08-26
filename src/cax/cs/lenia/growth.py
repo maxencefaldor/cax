@@ -1,4 +1,9 @@
-"""Lenia growth module."""
+"""Lenia growth module.
+
+References:
+	[1] Lenia — Biology of Artificial Life, Bert Wang-Chak Chan. 2019.
+
+"""
 
 from flax import nnx
 from jax import Array

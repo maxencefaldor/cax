@@ -1,4 +1,11 @@
-"""Lenia kernel module."""
+"""Lenia kernel module.
+
+References:
+	[1] Lenia — Biology of Artificial Life, Bert Wang-Chak Chan. 2019.
+	[2] Discovering Sensorimotor Agency in Cellular Automata using Diversity Search,
+		Hamon et al. 2024.
+
+"""
 
 from collections.abc import Callable
 
@@ -27,7 +34,11 @@ class FreeKernelParams(nnx.Pytree):
 
 
 def bell(x: Array, mean: Array | float, std: Array | float) -> Array:
-	"""Gaussian function."""
+	"""Gaussian function, `exp(-((x - mean) / std)^2 / 2)` — grid Lenia's convention [1].
+
+	Particle Lenia's `bell` deliberately differs (no 1/2 factor); each mirrors its
+	reference, and parameters do not transfer between the two without rescaling.
+	"""
 	return jnp.exp(-0.5 * ((x - mean) / std) ** 2)
 
 

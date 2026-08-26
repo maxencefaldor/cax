@@ -1,6 +1,9 @@
 """Particle Lenia kernel module.
 
-[1] https://google-research.github.io/self-organising-systems/particle-lenia/
+References:
+	[1] Particle Lenia and the energy-based formulation, Mordvintsev et al. 2022.
+		https://google-research.github.io/self-organising-systems/particle-lenia/
+
 """
 
 import jax.numpy as jnp
@@ -18,7 +21,11 @@ class KernelParams(nnx.Pytree):
 
 
 def bell(x: Array, mean: Array, std: Array) -> Array:
-	"""Gaussian function."""
+	"""Gaussian bump, `exp(-((x - mean) / std)^2)` — Particle Lenia's convention [1].
+
+	Grid Lenia's `bell` deliberately differs (1/2 factor in the exponent); each mirrors
+	its reference, and parameters do not transfer between the two without rescaling.
+	"""
 	return jnp.exp(-(((x - mean) / std) ** 2))
 
 

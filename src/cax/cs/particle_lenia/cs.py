@@ -6,7 +6,8 @@ move freely in continuous space and experience forces derived from kernel and gr
 computed from neighboring particles.
 
 References:
-	[1] https://google-research.github.io/self-organising-systems/particle-lenia/
+	[1] Particle Lenia and the energy-based formulation, Mordvintsev et al. 2022.
+		https://google-research.github.io/self-organising-systems/particle-lenia/
 
 """
 

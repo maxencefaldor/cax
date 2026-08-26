@@ -1,0 +1,37 @@
+name: release
+
+# Publishes to PyPI when a version tag is pushed. Uses PyPI trusted publishing
+# (OIDC): register this repository and workflow as a trusted publisher for the
+# cax project on PyPI — no token is stored. The release checklist is one move:
+# bump `version` in pyproject.toml and CITATION.cff, tag `vX.Y.Z`, push the tag.
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    environment: release
+    permissions:
+      id-token: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Check the tag matches the project version
+        run: |
+          version="$(uv version --short)"
+          if [ "v${version}" != "${GITHUB_REF_NAME}" ]; then
+            echo "Tag ${GITHUB_REF_NAME} does not match pyproject version ${version}" >&2
+            exit 1
+          fi
+
+      - name: Build
+        run: uv build
+
+      - name: Publish to PyPI
+        run: uv publish

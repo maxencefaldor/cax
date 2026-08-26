@@ -1,7 +1,10 @@
 """Lenia module.
 
-[1] Lenia - Biology of Artificial Life, Bert Wang-Chak Chan. 2019.
-[2] Discovering Sensorimotor Agency in Cellular Automata using Diversity Search, Hamon, et al. 2024.
+References:
+	[1] Lenia — Biology of Artificial Life, Bert Wang-Chak Chan. 2019.
+	[2] Discovering Sensorimotor Agency in Cellular Automata using Diversity Search,
+		Hamon et al. 2024.
+
 """
 
 from .cs import Lenia
