@@ -107,7 +107,8 @@ class ParticleLife(ComplexSystem[ParticleLifeState, Array]):
 				determined by particle type.
 
 		"""
-		assert state.position.shape[-1] == 2, "Particle Life only supports 2D visualization."
+		if state.position.shape[-1] != 2:
+			raise ValueError("Particle Life only supports 2D visualization.")
 
 		# Create grid of pixel centers
 		x = jnp.linspace(0, 1, resolution)

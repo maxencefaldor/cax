@@ -72,27 +72,27 @@ class Life(ComplexSystem[Array, Array]):
 				values (0.0 or 1.0) indicating which neighbor counts activate the rule.
 
 		"""
-		assert "/" in rule_golly, (
-			f"Invalid rule string format: {rule_golly}. Expected format: B{{digits}}/S{{digits}}"
-		)
+		if "/" not in rule_golly:
+			raise ValueError(
+				f"Invalid rule string format: {rule_golly}. "
+				f"Expected format: B{{digits}}/S{{digits}}"
+			)
 
 		# Split the rule string into birth and survival parts
 		birth_string, survival_string = rule_golly.split("/")
 
-		assert birth_string.startswith("B"), (
-			f"Invalid rule string format: {rule_golly}. Expected format: B{{digits}}/S{{digits}}"
-		)
-		assert survival_string.startswith("S"), (
-			f"Invalid rule string format: {rule_golly}. Expected format: B{{digits}}/S{{digits}}"
-		)
+		if not birth_string.startswith("B") or not survival_string.startswith("S"):
+			raise ValueError(
+				f"Invalid rule string format: {rule_golly}. "
+				f"Expected format: B{{digits}}/S{{digits}}"
+			)
 
 		# Extract the birth and survival numbers
 		birth_numbers = [int(digit) for digit in birth_string[1:]]
 		survival_numbers = [int(digit) for digit in survival_string[1:]]
 
-		assert all(0 <= num <= 8 for num in birth_numbers + survival_numbers), (
-			"Numbers in rule string must be between 0 and 8."
-		)
+		if not all(0 <= num <= 8 for num in birth_numbers + survival_numbers):
+			raise ValueError("Numbers in rule string must be between 0 and 8.")
 
 		# Create birth and survival rules
 		birth = jnp.array(

@@ -84,7 +84,8 @@ class Boids(ComplexSystem[BoidsState, Array]):
 				boids appear as black triangles on a white background.
 
 		"""
-		assert state.position.shape[-1] == 2, "Boids only supports 2D visualization."
+		if state.position.shape[-1] != 2:
+			raise ValueError("Boids only supports 2D visualization.")
 
 		# Adjust coordinates for rendering
 		# - Simulation has y increasing upwards (y=0 bottom, y=1 top).

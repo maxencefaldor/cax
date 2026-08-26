@@ -81,7 +81,7 @@ class Lenia(ComplexSystem[Array, Array]):
 
 		Converts the multi-channel Lenia state to an RGB visualization. Channels are
 		mapped to color channels (Red, Green, Blue) for visualization. If there are
-		more than 3 channels, only the first 3 are displayed. If there are fewer than
+		more than 3 channels, the last three are displayed. If there are fewer than
 		3 channels, the missing channels are filled with zeros.
 
 		Args:

@@ -74,7 +74,10 @@ class Buffer(nnx.Pytree):
 
 	@nnx.jit(static_argnames=("batch_size",))
 	def sample(self, key: Array, *, batch_size: int) -> Any:
-		"""Sample a batch from the buffer.
+		"""Sample a batch from the buffer, with replacement.
+
+		Replay-style buffers sample i.i.d. minibatches, so duplicate rows within a batch
+		are intended; the buffer is read-only under sampling, so duplicates are harmless.
 
 		Args:
 			key: JAX PRNG key.

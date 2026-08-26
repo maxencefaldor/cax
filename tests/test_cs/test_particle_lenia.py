@@ -84,7 +84,7 @@ def test_particle_lenia_render_modes_differ() -> None:
 	state = jax.random.uniform(key, (16, 2), minval=-6.0, maxval=6.0)
 
 	images = {
-		mode: particle_lenia.render(state, resolution=64, type=mode)
+		mode: particle_lenia.render(state, resolution=64, mode=mode)
 		for mode in ("particles", "UG", "E")
 	}
 	for image in images.values():

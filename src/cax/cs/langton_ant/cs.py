@@ -72,16 +72,16 @@ class LangtonAnt(ComplexSystem[LangtonAntState, Array]):
 				counter-clockwise).
 
 		"""
-		assert len(rule_string) >= 2, (
-			f"Rule string must have at least 2 characters, got: '{rule_string}'"
-		)
+		if len(rule_string) < 2:
+			raise ValueError(f"rule_string must have at least 2 characters, got: '{rule_string}'")
 
 		valid_chars = set(TURN_CHAR_TO_INT.keys())
 		for char in rule_string:
-			assert char in valid_chars, (
-				f"Invalid character '{char}' in rule string '{rule_string}'. "
-				f"Valid characters are: {sorted(valid_chars)}"
-			)
+			if char not in valid_chars:
+				raise ValueError(
+					f"Invalid character '{char}' in rule string '{rule_string}'. "
+					f"Valid characters are: {sorted(valid_chars)}"
+				)
 
 		turns = jnp.array([TURN_CHAR_TO_INT[char] for char in rule_string], dtype=jnp.int32)
 		return turns

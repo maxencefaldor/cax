@@ -18,7 +18,8 @@ def rgba_to_rgb(array: Array) -> Array:
 		RGB image with shape ``(..., 3)`` and values in ``[0, 1]``.
 
 	"""
-	assert array.shape[-1] == 4
+	if array.shape[-1] != 4:
+		raise ValueError(f"Expected an RGBA array with 4 channels, got {array.shape[-1]}")
 	rgb, alpha = array[..., :-1], array[..., -1:]
 	alpha = jnp.clip(alpha, min=0.0, max=1.0)
 	return (1.0 - alpha) * 1.0 + alpha * rgb
@@ -125,9 +126,6 @@ def render_array_with_channels_to_rgb(array: Array) -> Array:
 		colorful representation.
 	- If the array has 3 or more channels, the last three channels are used directly as the RGB
 		values.
-
-	The resulting RGB image is clipped to the valid range [0, 1] and converted
-	to uint8 format.
 
 	Args:
 		array: Input array with shape ``(..., C)`` and values in ``[0, 1]``.

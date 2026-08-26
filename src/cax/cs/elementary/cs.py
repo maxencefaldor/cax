@@ -64,7 +64,8 @@ class Elementary(ComplexSystem[Array, Array]):
 				the rule's lookup table.
 
 		"""
-		assert 0 <= rule_number < 256, "Wolfram code must be between 0 and 255."
+		if not 0 <= rule_number < 256:
+			raise ValueError(f"rule_number must be in [0, 255], got {rule_number}")
 		return ((rule_number >> 7 - jnp.arange(8)) & 1).astype(jnp.float32)
 
 	@nnx.jit

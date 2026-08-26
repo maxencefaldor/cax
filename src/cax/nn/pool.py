@@ -57,17 +57,23 @@ class Pool(nnx.Pytree):
 
 	@nnx.jit(static_argnames=("batch_size",))
 	def sample(self, key: Array, *, batch_size: int) -> tuple[Array, Any]:
-		"""Sample a batch from the pool.
+		"""Sample a batch from the pool, without replacement.
+
+		Sampling is without replacement so the indices are distinct: a later
+		`update(idxs, batch)` writes each row exactly once, with no collision between
+		duplicate indices deciding which write survives.
 
 		Args:
 			key: JAX PRNG key.
-			batch_size: Number of rows to sample.
+			batch_size: Number of rows to sample. Must not exceed the pool size.
 
 		Returns:
 			A tuple `(idxs, batch)` where `idxs` has shape `(batch_size,)` and `batch` is a PyTree
 			with each leaf shaped `(batch_size, ...)`.
 
 		"""
-		idxs = jax.random.choice(key, self.size, shape=(batch_size,))
+		if batch_size > self.size:
+			raise ValueError(f"batch_size ({batch_size}) must not exceed pool size ({self.size})")
+		idxs = jax.random.choice(key, self.size, shape=(batch_size,), replace=False)
 		batch = jax.tree.map(lambda leaf: leaf[idxs], self.data)
 		return idxs, batch

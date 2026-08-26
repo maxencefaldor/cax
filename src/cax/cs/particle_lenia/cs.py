@@ -70,7 +70,7 @@ class ParticleLenia(ComplexSystem[Array, Array]):
 
 		return next_state
 
-	@nnx.jit(static_argnames=("resolution", "extent", "particle_radius", "type"))
+	@nnx.jit(static_argnames=("resolution", "extent", "particle_radius", "mode"))
 	def render(
 		self,
 		state: Array,
@@ -78,7 +78,7 @@ class ParticleLenia(ComplexSystem[Array, Array]):
 		resolution: int = 512,
 		extent: float = 15.0,
 		particle_radius: float = 0.3,
-		type: str = "UG",  # Options: "particles", "UG", "E"
+		mode: str = "UG",  # Options: "particles", "UG", "E"
 	) -> Array:
 		"""Render state to RGB image.
 
@@ -97,7 +97,7 @@ class ParticleLenia(ComplexSystem[Array, Array]):
 				system.
 			particle_radius: Radius of each particle in coordinate space. Particles are drawn
 				as smooth circles with anti-aliased edges.
-			type: Visualization mode determining what fields to display:
+			mode: Visualization mode determining what fields to display:
 				"particles": Only show particles on white background (default).
 				"UG": Show particles overlaid on kernel (U) and growth (G) field visualization.
 				"E": Show particles overlaid on energy field visualization.
@@ -107,7 +107,8 @@ class ParticleLenia(ComplexSystem[Array, Array]):
 				and optionally the underlying field structure that drives their motion.
 
 		"""
-		assert self.num_spatial_dims == 2, "Particle Lenia only supports 2D visualization."
+		if self.num_spatial_dims != 2:
+			raise ValueError("Particle Lenia only supports 2D visualization.")
 
 		# Create a grid of coordinates
 		x = jnp.linspace(-extent, extent, resolution)
@@ -164,11 +165,11 @@ class ParticleLenia(ComplexSystem[Array, Array]):
 			vis_particle * (1.0 - particle_mask) + jnp.array([0.0, 0.0, 1.0]) * particle_mask
 		)
 
-		# Choose visualization based on type
-		if type == "UG":
+		# Choose visualization based on mode
+		if mode == "UG":
 			# Blend particles with UG field
 			rgb = vis_ug * (1.0 - particle_mask * 0.7) + vis_particle * (particle_mask * 0.7)
-		elif type == "E":
+		elif mode == "E":
 			# Blend particles with E field
 			rgb = vis_e * (1.0 - particle_mask * 0.7) + vis_particle * (particle_mask * 0.7)
 		else:  # "particles" (default)
