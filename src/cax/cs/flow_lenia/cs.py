@@ -5,12 +5,7 @@ This module implements Flow Lenia, a mass-conservative extension of Lenia.
 
 from collections.abc import Callable
 
-from flax import nnx
-from jax import Array
-
-from cax.core import ComplexSystem
-from cax.utils import clip_and_uint8, render_array_with_channels_to_rgb
-
+from ..lenia.cs import Lenia
 from ..lenia.growth import exponential_growth_fn
 from ..lenia.kernel import gaussian_kernel_fn
 from ..lenia.perceive import LeniaPerceive
@@ -18,8 +13,12 @@ from ..lenia.rule import LeniaRuleParams
 from .update import FlowLeniaUpdate
 
 
-class FlowLenia(ComplexSystem[Array, Array]):
-	"""Flow Lenia class."""
+class FlowLenia(Lenia):
+	"""Flow Lenia class.
+
+	Subclasses Lenia: perception and rendering are Lenia's, while the update adds
+	flow-based advection with mass conservation.
+	"""
 
 	def __init__(
 		self,
@@ -90,31 +89,3 @@ class FlowLenia(ComplexSystem[Array, Array]):
 			dd=dd,
 			sigma=sigma,
 		)
-
-	def _step(self, state: Array, input: Array | None = None) -> Array:
-		perception = self.perceive(state)
-		next_state = self.update(state, perception, input)
-
-		return next_state
-
-	@nnx.jit
-	def render(self, state: Array) -> Array:
-		"""Render state to RGB image.
-
-		Converts the multi-channel Lenia state to an RGB visualization. Channels are
-		mapped to color channels (Red, Green, Blue) for visualization. If there are
-		more than 3 channels, the last three are displayed. If there are fewer than
-		3 channels, the missing channels are filled with zeros.
-
-		Args:
-			state: Array with shape (*spatial_dims, channel_size) representing the
-				Lenia state, where each cell contains continuous values typically in [0, 1].
-
-		Returns:
-			RGB image with dtype uint8 and shape (*spatial_dims, 3), where state
-				values are mapped to colors in the range [0, 255].
-
-		"""
-		rgb = render_array_with_channels_to_rgb(state)
-
-		return clip_and_uint8(rgb)
