@@ -52,8 +52,15 @@ def get_kernel_fn(kernel_core: Callable[[Array], Array]) -> Callable[[Array, Ker
 
 # Kernel cores
 def exponential_kernel_core(radius: Array, alpha: float = 4.0) -> Array:
-	"""Exponential kernel core."""
-	return jnp.exp(alpha - alpha / (4 * radius * (1 - radius)))
+	"""Exponential kernel core.
+
+	The core is zero at the support boundaries, where the exponent diverges. The
+	double-`where` sanitizes the divisor before dividing so the gradient stays finite
+	at `radius` 0 and 1 (see cax.utils.numerics).
+	"""
+	is_interior = (radius > 0.0) & (radius < 1.0)
+	support = jnp.where(is_interior, 4 * radius * (1 - radius), jnp.ones_like(radius))
+	return jnp.where(is_interior, jnp.exp(alpha - alpha / support), jnp.zeros_like(radius))
 
 
 def polynomial_kernel_core(radius: Array, alpha: float = 4.0) -> Array:

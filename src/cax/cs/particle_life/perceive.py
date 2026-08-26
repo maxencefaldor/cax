@@ -10,8 +10,9 @@ from jax import Array
 
 from cax.core.perceive import Perceive
 from cax.core.perceive.perceive import Perception
+from cax.utils import safe_divide, safe_norm
 
-from .perception import ParticleLifePerception as ParticleLifePerception
+from .perception import ParticleLifePerception
 from .state import ParticleLifeState
 
 
@@ -120,11 +121,13 @@ class ParticleLifePerceive(Perceive[ParticleLifeState]):
 		pos_diff = jnp.where(pos_diff > 0.5, pos_diff - 1.0, pos_diff)
 		pos_diff = jnp.where(pos_diff < -0.5, pos_diff + 1.0, pos_diff)
 
-		# Calculate distances and normalized directions with periodic conditions
-		distance = jnp.linalg.norm(pos_diff, axis=-1)
-		direction_norm = jnp.where(
-			jnp.eye(num_particles)[..., None], 0.0, pos_diff / distance[..., None]
-		)
+		# Calculate distances and normalized directions with periodic conditions.
+		# Both go through the safe primitives: the diagonal is a zero vector, and a plain
+		# norm or division there leaves nan in the gradient even though the forward pass
+		# is masked (the where-NaN trap, see cax.utils.numerics).
+		distance = safe_norm(pos_diff, axis=-1)
+		is_other = ~jnp.eye(num_particles, dtype=bool)
+		direction_norm = safe_divide(pos_diff, distance[..., None], where=is_other[..., None])
 
 		# Calculate forces
 		forces = self._get_forces(distance, attraction_factors)
