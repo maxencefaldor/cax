@@ -1,0 +1,7 @@
+# Keeps the pinned action versions current: one weekly PR per stale action.
+version: 2
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
