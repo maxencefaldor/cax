@@ -10,6 +10,7 @@ from dataclasses import replace
 from jax import Array
 
 from cax.core.update import Update
+from cax.utils import damped_euler_step
 
 from .perception import ParticleLifePerception
 from .state import ParticleLifeState
@@ -64,10 +65,12 @@ class ParticleLifeUpdate(Update[ParticleLifeState, ParticleLifePerception, Array
 			New ParticleLifeState with updated positions and velocities (class unchanged).
 
 		"""
-		velocity = self.friction_factor * state.velocity + self.dt * perception.acceleration
-		position = state.position + self.dt * velocity
-
-		# Apply periodic boundary conditions
-		position = position % 1.0
+		position, velocity = damped_euler_step(
+			state.position,
+			state.velocity,
+			perception.acceleration,
+			dt=self.dt,
+			friction_factor=self.friction_factor,
+		)
 
 		return replace(state, position=position, velocity=velocity)

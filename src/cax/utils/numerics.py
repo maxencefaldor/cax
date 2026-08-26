@@ -54,3 +54,4 @@ def safe_norm(vector: Array, *, axis: int = -1, keepdims: bool = False) -> Array
 	is_positive = squared > 0.0
 	squared_safe = jnp.where(is_positive, squared, jnp.ones_like(squared))
 	return jnp.where(is_positive, jnp.sqrt(squared_safe), jnp.zeros_like(squared))
+

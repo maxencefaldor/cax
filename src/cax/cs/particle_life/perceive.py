@@ -9,7 +9,7 @@ import jax.numpy as jnp
 from jax import Array
 
 from cax.core.perceive import Perceive
-from cax.utils import safe_divide, safe_norm
+from cax.utils import safe_divide, safe_norm, toroidal_difference
 
 from .perception import ParticleLifePerception
 from .state import ParticleLifeState
@@ -114,11 +114,9 @@ class ParticleLifePerceive(Perceive[ParticleLifeState, ParticleLifePerception]):
 		num_particles = state.class_.shape[-1]
 		attraction_factors = self.A[state.class_[..., :, None], state.class_[..., None, :]]
 
-		pos_diff = state.position[..., None, :, :] - state.position[..., :, None, :]
-
-		# Apply periodic boundary conditions
-		pos_diff = jnp.where(pos_diff > 0.5, pos_diff - 1.0, pos_diff)
-		pos_diff = jnp.where(pos_diff < -0.5, pos_diff + 1.0, pos_diff)
+		pos_diff = toroidal_difference(
+			state.position[..., :, None, :], state.position[..., None, :, :]
+		)
 
 		# Calculate distances and normalized directions with periodic conditions.
 		# Both go through the safe primitives: the diagonal is a zero vector, and a plain
