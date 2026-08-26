@@ -227,15 +227,15 @@ def sobel(A: Array) -> Array:
 		A: Input array of shape (y, x, c), where c is the number of channels.
 
 	Returns:
-		Gradients of shape (y, x, 2, c), where axis -3 is [sobel_y(A), sobel_x(A)],
-		matching the reference code's [-dy, -dx] convention.
+		Gradients of shape (y, x, 2, c), where axis -3 is [sobel_y(A), sobel_x(A)].
+		`convolve2d` flips the kernel, so each component is +8 times the partial
+		derivative along its axis — matching the reference implementation exactly.
 
 	"""
 	kx, ky = get_sobel_kernels()
 
-	# Compute gradients per channel
-	grad_y = sobel_y(A, ky)  # -dy
-	grad_x = sobel_x(A, kx)  # -dx
+	# Compute gradients per channel (+d/drow, +d/dcol up to the Sobel scale)
+	grad_y = sobel_y(A, ky)
+	grad_x = sobel_x(A, kx)
 
-	# Stack gradients as [grad_y, grad_x] = [-dy, -dx]
 	return jnp.stack([grad_y, grad_x], axis=2)  # (y, x, 2, c)

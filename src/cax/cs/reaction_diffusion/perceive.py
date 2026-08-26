@@ -1,22 +1,29 @@
 """Reaction-Diffusion perceive module.
 
 This module implements the perception function for the Gray-Scott reaction-diffusion system.
-It computes the discrete Laplacian of each chemical species using a convolution kernel,
+It computes the discrete Laplacian of each chemical species using a fixed convolution stencil,
 which represents the spatial diffusion component of the PDE.
 """
 
+import jax
 import jax.numpy as jnp
 from flax import nnx
+from jax import Array
 
-from cax.core.perceive import ConvPerceive, grad2_kernel, identity_kernel
+from cax.core.perceive import Perceive, grad2_kernel, identity_kernel
+from cax.core.perceive.perceive import Perception
 
 
-class ReactionDiffusionPerceive(ConvPerceive):
+class ReactionDiffusionPerceive(Perceive[Array]):
 	"""Reaction-Diffusion perception.
 
 	Computes the identity (current concentration) and the discrete Laplacian for each
 	chemical species. The state has 2 channels (species U and V), so the perception
-	produces 4 channels: [U, lap(U), V, lap(V)] via grouped convolution.
+	produces 4 channels: [U, lap(U), V, lap(V)] via grouped convolution with circular
+	(periodic) boundaries.
+
+	The stencil is physics, not weights: it is stored as a plain constant, applied with
+	`jax.lax.conv_general_dilated`, and never appears in the trainable parameters.
 	"""
 
 	def __init__(self, *, num_spatial_dims: int = 2, rngs: nnx.Rngs):
@@ -24,27 +31,58 @@ class ReactionDiffusionPerceive(ConvPerceive):
 
 		Args:
 			num_spatial_dims: Number of spatial dimensions (default 2).
-			rngs: RNG key.
+			rngs: rng key (unused; accepted for interface uniformity).
 
 		"""
-		channel_size = 2
-		kernel_size = tuple(3 for _ in range(num_spatial_dims))
-		super().__init__(
-			channel_size=channel_size,
-			perception_size=2 * channel_size,
-			kernel_size=kernel_size,
-			padding="CIRCULAR",
-			feature_group_count=channel_size,
-			rngs=rngs,
-		)
+		self.num_spatial_dims = num_spatial_dims
+		self.channel_size = 2
 
+		# One (identity, Laplacian) pair per species, shape (*kernel_spatial, 1, 4):
+		# input size 1 per group and 4 output features under feature_group_count=2.
 		kernel = jnp.concatenate(
 			[
 				identity_kernel(num_dims=num_spatial_dims),
 				grad2_kernel(num_dims=num_spatial_dims, normalize=False),
 			]
-			* channel_size,
+			* self.channel_size,
 			axis=-1,
 		)
-		kernel = jnp.expand_dims(kernel, axis=-2)
-		self.conv.kernel[...] = kernel
+		self.kernel = jnp.expand_dims(kernel, axis=-2)
+
+	def __call__(self, state: Array) -> Perception:
+		"""Apply the fixed identity/Laplacian stencil to the input state.
+
+		Args:
+			state: Array with shape `(..., *spatial_dims, 2)` containing the [U, V]
+				concentrations.
+
+		Returns:
+			Array with shape `(..., *spatial_dims, 4)` containing [U, lap(U), V, lap(V)].
+
+		"""
+		num_spatial_dims = self.num_spatial_dims
+		spatial_dims = state.shape[-num_spatial_dims - 1 : -1]
+		batch_dims = state.shape[: -num_spatial_dims - 1]
+
+		# Periodic boundaries: wrap-pad the spatial axes, then convolve without padding.
+		pad_widths = [(0, 0)] * len(batch_dims) + [(1, 1)] * num_spatial_dims + [(0, 0)]
+		padded = jnp.pad(state, pad_widths, mode="wrap")
+		padded = padded.reshape(-1, *[dim + 2 for dim in spatial_dims], self.channel_size)
+
+		# Channel-last layouts for any dimensionality: lhs (N, *spatial, C),
+		# rhs (*spatial, I, O), out (N, *spatial, C).
+		dimension_numbers = jax.lax.ConvDimensionNumbers(
+			lhs_spec=(0, num_spatial_dims + 1, *range(1, num_spatial_dims + 1)),
+			rhs_spec=(num_spatial_dims + 1, num_spatial_dims, *range(num_spatial_dims)),
+			out_spec=(0, num_spatial_dims + 1, *range(1, num_spatial_dims + 1)),
+		)
+		perception = jax.lax.conv_general_dilated(
+			padded,
+			self.kernel,
+			window_strides=(1,) * num_spatial_dims,
+			padding="VALID",
+			dimension_numbers=dimension_numbers,
+			feature_group_count=self.channel_size,
+		)
+
+		return perception.reshape(*batch_dims, *spatial_dims, 2 * self.channel_size)

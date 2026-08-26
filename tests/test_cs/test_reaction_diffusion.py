@@ -67,3 +67,38 @@ def test_reaction_diffusion_render() -> None:
 
 	assert rgb.shape == (*spatial_dims, 3)
 	assert rgb.dtype == jnp.uint8
+
+
+def test_reaction_diffusion_perception_is_identity_and_laplacian() -> None:
+	"""Test the perception channels against a manual periodic Laplacian."""
+	from cax.cs.reaction_diffusion import ReactionDiffusionPerceive
+
+	perceive = ReactionDiffusionPerceive(rngs=nnx.Rngs(0))
+	key = jax.random.key(0)
+	state = jax.random.uniform(key, (8, 8, 2))
+
+	perception = perceive(state)
+	assert perception.shape == (8, 8, 4)
+
+	def laplacian(field: jax.Array) -> jax.Array:
+		return (
+			jnp.roll(field, 1, axis=0)
+			+ jnp.roll(field, -1, axis=0)
+			+ jnp.roll(field, 1, axis=1)
+			+ jnp.roll(field, -1, axis=1)
+			- 4.0 * field
+		)
+
+	assert jnp.allclose(perception[..., 0], state[..., 0], atol=1e-6)
+	assert jnp.allclose(perception[..., 1], laplacian(state[..., 0]), atol=1e-5)
+	assert jnp.allclose(perception[..., 2], state[..., 1], atol=1e-6)
+	assert jnp.allclose(perception[..., 3], laplacian(state[..., 1]), atol=1e-5)
+
+
+def test_reaction_diffusion_stencil_is_not_trainable() -> None:
+	"""Test that the physics stencil never appears among the trainable parameters."""
+	from cax.cs.reaction_diffusion import ReactionDiffusion
+
+	reaction_diffusion = ReactionDiffusion(rngs=nnx.Rngs(0))
+	params = nnx.state(reaction_diffusion, nnx.Param)
+	assert not nnx.to_flat_state(params)
