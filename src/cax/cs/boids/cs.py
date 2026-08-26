@@ -54,13 +54,13 @@ class Boids(ComplexSystem[BoidsState, Array]):
 
 		return next_state
 
-	@nnx.jit(static_argnames=("resolution", "boids_size"))
+	@nnx.jit(static_argnames=("resolution", "particle_radius"))
 	def render(
 		self,
 		state: BoidsState,
 		*,
 		resolution: int = 512,
-		boids_size: float = 0.01,
+		particle_radius: float = 0.01,
 	) -> Array:
 		"""Render state to RGB image.
 
@@ -75,9 +75,10 @@ class Boids(ComplexSystem[BoidsState, Array]):
 				orientation and can have arbitrary magnitude.
 			resolution: Size of the output image in pixels for both width and height.
 				Higher values produce smoother, more detailed renderings.
-			boids_size: Base width of each boid triangle in coordinate space [0, 1].
-				The triangle height is twice this value. Larger values make boids more
-				visible but may cause overlap.
+			particle_radius: Half-extent of each boid glyph in coordinate space [0, 1]:
+				the triangle spans twice this value from base to tip and one radius
+				across the base. Larger values make boids more visible but may cause
+				overlap.
 
 		Returns:
 			RGB image with dtype uint8 and shape (resolution, resolution, 3), where
@@ -103,8 +104,8 @@ class Boids(ComplexSystem[BoidsState, Array]):
 		v_perp = jnp.stack([-v_hat[..., 1], v_hat[..., 0]], axis=-1)
 
 		# Define triangle dimensions
-		h = 2 * boids_size  # Height from base to tip
-		w = boids_size  # Base width
+		h = 2 * particle_radius  # Height from base to tip
+		w = particle_radius  # Base width
 
 		# Compute triangle vertices
 		vertex0 = position - (w / 2) * v_perp  # Base left
