@@ -236,6 +236,16 @@ def sobel(A: Array) -> Array:
 	Args:
 		A: Input array of shape (*spatial_dims, c), where c is the number of channels.
 
+	`jax.scipy.signal.convolve` is the n-dimensional sibling of the reference's
+	`convolve2d` and lowers to `lax.conv_general_dilated`, adding only the kernel flip
+	and SAME padding. Two properties make it the right primitive here rather than the
+	alternatives used elsewhere in the library: it zero-pads, as the reference does,
+	where an FFT convolution (Lenia's perception) would wrap the torus and change the
+	gradient at the boundary; and the stencil is fixed physics, so it stays a plain
+	constant rather than an `nnx.Conv`'s trainable weights. Packing every axis into one
+	grouped convolution is measurably faster but reorders the float32 summation, which
+	costs bitwise agreement with the reference.
+
 	Returns:
 		Gradients of shape (*spatial_dims, num_spatial_dims, c), where axis -2 orders the
 		components by spatial axis. `convolve` flips the kernel, so each component is
