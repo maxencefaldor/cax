@@ -1,4 +1,4 @@
-name: release
+name: publish
 
 # Publishes to PyPI when a version tag is pushed. Uses PyPI trusted publishing
 # (OIDC): register this repository and workflow as a trusted publisher for the
@@ -12,7 +12,9 @@ on:
 jobs:
   release:
     runs-on: ubuntu-latest
-    environment: release
+    environment:
+      name: pypi
+      url: https://pypi.org/p/cax
     permissions:
       id-token: write
 
