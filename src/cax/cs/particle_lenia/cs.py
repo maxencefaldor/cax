@@ -19,7 +19,7 @@ from jax import Array
 from cax.core import ComplexSystem
 from cax.utils.render import clip_and_uint8
 
-from ..lenia.growth import exponential_growth_fn
+from .growth import peak_growth_fn
 from .kernel import peak_kernel_fn
 from .perceive import ParticleLeniaPerceive
 from .rule import ParticleLeniaRuleParams
@@ -35,7 +35,7 @@ class ParticleLenia(ComplexSystem[Array, Array]):
 		*,
 		T: int,
 		kernel_fn: Callable = peak_kernel_fn,
-		growth_fn: Callable = exponential_growth_fn,
+		growth_fn: Callable = peak_growth_fn,
 		rule_params: ParticleLeniaRuleParams,
 	):
 		"""Initialize Particle Lenia.
@@ -120,15 +120,17 @@ class ParticleLenia(ComplexSystem[Array, Array]):
 		# Reshape grid for computation
 		flat_grid = grid.reshape(-1, 2)
 
-		# Vectorize the field computation over all grid points
-		flat_E, flat_U, flat_G = nnx.vmap(self.perceive.compute_fields, in_axes=(None, 0))(
-			state, flat_grid
-		)
+		# Vectorize the field computation over all grid points. nnx transforms reject
+		# bound methods, so the unbound method is vmapped with the module as first arg.
+		flat_U, flat_G, flat_R = nnx.vmap(
+			ParticleLeniaPerceive.compute_fields, in_axes=(None, None, 0)
+		)(self.perceive, state, flat_grid)
 
-		# Reshape back to grid
-		E_field = flat_E.reshape(resolution, resolution)
+		# Reshape back to grid; the energy field is repulsion minus growth
 		U_field = flat_U.reshape(resolution, resolution)
 		G_field = flat_G.reshape(resolution, resolution)
+		R_field = flat_R.reshape(resolution, resolution)
+		E_field = R_field - G_field
 
 		# Helper functions for colormapping
 		def lerp(x: Array, a: Array, b: Array) -> Array:
@@ -149,7 +151,6 @@ class ParticleLenia(ComplexSystem[Array, Array]):
 		particle_mask = jnp.clip(1.0 - distance_sq_min / (particle_radius**2), 0.0, 1.0)
 
 		# Normalize fields for visualization
-		_ = (E_field - jnp.min(E_field)) / (jnp.max(E_field) - jnp.min(E_field) + 1e-8)  # E_norm
 		U_norm = (U_field - jnp.min(U_field)) / (jnp.max(U_field) - jnp.min(U_field) + 1e-8)
 		G_norm = (G_field - jnp.min(G_field)) / (jnp.max(G_field) - jnp.min(G_field) + 1e-8)
 

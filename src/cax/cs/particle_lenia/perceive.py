@@ -16,7 +16,7 @@ from jax import Array
 from cax.core.perceive import Perceive
 from cax.core.perceive.perceive import Perception
 
-from ..lenia.growth import exponential_growth_fn
+from .growth import peak_growth_fn
 from .kernel import peak_kernel_fn
 from .rule import ParticleLeniaRuleParams
 
@@ -34,7 +34,7 @@ class ParticleLeniaPerceive(Perceive[Array]):
 		num_spatial_dims: int,
 		*,
 		kernel_fn: Callable[[Array, Any], Array] = peak_kernel_fn,
-		growth_fn: Callable[[Array, Any], Array] = exponential_growth_fn,
+		growth_fn: Callable[[Array, Any], Array] = peak_growth_fn,
 		rule_params: ParticleLeniaRuleParams,
 	):
 		"""Initialize Particle Lenia perceive.
