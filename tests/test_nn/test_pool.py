@@ -44,6 +44,25 @@ def test_pool_sample(pool: Pool) -> None:
 	assert sampled_batch["b"].shape == (3,)
 
 
+def test_pool_sample_with_replacement_exceeds_size(pool: Pool) -> None:
+	"""Test that the default sampling allows batches larger than the pool."""
+	key = jax.random.key(0)
+	idxs, sampled_batch = pool.sample(key, batch_size=12)
+	assert idxs.shape == (12,)
+	assert sampled_batch["a"].shape == (12,)
+
+
+def test_pool_sample_without_replacement_is_distinct_and_capped(pool: Pool) -> None:
+	"""Test that replace=False yields distinct indices and enforces the size cap."""
+	import pytest
+
+	key = jax.random.key(0)
+	idxs, _ = pool.sample(key, batch_size=5, replace=False)
+	assert jnp.unique(idxs).shape == (5,)
+	with pytest.raises(ValueError, match="must not exceed pool size"):
+		pool.sample(key, batch_size=6, replace=False)
+
+
 def test_pool_update(pool: Pool) -> None:
 	"""Test the update method of the Pool class."""
 	new_idxs = jnp.array([0, 2, 4])
