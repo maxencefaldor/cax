@@ -4,7 +4,7 @@ import jax
 import pytest
 from flax import nnx
 
-from cax.cs.boids import BoidsPolicy, Boids
+from cax.cs.boids import Boids, BoidsPolicy
 
 
 def test_boids_jit_init() -> None:

@@ -73,7 +73,9 @@ def test_particle_lenia_fields_match_reference() -> None:
 
 def test_particle_lenia_render_modes_differ() -> None:
 	"""Test that the three render modes run and produce distinct images."""
-	kernel_params = ParticleLeniaKernelParams(weight=jnp.array(0.022), mean=jnp.array(4.0), std=jnp.array(1.0))
+	kernel_params = ParticleLeniaKernelParams(
+		weight=jnp.array(0.022), mean=jnp.array(4.0), std=jnp.array(1.0)
+	)
 	growth_params = ParticleLeniaGrowthParams(mean=jnp.array(0.6), std=jnp.array(0.15))
 	rule_params = ParticleLeniaRuleParams(
 		c_rep=1.0, kernel_params=kernel_params, growth_params=growth_params

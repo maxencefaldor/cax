@@ -63,7 +63,9 @@ def test_flow_lenia_theta_a_defaults_to_channel_size() -> None:
 		kernel_params=LeniaKernelParams(
 			r=jnp.array([1.0, 1.0, 1.0]), beta=jnp.array([[1.0], [1.0], [1.0]])
 		),
-		growth_params=LeniaGrowthParams(mean=jnp.array([0.5, 0.5, 0.5]), std=jnp.array([0.1, 0.1, 0.1])),
+		growth_params=LeniaGrowthParams(
+			mean=jnp.array([0.5, 0.5, 0.5]), std=jnp.array([0.1, 0.1, 0.1])
+		),
 	)
 	flow_lenia = FlowLenia(
 		spatial_dims=(32, 32), channel_size=3, R=5, T=10, rule_params=rule_params

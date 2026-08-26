@@ -42,7 +42,9 @@ def bell(x: Array, mean: Array | float, std: Array | float) -> Array:
 	return jnp.exp(-0.5 * ((x - mean) / std) ** 2)
 
 
-def get_kernel_fn(kernel_core: Callable[[Array], Array]) -> Callable[[Array, LeniaKernelParams], Array]:
+def get_kernel_fn(
+	kernel_core: Callable[[Array], Array],
+) -> Callable[[Array, LeniaKernelParams], Array]:
 	"""Get kernel function."""
 
 	def kernel_fn(radius: Array, kernel_params: LeniaKernelParams) -> Array:

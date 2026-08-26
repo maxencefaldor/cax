@@ -27,9 +27,9 @@ from .update import LeniaUpdate
 __all__ = [
 	"PATTERN_NAMES",
 	"FreeKernelParams",
+	"Lenia",
 	"LeniaGrowthParams",
 	"LeniaKernelParams",
-	"Lenia",
 	"LeniaPerceive",
 	"LeniaRuleParams",
 	"LeniaUpdate",

@@ -14,9 +14,9 @@ from .rule import ParticleLeniaRuleParams
 from .update import ParticleLeniaUpdate
 
 __all__ = [
+	"ParticleLenia",
 	"ParticleLeniaGrowthParams",
 	"ParticleLeniaKernelParams",
-	"ParticleLenia",
 	"ParticleLeniaPerceive",
 	"ParticleLeniaRuleParams",
 	"ParticleLeniaUpdate",
