@@ -179,6 +179,7 @@ class FlowLeniaUpdate(LeniaUpdate):
 
 		return new_state
 
+
 def get_sobel_kernels() -> tuple[Array, Array]:
 	"""Define Sobel kernels exactly as in the reference Flow Lenia code."""
 	kx = jnp.array([[1.0, 0.0, -1.0], [2.0, 0.0, -2.0], [1.0, 0.0, -1.0]], dtype=jnp.float32)

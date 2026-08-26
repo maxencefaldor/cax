@@ -1,8 +1,18 @@
 name: docs
 
+# Build on every change that can break the docs; deploy only from main.
 on:
   push:
     branches: [ main ]
+  pull_request:
+    paths:
+      - "docs/**"
+      - "mkdocs.yml"
+      - "README.md"
+      - "examples/**"
+      - "src/**.py"
+      - ".github/workflows/docs.yml"
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -17,17 +27,26 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v5
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
         with:
-          python-version: '3.13'
-      - run: pip install -e .[docs]
-      - run: mkdocs build --clean
+          enable-cache: true
+
+      - name: Install the project
+        run: uv sync --extra docs
+
+      - name: Build (strict)
+        run: uv run mkdocs build --clean
+
       - uses: actions/upload-pages-artifact@v3
+        if: github.event_name == 'push'
         with:
           path: ./site
 
   deploy:
+    if: github.event_name == 'push'
     needs: build
     runs-on: ubuntu-latest
     environment:
