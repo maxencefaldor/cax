@@ -38,7 +38,7 @@ def test_get_image_from_url(mock_urlopen: MagicMock, mock_pil_image: MagicMock) 
 	url = "https://example.com/image.png"
 	result = get_image_from_url(url)
 
-	mock_urlopen.assert_called_once_with(url)
+	mock_urlopen.assert_called_once_with(url, timeout=30.0)
 
 	# Check that PIL.Image.open was called with a BytesIO object containing the correct content
 	mock_pil_image.assert_called_once()
@@ -64,7 +64,7 @@ def test_get_emoji(emoji: str, mock_urlopen: MagicMock, mock_pil_image: MagicMoc
 	result = get_emoji(emoji)
 
 	expected_url = f"https://raw.githubusercontent.com/googlefonts/noto-emoji/refs/heads/main/png/128/emoji_u{hex(ord(emoji))[2:].lower()}.png"
-	mock_urlopen.assert_called_once_with(expected_url)
+	mock_urlopen.assert_called_once_with(expected_url, timeout=30.0)
 
 	# Check that PIL.Image.open was called correctly (it's called inside get_image_from_url)
 	mock_pil_image.assert_called_once()

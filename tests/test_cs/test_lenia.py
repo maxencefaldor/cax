@@ -36,3 +36,43 @@ def test_lenia_jit_init() -> None:
 		init_lenia()
 	except Exception as e:
 		pytest.fail(f"Lenia instantiation failed under jit: {e}")
+
+
+def test_load_pattern_all_shipped_names() -> None:
+	"""Test that every shipped pattern loads with consistent shapes."""
+	from cax.cs.lenia import PATTERN_NAMES, load_pattern
+
+	for name in PATTERN_NAMES:
+		pattern, rule_params = load_pattern(name)
+		num_kernels = rule_params.weight.shape[0]
+		assert pattern.ndim == 3
+		assert rule_params.channel_source.shape == (num_kernels,)
+		assert rule_params.channel_target.shape == (num_kernels,)
+		assert rule_params.kernel_params.r.shape == (num_kernels,)
+		assert rule_params.growth_params.mean.shape == (num_kernels,)
+
+
+def test_load_pattern_unknown_name() -> None:
+	"""Test that an unknown pattern name is refused with the catalogue listed."""
+	from cax.cs.lenia import load_pattern
+
+	with pytest.raises(ValueError, match="Shipped patterns"):
+		load_pattern("Gliderium")
+
+
+def test_orbium_survives() -> None:
+	"""Test that the shipped Orbium survives 200 steps, localized and near-constant mass."""
+	from cax.cs.lenia import load_pattern, metrics_fn
+
+	pattern, rule_params = load_pattern("Orbium")
+	R, T = 13, 10
+	lenia = Lenia(spatial_dims=(64, 64), channel_size=1, R=R, T=T, rule_params=rule_params)
+
+	state = jnp.zeros((64, 64, 1)).at[22:42, 22:42].set(pattern)
+	mass_before = metrics_fn(state, R=R)["mass"]
+
+	state_final = lenia(state, num_steps=200)
+	metrics_final = metrics_fn(state_final, R=R)
+
+	assert jnp.allclose(metrics_final["mass"], mass_before, rtol=0.1)
+	assert metrics_final["concentration"] > 0.5

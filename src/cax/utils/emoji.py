@@ -1,10 +1,14 @@
 """Utilities for emojis."""
 
 import io
+from functools import cache
+from urllib.error import URLError
 from urllib.request import urlopen
 
 import PIL.Image
 from PIL.Image import Image
+
+_FETCH_TIMEOUT_S = 30.0
 
 
 def get_image_from_url(url: str) -> Image:
@@ -16,19 +20,31 @@ def get_image_from_url(url: str) -> Image:
 	Returns:
 		The fetched image as a PIL Image object.
 
+	Raises:
+		ConnectionError: If the download fails — most commonly because the machine
+			is offline. The original error is chained.
+
 	"""
-	with urlopen(url) as response:
-		image_data = response.read()
+	try:
+		with urlopen(url, timeout=_FETCH_TIMEOUT_S) as response:
+			image_data = response.read()
+	except (URLError, TimeoutError) as error:
+		raise ConnectionError(
+			f"Could not download {url}. Emoji images are fetched from the network at "
+			f"call time; check the connection and retry."
+		) from error
 
 	image_pil = PIL.Image.open(io.BytesIO(image_data))
 	return image_pil
 
 
+@cache
 def get_emoji(emoji: str) -> Image:
 	"""Fetch and return an emoji as a PIL Image.
 
-	The emoji glyph is downloaded from Google's Noto Emoji repository (PNG, 128 px). The image
-	is returned as a PIL Image without further processing. Callers may convert to arrays or
+	The emoji glyph is downloaded from Google's Noto Emoji repository (PNG, 128 px) and
+	cached in memory, so repeated calls for the same glyph fetch once. The image is
+	returned as a PIL Image without further processing. Callers may convert to arrays or
 	resize as needed.
 
 	Args:
