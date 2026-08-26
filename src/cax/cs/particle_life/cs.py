@@ -13,7 +13,7 @@ from flax import nnx
 from jax import Array
 
 from cax.core import ComplexSystem
-from cax.utils.render import clip_and_uint8, hsv_to_rgb
+from cax.utils import clip_and_uint8, hsv_to_rgb, nearest_point, pixel_grid, soft_disk_mask
 
 from .perceive import ParticleLifePerceive
 from .state import ParticleLifeState
@@ -117,27 +117,15 @@ class ParticleLife(ComplexSystem[ParticleLifeState, Array]):
 		positions = state.position  # Shape: (num_particles, 2)
 		positions = positions.at[:, 1].set(1 - positions[:, 1])
 
-		# Create grid of pixel centers
-		x = jnp.linspace(0, 1, resolution)
-		y = jnp.linspace(0, 1, resolution)
-		grid = jnp.stack(jnp.meshgrid(x, y), axis=-1)  # Shape: (resolution, resolution, 2)
-
-		# Compute squared distances to all particles
-		distance_sq = jnp.sum(
-			(grid[:, :, None, :] - positions[None, None, :, :]) ** 2, axis=-1
-		)  # Shape: (resolution, resolution, num_particles)
-
-		# Find minimum squared distance and index of closest particle
-		min_distance_sq = jnp.min(distance_sq, axis=-1)  # Shape: (resolution, resolution)
-		closest_particle_idx = jnp.argmin(distance_sq, axis=-1)  # Shape: (resolution, resolution)
+		# Rasterize: nearest particle per pixel
+		grid = pixel_grid(resolution)  # Shape: (resolution, resolution, 2)
+		min_distance_sq, closest_particle_idx = nearest_point(grid, positions)
 
 		# Get class of the closest particle for each pixel
 		closest_class = state.class_[closest_particle_idx]  # Shape: (resolution, resolution)
 
 		# Compute smooth mask based on distance to closest particle
-		mask = jnp.clip(
-			1.0 - min_distance_sq / (particle_radius**2), 0.0, 1.0
-		)  # Shape: (resolution, resolution)
+		mask = soft_disk_mask(min_distance_sq, particle_radius)  # Shape: (resolution, resolution)
 
 		# Generate colors for each class using HSV
 		hues = jnp.linspace(0, 1, self.num_classes, endpoint=False)

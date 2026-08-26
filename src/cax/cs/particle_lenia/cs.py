@@ -18,7 +18,7 @@ from flax import nnx
 from jax import Array
 
 from cax.core import ComplexSystem
-from cax.utils.render import clip_and_uint8
+from cax.utils import clip_and_uint8, nearest_point, pixel_grid, soft_disk_mask
 
 from .growth import peak_growth_fn
 from .kernel import peak_kernel_fn
@@ -112,9 +112,7 @@ class ParticleLenia(ComplexSystem[Array, Array]):
 			raise ValueError("Particle Lenia only supports 2D visualization.")
 
 		# Create a grid of coordinates
-		x = jnp.linspace(-extent, extent, resolution)
-		y = jnp.linspace(-extent, extent, resolution)
-		grid = jnp.stack(jnp.meshgrid(x, y), axis=-1)  # Shape: (resolution, resolution, 2)
+		grid = pixel_grid(resolution, low=-extent, high=extent)  # (resolution, resolution, 2)
 
 		# Reshape grid for computation
 		flat_grid = grid.reshape(-1, 2)
@@ -145,9 +143,8 @@ class ParticleLenia(ComplexSystem[Array, Array]):
 			return lerp(g[..., None], vis, jnp.array([1.17, 0.91, 0.13]))
 
 		# Calculate particle mask
-		distance_sq = jnp.sum(jnp.square(grid[:, :, None, :] - state[None, None, :, :]), axis=-1)
-		distance_sq_min = jnp.min(distance_sq, axis=-1)
-		particle_mask = jnp.clip(1.0 - distance_sq_min / (particle_radius**2), 0.0, 1.0)
+		distance_sq_min, _ = nearest_point(grid, state)
+		particle_mask = soft_disk_mask(distance_sq_min, particle_radius)
 
 		# Normalize fields for visualization
 		U_norm = (U_field - jnp.min(U_field)) / (jnp.max(U_field) - jnp.min(U_field) + 1e-8)

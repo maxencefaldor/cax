@@ -1,15 +1,18 @@
 """Utilities for rendering, emoji, and safe numerics."""
 
-from .emoji import get_emoji
 from .dynamics import damped_euler_step, toroidal_difference
+from .emoji import get_emoji
 from .numerics import safe_divide, safe_norm
 from .render import (
 	clip_and_uint8,
 	hsv_to_rgb,
+	nearest_point,
+	pixel_grid,
 	render_array_with_channels_to_rgb,
 	render_array_with_channels_to_rgba,
 	rgb_to_hsv,
 	rgba_to_rgb,
+	soft_disk_mask,
 )
 
 __all__ = [
@@ -17,11 +20,14 @@ __all__ = [
 	"damped_euler_step",
 	"get_emoji",
 	"hsv_to_rgb",
+	"nearest_point",
+	"pixel_grid",
 	"render_array_with_channels_to_rgb",
 	"render_array_with_channels_to_rgba",
 	"rgb_to_hsv",
 	"rgba_to_rgb",
 	"safe_divide",
 	"safe_norm",
+	"soft_disk_mask",
 	"toroidal_difference",
 ]

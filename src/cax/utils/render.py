@@ -196,3 +196,50 @@ def render_array_with_channels_to_rgba(array: Array) -> Array:
 		rgba = array[..., -4:]
 
 	return rgba
+
+
+def pixel_grid(resolution: int, *, low: float = 0.0, high: float = 1.0) -> Array:
+	"""Build a square grid of pixel-center coordinates.
+
+	Args:
+		resolution: Number of pixels along each side.
+		low: Coordinate of the first pixel along each axis.
+		high: Coordinate of the last pixel along each axis.
+
+	Returns:
+		Array with shape ``(resolution, resolution, 2)`` of ``(x, y)`` coordinates.
+
+	"""
+	x = jnp.linspace(low, high, resolution)
+	y = jnp.linspace(low, high, resolution)
+	return jnp.stack(jnp.meshgrid(x, y), axis=-1)
+
+
+def nearest_point(grid: Array, points: Array) -> tuple[Array, Array]:
+	"""Find the nearest of `points` for every grid pixel.
+
+	Args:
+		grid: Pixel coordinates with shape ``(resolution, resolution, 2)``.
+		points: Point coordinates with shape ``(num_points, 2)``.
+
+	Returns:
+		A ``(min_distance_sq, index)`` tuple of ``(resolution, resolution)`` arrays:
+			the squared distance to, and the index of, the nearest point per pixel.
+
+	"""
+	distance_sq = jnp.sum((grid[:, :, None, :] - points[None, None, :, :]) ** 2, axis=-1)
+	return jnp.min(distance_sq, axis=-1), jnp.argmin(distance_sq, axis=-1)
+
+
+def soft_disk_mask(min_distance_sq: Array, radius: float) -> Array:
+	"""Anti-aliased disk coverage from squared distances to the nearest point.
+
+	Args:
+		min_distance_sq: Squared distance to the nearest point per pixel.
+		radius: Disk radius in the grid's coordinate space.
+
+	Returns:
+		Coverage in ``[0, 1]``: one at the point, falling to zero at the disk edge.
+
+	"""
+	return jnp.clip(1.0 - min_distance_sq / (radius**2), 0.0, 1.0)

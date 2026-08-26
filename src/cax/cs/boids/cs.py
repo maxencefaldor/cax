@@ -11,7 +11,7 @@ from flax import nnx
 from jax import Array
 
 from cax.core import ComplexSystem
-from cax.utils import clip_and_uint8
+from cax.utils import clip_and_uint8, nearest_point, pixel_grid
 
 from .perceive import BoidsPerceive
 from .policy import BoidsPolicy
@@ -112,17 +112,9 @@ class Boids(ComplexSystem[BoidsState, Array]):
 		vertex2 = position + (w / 2) * v_perp  # Base right
 		vertices = jnp.stack([vertex0, vertex1, vertex2], axis=1)  # Shape: (num_boids, 3, 2)
 
-		# Create grid of pixel centers
-		x = jnp.linspace(0, 1, resolution)
-		y = jnp.linspace(0, 1, resolution)
-		grid = jnp.stack(jnp.meshgrid(x, y), axis=-1)  # Shape: (resolution, resolution, 2)
-
-		# Compute squared distances to all boids
-		distance_sq = jnp.sum((grid[:, :, None, :] - position[None, None, :, :]) ** 2, axis=-1)
-		# Shape: (resolution, resolution, num_boids)
-
-		# Find index of closest boid
-		closest_idx = jnp.argmin(distance_sq, axis=-1)  # Shape: (resolution, resolution)
+		# Rasterize: nearest boid per pixel
+		grid = pixel_grid(resolution)  # Shape: (resolution, resolution, 2)
+		_, closest_idx = nearest_point(grid, position)  # Shape: (resolution, resolution)
 
 		# Get vertices of the closest boid
 		closest_vertices = vertices[closest_idx, :, :]  # Shape: (resolution, resolution, 3, 2)
