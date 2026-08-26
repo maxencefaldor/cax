@@ -1,11 +1,14 @@
 """Boids perception module."""
 
-from flax import nnx
+from dataclasses import dataclass
+
+import jax
 from jax import Array
 
 
-@nnx.dataclass
-class BoidsPerception(nnx.Pytree):
+@jax.tree_util.register_dataclass
+@dataclass(frozen=True)
+class BoidsPerception:
 	"""Boids perception class."""
 
-	acceleration: Array = nnx.data()
+	acceleration: Array

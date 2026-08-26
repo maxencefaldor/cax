@@ -29,7 +29,6 @@ class LangtonAntPerceive(Perceive[LangtonAntState]):
 			Scalar array containing the cell color at the ant's position.
 
 		"""
-		row: Array = state.position[0].astype(int)
-		col: Array = state.position[1].astype(int)
+		row, col = state.position[0], state.position[1]
 		cell_color: Array = state.grid[row, col, 0]
 		return cell_color

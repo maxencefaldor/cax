@@ -1,12 +1,15 @@
 """Boids state module."""
 
-from flax import nnx
+from dataclasses import dataclass
+
+import jax
 from jax import Array
 
 
-@nnx.dataclass
-class BoidsState(nnx.Pytree):
+@jax.tree_util.register_dataclass
+@dataclass(frozen=True)
+class BoidsState:
 	"""Boids state class."""
 
-	position: Array = nnx.data()
-	velocity: Array = nnx.data()
+	position: Array
+	velocity: Array

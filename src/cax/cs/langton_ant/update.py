@@ -5,6 +5,8 @@ The ant turns based on the current cell color, flips the cell to the next color,
 forward one step.
 """
 
+from dataclasses import replace
+
 import jax.numpy as jnp
 from jax import Array
 
@@ -59,19 +61,13 @@ class LangtonAntUpdate(Update[LangtonAntState, Array]):
 		cell_color = perception.astype(jnp.int32)
 
 		turn = self.turns[cell_color]
-		new_direction = (state.direction.astype(jnp.int32) + turn) % 4
+		new_direction = (state.direction + turn) % 4
 
-		new_color = ((cell_color + 1) % num_colors).astype(jnp.float32)
-		row = state.position[0].astype(jnp.int32)
-		col = state.position[1].astype(jnp.int32)
+		new_color = ((cell_color + 1) % num_colors).astype(state.grid.dtype)
+		row, col = state.position[0], state.position[1]
 		new_grid = state.grid.at[row, col, 0].set(new_color)
 
 		delta = DIRECTION_VECTORS[new_direction]
-		new_row = (row + delta[0]) % grid_height
-		new_col = (col + delta[1]) % grid_width
-		new_position = jnp.array([new_row, new_col], dtype=jnp.float32)
+		new_position = jnp.stack([(row + delta[0]) % grid_height, (col + delta[1]) % grid_width])
 
-		state.grid = new_grid
-		state.position = new_position
-		state.direction = new_direction.astype(jnp.float32)
-		return state
+		return replace(state, grid=new_grid, position=new_position, direction=new_direction)

@@ -57,8 +57,8 @@ def test_langton_ant_step_classic_rl() -> None:
 	langton_ant = LangtonAnt(turns=turns, rngs=rngs)
 
 	grid = jnp.zeros((5, 5, 1), dtype=jnp.float32)
-	position = jnp.array([2.0, 2.0], dtype=jnp.float32)
-	direction = jnp.array(0.0, dtype=jnp.float32)  # North
+	position = jnp.array([2, 2], dtype=jnp.int32)
+	direction = jnp.array(0, dtype=jnp.int32)  # North
 	state = LangtonAntState(grid=grid, position=position, direction=direction)
 
 	next_state = langton_ant._step(state)
@@ -85,8 +85,8 @@ def test_langton_ant_step_on_color_1() -> None:
 
 	grid = jnp.zeros((5, 5, 1), dtype=jnp.float32)
 	grid = grid.at[2, 2, 0].set(1.0)
-	position = jnp.array([2.0, 2.0], dtype=jnp.float32)
-	direction = jnp.array(0.0, dtype=jnp.float32)  # North
+	position = jnp.array([2, 2], dtype=jnp.int32)
+	direction = jnp.array(0, dtype=jnp.int32)  # North
 	state = LangtonAntState(grid=grid, position=position, direction=direction)
 
 	next_state = langton_ant._step(state)
@@ -107,8 +107,8 @@ def test_langton_ant_periodic_boundary() -> None:
 	langton_ant = LangtonAnt(turns=turns, rngs=rngs)
 
 	grid = jnp.zeros((5, 5, 1), dtype=jnp.float32)
-	position = jnp.array([0.0, 2.0], dtype=jnp.float32)
-	direction = jnp.array(0.0, dtype=jnp.float32)  # North
+	position = jnp.array([0, 2], dtype=jnp.int32)
+	direction = jnp.array(0, dtype=jnp.int32)  # North
 	state = LangtonAntState(grid=grid, position=position, direction=direction)
 
 	# On color 0, rule R -> turn right -> East, move to (0, 3)
@@ -120,8 +120,8 @@ def test_langton_ant_periodic_boundary() -> None:
 	# Set direction to West (3), at col=0.
 	grid = jnp.zeros((5, 5, 1), dtype=jnp.float32)
 	grid = grid.at[2, 0, 0].set(1.0)  # color 1 -> L
-	position = jnp.array([2.0, 0.0], dtype=jnp.float32)
-	direction = jnp.array(0.0, dtype=jnp.float32)  # North
+	position = jnp.array([2, 0], dtype=jnp.int32)
+	direction = jnp.array(0, dtype=jnp.int32)  # North
 	state = LangtonAntState(grid=grid, position=position, direction=direction)
 
 	next_state = langton_ant._step(state)
@@ -139,8 +139,8 @@ def test_langton_ant_multi_step() -> None:
 	langton_ant = LangtonAnt(turns=turns, rngs=rngs)
 
 	grid = jnp.zeros((11, 11, 1), dtype=jnp.float32)
-	position = jnp.array([5.0, 5.0], dtype=jnp.float32)
-	direction = jnp.array(0.0, dtype=jnp.float32)
+	position = jnp.array([5, 5], dtype=jnp.int32)
+	direction = jnp.array(0, dtype=jnp.int32)
 	state = LangtonAntState(grid=grid, position=position, direction=direction)
 
 	final_state = langton_ant(state, num_steps=4)
@@ -158,8 +158,8 @@ def test_langton_ant_render() -> None:
 	langton_ant = LangtonAnt(turns=turns, rngs=rngs)
 
 	grid = jnp.zeros((8, 8, 1), dtype=jnp.float32)
-	position = jnp.array([4.0, 4.0], dtype=jnp.float32)
-	direction = jnp.array(0.0, dtype=jnp.float32)
+	position = jnp.array([4, 4], dtype=jnp.int32)
+	direction = jnp.array(0, dtype=jnp.int32)
 	state = LangtonAntState(grid=grid, position=position, direction=direction)
 
 	image = langton_ant.render(state)
@@ -175,8 +175,8 @@ def test_langton_ant_render_multicolor() -> None:
 
 	grid = jnp.zeros((8, 8, 1), dtype=jnp.float32)
 	grid = grid.at[3, 3, 0].set(2.0)
-	position = jnp.array([4.0, 4.0], dtype=jnp.float32)
-	direction = jnp.array(0.0, dtype=jnp.float32)
+	position = jnp.array([4, 4], dtype=jnp.int32)
+	direction = jnp.array(0, dtype=jnp.int32)
 	state = LangtonAntState(grid=grid, position=position, direction=direction)
 
 	image = langton_ant.render(state)

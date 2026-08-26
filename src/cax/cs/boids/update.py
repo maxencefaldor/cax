@@ -6,6 +6,8 @@ and periodic boundary conditions.
 
 """
 
+from dataclasses import replace
+
 import jax.numpy as jnp
 from jax import Array
 
@@ -68,6 +70,4 @@ class BoidsUpdate(Update[BoidsState, Array]):
 		# Apply periodic boundary conditions
 		position = position % 1.0
 
-		state.position = position
-		state.velocity = velocity
-		return state
+		return replace(state, position=position, velocity=velocity)

@@ -1,13 +1,16 @@
 """Particle Life state module."""
 
-from flax import nnx
+from dataclasses import dataclass
+
+import jax
 from jax import Array
 
 
-@nnx.dataclass
-class ParticleLifeState(nnx.Pytree):
+@jax.tree_util.register_dataclass
+@dataclass(frozen=True)
+class ParticleLifeState:
 	"""Particle Life state class."""
 
-	class_: Array = nnx.data()
-	position: Array = nnx.data()
-	velocity: Array = nnx.data()
+	class_: Array
+	position: Array
+	velocity: Array

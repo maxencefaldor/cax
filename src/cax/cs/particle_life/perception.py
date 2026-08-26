@@ -1,11 +1,14 @@
 """Particle Life perception module."""
 
-from flax import nnx
+from dataclasses import dataclass
+
+import jax
 from jax import Array
 
 
-@nnx.dataclass
-class ParticleLifePerception(nnx.Pytree):
+@jax.tree_util.register_dataclass
+@dataclass(frozen=True)
+class ParticleLifePerception:
 	"""Particle Life perception class."""
 
-	acceleration: Array = nnx.data()
+	acceleration: Array

@@ -5,6 +5,8 @@ forces to update particle velocities and positions. Includes velocity damping th
 friction and periodic boundary conditions.
 """
 
+from dataclasses import replace
+
 from jax import Array
 
 from cax.core.update import Update
@@ -68,6 +70,4 @@ class ParticleLifeUpdate(Update[ParticleLifeState, Array]):
 		# Apply periodic boundary conditions
 		position = position % 1.0
 
-		state.position = position
-		state.velocity = velocity
-		return state
+		return replace(state, position=position, velocity=velocity)
