@@ -131,13 +131,9 @@ class CustomNCA(ComplexSystem[Array, Array]):
 		# CAX provides a set of update modules but you can define your own.
 		self.update = CustomUpdate(...)
 
-	def _step(self, state: Array, input: Array | None = None, *, sow: bool = False) -> Array:
+	def _step(self, state: Array, input: Array | None = None) -> Array:
 		perception = self.perceive(state)
 		next_state = self.update(state, perception, input)
-
-		if sow:
-			self.sow(nnx.Intermediate, "state", next_state)
-
 		return next_state
 
 	@nnx.jit
@@ -149,6 +145,43 @@ class CustomNCA(ComplexSystem[Array, Array]):
 		# Clip values to valid range and convert to uint8
 		return clip_and_uint8(rgb)
 ```
+
+### Library Conventions
+
+These are the decisions the codebase holds everywhere; new code follows them.
+
+- **State typing is binary: trainable if and only if `nnx.Param`.** Learned weights are
+  `nnx.Param`; rule tables, physics stencils, derived caches, and every other array are
+  plain data. The two filters `nnx.state(cs, nnx.Param)` and
+  `nnx.state(cs, nnx.Not(nnx.Param))` then mean exactly "the weights" and "everything
+  else" — which is what optimizers, checkpointers, and parameter-space searches need.
+  Storing a fixed quantity as a `Param` puts physics where optimizers look.
+- **Simulation states are frozen dataclasses registered as JAX pytrees**
+  (`@jax.tree_util.register_dataclass` over `@dataclass(frozen=True)`), replaced with
+  `dataclasses.replace`, never mutated. States are values: mutating one aliases the
+  caller's object, and `nnx.scan` carries graph nodes by reference. Modules hold the
+  long-lived state; states flow through them.
+- **Trajectories are scan outputs.** The driver returns
+  `(final_state, states)` under `trajectory=True`; nothing is sown onto the module.
+  Per-step metrics are functions applied to the returned trajectory.
+- **Gradient safety is input sanitization.** Any division, norm, or singular kernel
+  evaluated where its argument can degenerate goes through
+  `cax.utils.safe_divide` / `safe_norm` or repeats their double-`where` pattern —
+  masking an invalid output after computing it leaves `nan` in the gradient even when
+  the forward pass is finite.
+- **Randomness at call time draws from a named stream** (e.g. `rngs.noise()`), never
+  from `params`, which is the initialization stream; a dedicated name keeps simulation
+  noise independent of how many parameters were initialized and makes
+  `nnx.split_rngs(..., only=...)` filtering correct. Constructors take keyword-only
+  `*, rngs: nnx.Rngs` even when unused, for interface uniformity.
+- **Validation raises `ValueError` for anything a user can trigger**; `assert` is
+  reserved for internal invariants (and `python -O` removes it).
+- **Every module that cites `[n]` carries its own `References:` block** in its module
+  docstring; entries give the work and, where useful, the URL.
+- **Reference fidelity is load-bearing.** Each system mirrors its reference
+  implementation's formulas exactly — including where references disagree with each
+  other (grid Lenia's Gaussian carries a 1/2 factor, Particle Lenia's does not).
+  Deviations are bugs unless the docstring states them as decisions.
 
 ### Common Pitfalls
 
