@@ -25,6 +25,7 @@ library-wide review. It renames and removes public API — see **Migrating** bel
 | `Life(..., rngs=rngs)`, `Elementary`, `LangtonAnt`, `ReactionDiffusion` | drop `rngs`; these systems are deterministic |
 | `Sandpile(padding="OPEN")` | `Sandpile(padding="ZERO")` |
 | `cax.cs.lenia.patterns` pickles | `load_pattern(name)` |
+| `pip install cax[dev]` | dev tooling is a dependency group; `uv sync --dev` |
 
 Three changes alter numerical results without raising:
 
@@ -71,6 +72,9 @@ Three changes alter numerical results without raising:
 - `KernelParams.b` is `beta`.
 - Perceive modules use an optimized pad-slice implementation, and Reaction-Diffusion's
   stencil is a plain constant rather than trainable weights.
+- Development tooling moved from the `dev` extra to a PEP 735 dependency group, so
+  `pytest`, `ruff`, and `ty` no longer ship in the published package metadata.
+  Contributors keep using `uv sync --all-extras --dev`; `pip install cax[dev]` is gone.
 - Python 3.12 or later is required.
 
 ### Fixed

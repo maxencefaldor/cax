@@ -115,13 +115,6 @@ dependencies = [
 ]
 
 [package.optional-dependencies]
-dev = [
-    { name = "pytest" },
-    { name = "pytest-cov" },
-    { name = "pytest-xdist" },
-    { name = "ruff" },
-    { name = "ty" },
-]
 docs = [
     { name = "mkdocs" },
     { name = "mkdocs-jupyter" },
@@ -135,6 +128,15 @@ examples = [
     { name = "mediapy" },
     { name = "torchvision" },
     { name = "tqdm" },
+]
+
+[package.dev-dependencies]
+dev = [
+    { name = "pytest" },
+    { name = "pytest-cov" },
+    { name = "pytest-xdist" },
+    { name = "ruff" },
+    { name = "ty" },
 ]
 
 [package.metadata]
@@ -151,15 +153,19 @@ requires-dist = [
     { name = "mkdocstrings", extras = ["python"], marker = "extra == 'docs'", specifier = ">=1.0.0" },
     { name = "optax", specifier = ">=0.2.8" },
     { name = "pillow", specifier = ">=11.1.0" },
-    { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.3.0" },
-    { name = "pytest-cov", marker = "extra == 'dev'", specifier = ">=5.0.0" },
-    { name = "pytest-xdist", marker = "extra == 'dev'", specifier = ">=3.5.0" },
-    { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.15.0" },
     { name = "torchvision", marker = "extra == 'examples'", specifier = ">=0.21.0" },
     { name = "tqdm", marker = "extra == 'examples'", specifier = ">=4.67.0" },
-    { name = "ty", marker = "extra == 'dev'", specifier = ">=0.0.38" },
 ]
-provides-extras = ["dev", "docs", "examples"]
+provides-extras = ["docs", "examples"]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "pytest", specifier = ">=8.3.0" },
+    { name = "pytest-cov", specifier = ">=5.0.0" },
+    { name = "pytest-xdist", specifier = ">=3.5.0" },
+    { name = "ruff", specifier = ">=0.15.0" },
+    { name = "ty", specifier = ">=0.0.38" },
+]
 
 [[package]]
 name = "certifi"
