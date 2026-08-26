@@ -4,6 +4,12 @@ This module implements the update rule for Flow Lenia, which extends Lenia with 
 advection. In addition to growth, it computes displacement fields from affinity and
 concentration gradients, then applies reintegration tracking to transport matter.
 
+References:
+	[1] Flow-Lenia: Towards open-ended evolution in cellular automata through mass
+		conservation and parameter localization, Plantec et al. 2023. arXiv:2212.07906.
+		Official implementation: https://github.com/erwanplantec/FlowLenia (flowlenia.py
+		is the variant mirrored here; verified bitwise-identical on shared configs).
+
 """
 
 from collections.abc import Callable
@@ -25,6 +31,20 @@ class FlowLeniaUpdate(LeniaUpdate):
 	(growth potentials) and their gradients, combines them with concentration gradients to
 	produce flow fields, and applies reintegration tracking to transport cell matter through
 	space. This creates mass-conservative dynamics with fluid-like behaviors.
+
+	Reference fidelity, stated where it can be checked:
+
+	- The flow gate alpha is computed per channel from A, matching the official
+		implementation ([1], flowlenia.py); the paper's Eq. 5 gates by the channel-sum
+		density instead. The two coincide for channel_size 1.
+	- The official implementation hardcodes theta_A = channel_size and n = 2; both are
+		parameters here. Pass ``theta_A=channel_size`` to reproduce official behavior
+		for multi-channel systems.
+	- Kernel weights are normalized to sum to one (Chan's Lenia convention, inherited
+		from LeniaUpdate's _growth); the reference uses raw h. Identical when sum(h) is
+		one. In Flow Lenia the scale of h is a real degree of freedom — it sets the
+		balance of affinity flow against the alpha-gated diffusion term — and can be
+		recovered by scaling the growth function.
 
 	"""
 

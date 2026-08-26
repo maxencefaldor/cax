@@ -50,6 +50,10 @@ class LeniaUpdate(Update[Array, Array, Array]):
 		self.channel_size = channel_size
 		self.T = T
 
+		# Chan's multi-kernel convention ("Lenia and Expanded Universe", 2020): growth is
+		# the weighted AVERAGE of per-kernel growths, factors h_k / sum(h). Flow Lenia
+		# inherits this through _growth, where the reference uses raw h instead — see
+		# FlowLeniaUpdate's fidelity notes.
 		self.normalized_weight = rule_params.weight / jnp.sum(rule_params.weight)
 		self.reshape_kernel_to_channel = self._reshape_kernel_to_channel(rule_params)
 

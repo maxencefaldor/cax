@@ -98,7 +98,13 @@ gaussian_kernel_fn = get_kernel_fn(gaussian_kernel_core)
 
 # Differentiable kernel
 def free_kernel_fn(radius: Array, kernel_params: FreeKernelParams) -> Array:
-	"""Free kernel function introduced in [2]."""
+	"""Free kernel function introduced in [2].
+
+	Follows [2]'s convention exactly: Gaussian bumps `exp(-((x/r - a) / w)^2 / 2)` under a
+	sigmoid support mask. The official Flow Lenia repository uses a different bump
+	convention (variance-form widths, support scaled with r), so kernel parameters from
+	that codebase do not transfer numerically to this function.
+	"""
 	# Compute soft kernel mask to avoid out of bounds interactions
 	mask = nnx.sigmoid(-10 * (radius - 1))
 
