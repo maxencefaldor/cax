@@ -11,6 +11,6 @@ from jax import Array
 class ParticleLifeState:
 	"""Particle Life state class."""
 
-	class_: Array
+	class_id: Array
 	position: Array
 	velocity: Array

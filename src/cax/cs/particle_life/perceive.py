@@ -103,7 +103,7 @@ class ParticleLifePerceive(Perceive[ParticleLifeState, ParticleLifePerception]):
 		and aggregates forces into acceleration vectors for each particle.
 
 		Args:
-			state: ParticleLifeState containing class_, position, and velocity arrays.
+			state: ParticleLifeState containing class_id, position, and velocity arrays.
 				Position should have shape (num_particles, num_spatial_dims).
 
 		Returns:
@@ -111,9 +111,9 @@ class ParticleLifePerceive(Perceive[ParticleLifeState, ParticleLifePerception]):
 				(num_particles, num_spatial_dims) representing the total force on each particle.
 
 		"""
-		num_particles = state.class_.shape[-1]
+		num_particles = state.class_id.shape[-1]
 		attraction_factors = self.attraction_matrix[
-			state.class_[..., :, None], state.class_[..., None, :]
+			state.class_id[..., :, None], state.class_id[..., None, :]
 		]
 
 		pos_diff = toroidal_difference(

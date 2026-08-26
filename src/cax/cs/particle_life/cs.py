@@ -25,8 +25,8 @@ class ParticleLife(ComplexSystem[ParticleLifeState, Array]):
 
 	def __init__(
 		self,
-		num_classes: int,
 		*,
+		num_classes: int,
 		dt: float = 0.01,
 		force_factor: float = 1.0,
 		velocity_half_life: float = 0.01,
@@ -92,7 +92,7 @@ class ParticleLife(ComplexSystem[ParticleLifeState, Array]):
 		in the range [0, 1].
 
 		Args:
-			state: ParticleLifeState containing class_, position, and velocity arrays.
+			state: ParticleLifeState containing class_id, position, and velocity arrays.
 				Position should have shape (num_particles, 2) with coordinates in [0, 1].
 				Class array determines the color of each particle.
 			resolution: Size of the output image in pixels for both width and height.
@@ -122,7 +122,7 @@ class ParticleLife(ComplexSystem[ParticleLifeState, Array]):
 		min_distance_sq, closest_particle_idx = nearest_point(grid, positions)
 
 		# Get class of the closest particle for each pixel
-		closest_class = state.class_[closest_particle_idx]  # Shape: (resolution, resolution)
+		closest_class = state.class_id[closest_particle_idx]  # Shape: (resolution, resolution)
 
 		# Compute smooth mask based on distance to closest particle
 		mask = soft_disk_mask(min_distance_sq, particle_radius)  # Shape: (resolution, resolution)

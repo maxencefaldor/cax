@@ -38,11 +38,11 @@ def test_particle_life_gradient_is_finite() -> None:
 
 	key = jax.random.key(0)
 	position = jax.random.uniform(key, (16, 2))
-	class_ = jnp.zeros((16,), dtype=jnp.int32).at[8:].set(1)
+	class_id = jnp.zeros((16,), dtype=jnp.int32).at[8:].set(1)
 	velocity = jnp.zeros((16, 2))
 
 	def loss(position: jax.Array) -> jax.Array:
-		state = ParticleLifeState(class_=class_, position=position, velocity=velocity)
+		state = ParticleLifeState(class_id=class_id, position=position, velocity=velocity)
 		return jnp.sum(perceive(state).acceleration)
 
 	grad = jax.grad(loss)(position)

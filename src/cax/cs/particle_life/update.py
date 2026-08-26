@@ -55,7 +55,7 @@ class ParticleLifeUpdate(Update[ParticleLifeState, ParticleLifePerception, Array
 		positions. Applies periodic boundary conditions by wrapping positions to [0, 1].
 
 		Args:
-			state: ParticleLifeState containing current class_, position, and velocity arrays
+			state: ParticleLifeState containing current class_id, position, and velocity arrays
 				with shape (num_particles, num_spatial_dims).
 			perception: ParticleLifePerception containing acceleration array with shape
 				(num_particles, num_spatial_dims) from the perception step.
