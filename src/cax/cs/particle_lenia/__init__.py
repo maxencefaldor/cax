@@ -11,6 +11,7 @@ from .growth import ParticleLeniaGrowthParams, peak_growth_fn
 from .kernel import ParticleLeniaKernelParams, bell, peak_kernel_fn
 from .perceive import ParticleLeniaPerceive
 from .rule import ParticleLeniaRuleParams
+from .state import ParticleLeniaState
 from .update import ParticleLeniaUpdate
 
 __all__ = [
@@ -19,6 +20,7 @@ __all__ = [
 	"ParticleLeniaKernelParams",
 	"ParticleLeniaPerceive",
 	"ParticleLeniaRuleParams",
+	"ParticleLeniaState",
 	"ParticleLeniaUpdate",
 	"bell",
 	"peak_growth_fn",

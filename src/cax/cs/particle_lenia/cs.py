@@ -12,6 +12,7 @@ References:
 """
 
 from collections.abc import Callable
+from typing import Literal
 
 import jax.numpy as jnp
 from flax import nnx
@@ -24,16 +25,17 @@ from .growth import peak_growth_fn
 from .kernel import peak_kernel_fn
 from .perceive import ParticleLeniaPerceive
 from .rule import ParticleLeniaRuleParams
+from .state import ParticleLeniaState
 from .update import ParticleLeniaUpdate
 
 
-class ParticleLenia(ComplexSystem[Array, Array]):
+class ParticleLenia(ComplexSystem[ParticleLeniaState, Array]):
 	"""Particle Lenia class."""
 
 	def __init__(
 		self,
-		num_spatial_dims: int,
 		*,
+		num_spatial_dims: int,
 		T: float,
 		kernel_fn: Callable = peak_kernel_fn,
 		growth_fn: Callable = peak_growth_fn,
@@ -65,7 +67,7 @@ class ParticleLenia(ComplexSystem[Array, Array]):
 			T=T,
 		)
 
-	def _step(self, state: Array, input: Array | None = None) -> Array:
+	def _step(self, state: ParticleLeniaState, input: Array | None = None) -> ParticleLeniaState:
 		perception = self.perceive(state)
 		next_state = self.update(state, perception, input)
 
@@ -74,12 +76,12 @@ class ParticleLenia(ComplexSystem[Array, Array]):
 	@nnx.jit(static_argnames=("resolution", "extent", "particle_radius", "mode"))
 	def render(
 		self,
-		state: Array,
+		state: ParticleLeniaState,
 		*,
 		resolution: int = 512,
 		extent: float = 15.0,
 		particle_radius: float = 0.3,
-		mode: str = "UG",  # Options: "particles", "UG", "E"
+		mode: Literal["particles", "UG", "E"] = "UG",
 	) -> Array:
 		"""Render state to RGB image.
 
@@ -89,8 +91,8 @@ class ParticleLenia(ComplexSystem[Array, Array]):
 		Field visualizations use color mapping to represent field intensities across space.
 
 		Args:
-			state: Array of shape (num_particles, num_spatial_dims) containing particle positions
-				in continuous space. Currently only 2D visualization is supported.
+			state: ParticleLeniaState containing particle positions in continuous space.
+				Currently only 2D visualization is supported.
 			resolution: Size of the output image in pixels for both width and height.
 				Higher values produce smoother field gradients but increase computation cost.
 			extent: Half-width of the viewing area in coordinate space. The view spans from
@@ -99,8 +101,9 @@ class ParticleLenia(ComplexSystem[Array, Array]):
 			particle_radius: Radius of each particle in coordinate space. Particles are drawn
 				as smooth circles with anti-aliased edges.
 			mode: Visualization mode determining what fields to display:
-				"particles": Only show particles on white background (default).
-				"UG": Show particles overlaid on kernel (U) and growth (G) field visualization.
+				"particles": Only show particles on white background.
+				"UG": Show particles overlaid on kernel (U) and growth (G) field
+					visualization (default).
 				"E": Show particles overlaid on energy field visualization.
 
 		Returns:
@@ -143,7 +146,7 @@ class ParticleLenia(ComplexSystem[Array, Array]):
 			return lerp(g[..., None], vis, jnp.array([1.17, 0.91, 0.13]))
 
 		# Calculate particle mask
-		distance_sq_min, _ = nearest_point(grid, state)
+		distance_sq_min, _ = nearest_point(grid, state.position)
 		particle_mask = soft_disk_mask(distance_sq_min, particle_radius)
 
 		# Normalize fields for visualization
@@ -170,8 +173,9 @@ class ParticleLenia(ComplexSystem[Array, Array]):
 		elif mode == "E":
 			# Blend particles with E field
 			rgb = vis_e * (1.0 - particle_mask * 0.7) + vis_particle * (particle_mask * 0.7)
-		else:  # "particles" (default)
-			# Just show particles
+		elif mode == "particles":
 			rgb = vis_particle
+		else:
+			raise ValueError(f"mode must be one of 'particles', 'UG', 'E', got {mode!r}")
 
 		return clip_and_uint8(rgb)

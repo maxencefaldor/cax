@@ -18,9 +18,10 @@ from cax.core.perceive import Perceive
 from .growth import peak_growth_fn
 from .kernel import peak_kernel_fn
 from .rule import ParticleLeniaRuleParams
+from .state import ParticleLeniaState
 
 
-class ParticleLeniaPerceive(Perceive[Array, Array]):
+class ParticleLeniaPerceive(Perceive[ParticleLeniaState, Array]):
 	"""Particle Lenia perception.
 
 	Computes forces on particles by taking the gradient of an energy field. The energy
@@ -30,8 +31,8 @@ class ParticleLeniaPerceive(Perceive[Array, Array]):
 
 	def __init__(
 		self,
-		num_spatial_dims: int,
 		*,
+		num_spatial_dims: int,
 		kernel_fn: Callable[[Array, Any], Array] = peak_kernel_fn,
 		growth_fn: Callable[[Array, Any], Array] = peak_growth_fn,
 		rule_params: ParticleLeniaRuleParams,
@@ -59,7 +60,7 @@ class ParticleLeniaPerceive(Perceive[Array, Array]):
 
 		self.c_rep = rule_params.c_rep
 
-	def __call__(self, state: Array) -> Array:
+	def __call__(self, state: ParticleLeniaState) -> Array:
 		"""Process the current state to produce a perception.
 
 		Computes the force on each particle by taking the negative gradient of the energy
@@ -67,8 +68,7 @@ class ParticleLeniaPerceive(Perceive[Array, Array]):
 		high growth and away from regions of high repulsion.
 
 		Args:
-			state: Array with shape (num_particles, num_spatial_dims) containing particle
-				positions in continuous space.
+			state: ParticleLeniaState containing particle positions in continuous space.
 
 		Returns:
 			Array with shape (num_particles, num_spatial_dims) containing force vectors
@@ -76,17 +76,16 @@ class ParticleLeniaPerceive(Perceive[Array, Array]):
 
 		"""
 		grad_E = jax.grad(lambda x: self.energy_field(state, x))
-		return -nnx.vmap(grad_E)(state)
+		return -nnx.vmap(grad_E)(state.position)
 
-	def compute_fields(self, state: Array, x: Array) -> tuple[Array, Array, Array]:
+	def compute_fields(self, state: ParticleLeniaState, x: Array) -> tuple[Array, Array, Array]:
 		"""Compute kernel, growth, and repulsion fields at a position.
 
 		Evaluates the kernel field (neighborhood density), growth field (desirability),
 		and repulsion field (overlap prevention) at position x given all particle positions.
 
 		Args:
-			state: Array with shape (num_particles, num_spatial_dims) containing all
-				particle positions.
+			state: ParticleLeniaState containing all particle positions.
 			x: Array with shape (num_spatial_dims,) specifying the query position.
 
 		Returns:
@@ -94,7 +93,7 @@ class ParticleLeniaPerceive(Perceive[Array, Array]):
 				value, and R is the repulsion field value at position x.
 
 		"""
-		r = jnp.sqrt(jnp.clip(jnp.sum(jnp.square(x - state), axis=-1), min=1e-10))
+		r = jnp.sqrt(jnp.clip(jnp.sum(jnp.square(x - state.position), axis=-1), min=1e-10))
 
 		# Compute Lenia field
 		U = jnp.sum(self.kernel_fn(r, self.kernel_params))
@@ -108,7 +107,7 @@ class ParticleLeniaPerceive(Perceive[Array, Array]):
 		# Return energy field
 		return U, G, R
 
-	def energy_field(self, state: Array, x: Array) -> Array:
+	def energy_field(self, state: ParticleLeniaState, x: Array) -> Array:
 		"""Compute energy field at a position.
 
 		The energy field combines repulsion (positive, increases near particles) and
@@ -116,8 +115,7 @@ class ParticleLeniaPerceive(Perceive[Array, Array]):
 		that drives particle motion.
 
 		Args:
-			state: Array with shape (num_particles, num_spatial_dims) containing all
-				particle positions.
+			state: ParticleLeniaState containing all particle positions.
 			x: Array with shape (num_spatial_dims,) specifying the query position.
 
 		Returns:

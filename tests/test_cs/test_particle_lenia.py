@@ -4,7 +4,7 @@ import jax
 import jax.numpy as jnp
 import pytest
 
-from cax.cs.particle_lenia import ParticleLenia, ParticleLeniaRuleParams
+from cax.cs.particle_lenia import ParticleLenia, ParticleLeniaRuleParams, ParticleLeniaState
 from cax.cs.particle_lenia.growth import ParticleLeniaGrowthParams
 from cax.cs.particle_lenia.kernel import ParticleLeniaKernelParams
 
@@ -54,14 +54,14 @@ def test_particle_lenia_fields_match_reference() -> None:
 	perceive = ParticleLeniaPerceive(num_spatial_dims=2, rule_params=rule_params)
 
 	key = jax.random.key(0)
-	state = jax.random.uniform(key, (12, 2), minval=-4.0, maxval=4.0)
+	state = ParticleLeniaState(position=jax.random.uniform(key, (12, 2), minval=-4.0, maxval=4.0))
 	x = jnp.array([0.5, -0.25])
 
 	U, G, R = perceive.compute_fields(state, x)
 
 	# Reference: U = sum_i w_k * exp(-((r_i - mu_k) / sigma_k)^2);
 	# G = exp(-((U - mu_g) / sigma_g)^2); R = c_rep / 2 * sum_i max(1 - r_i, 0)^2.
-	r = jnp.sqrt(jnp.sum(jnp.square(x - state), axis=-1))
+	r = jnp.sqrt(jnp.sum(jnp.square(x - state.position), axis=-1))
 	U_reference = jnp.sum(w_k * jnp.exp(-(((r - mu_k) / sigma_k) ** 2)))
 	G_reference = jnp.exp(-(((U_reference - mu_g) / sigma_g) ** 2))
 	R_reference = 0.5 * c_rep * jnp.sum(jnp.maximum(1.0 - r, 0.0) ** 2)
@@ -83,7 +83,7 @@ def test_particle_lenia_render_modes_differ() -> None:
 	particle_lenia = ParticleLenia(num_spatial_dims=2, T=10, rule_params=rule_params)
 
 	key = jax.random.key(0)
-	state = jax.random.uniform(key, (16, 2), minval=-6.0, maxval=6.0)
+	state = ParticleLeniaState(position=jax.random.uniform(key, (16, 2), minval=-6.0, maxval=6.0))
 
 	images = {
 		mode: particle_lenia.render(state, resolution=64, mode=mode)
