@@ -15,7 +15,7 @@ def vae() -> VAE:
 	features = (1, 32, 64)
 	latent_size = 10
 	rngs = nnx.Rngs(0)
-	return VAE(spatial_dims, features, latent_size, rngs)
+	return VAE(spatial_dims=spatial_dims, features=features, latent_size=latent_size, rngs=rngs)
 
 
 def test_vae_init(vae: VAE) -> None:

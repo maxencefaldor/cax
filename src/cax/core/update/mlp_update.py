@@ -21,11 +21,11 @@ class MLPUpdate(Update[Array, Array, Array]):
 
 	def __init__(
 		self,
+		*,
 		num_spatial_dims: int,
 		channel_size: int,
 		perception_size: int,
 		hidden_layer_sizes: tuple[int, ...],
-		*,
 		activation_fn: Callable = nnx.relu,
 		zeros_init: bool = False,
 		rngs: nnx.Rngs,

@@ -26,9 +26,9 @@ class Lenia(ComplexSystem[Array, Array]):
 
 	def __init__(
 		self,
+		*,
 		spatial_dims: tuple[int, ...],
 		channel_size: int,
-		*,
 		R: int,
 		T: float,
 		state_scale: float = 1.0,

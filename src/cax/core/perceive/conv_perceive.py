@@ -13,9 +13,9 @@ class ConvPerceive(Perceive[Array, Array]):
 
 	def __init__(
 		self,
+		*,
 		channel_size: int,
 		perception_size: int,
-		*,
 		kernel_size: int | tuple[int, ...] = (3, 3),
 		padding: str = "SAME",
 		feature_group_count: int = 1,

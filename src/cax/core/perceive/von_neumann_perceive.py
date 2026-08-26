@@ -18,9 +18,9 @@ class VonNeumannPerceive(NeighborhoodPerceive):
 
 	def __init__(
 		self,
+		*,
 		num_spatial_dims: int,
 		radius: int,
-		*,
 		padding: str = "CIRCULAR",
 		include_center: bool = True,
 		reduce_fn: Callable[..., Array] | None = None,

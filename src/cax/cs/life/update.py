@@ -19,7 +19,7 @@ class LifeUpdate(Update[Array, Array, Array]):
 	of alive neighbors survive. All other cells become or remain dead.
 	"""
 
-	def __init__(self, birth: Array, survival: Array):
+	def __init__(self, *, birth: Array, survival: Array):
 		"""Initialize Life update.
 
 		Args:

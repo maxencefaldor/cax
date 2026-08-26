@@ -27,9 +27,9 @@ class LeniaPerceive(Perceive[Array, Array]):
 
 	def __init__(
 		self,
+		*,
 		spatial_dims: tuple[int, ...],
 		channel_size: int,
-		*,
 		R: int,
 		state_scale: float = 1.0,
 		kernel_fn: Callable = gaussian_kernel_fn,

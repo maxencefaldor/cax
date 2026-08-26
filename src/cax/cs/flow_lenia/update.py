@@ -49,8 +49,8 @@ class FlowLeniaUpdate(LeniaUpdate):
 
 	def __init__(
 		self,
-		channel_size: int,
 		*,
+		channel_size: int,
 		T: float,
 		growth_fn: Callable = exponential_growth_fn,
 		rule_params: LeniaRuleParams,
@@ -81,7 +81,9 @@ class FlowLeniaUpdate(LeniaUpdate):
 				localized flow, larger values produce smoother displacement fields.
 
 		"""
-		super().__init__(channel_size, T=T, growth_fn=growth_fn, rule_params=rule_params)
+		super().__init__(
+			channel_size=channel_size, T=T, growth_fn=growth_fn, rule_params=rule_params
+		)
 
 		# Flow Lenia parameters
 		self.theta_A = channel_size if theta_A is None else theta_A

@@ -24,7 +24,7 @@ class BoidsPerceive(Perceive[BoidsState, BoidsPerception]):
 	to achieve flocking behaviors.
 	"""
 
-	def __init__(self, boid_policy: BoidsPolicy):
+	def __init__(self, *, boid_policy: BoidsPolicy):
 		"""Initialize Boids perceive.
 
 		Args:

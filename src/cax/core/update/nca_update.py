@@ -17,10 +17,10 @@ class NCAUpdate(ResidualUpdate):
 
 	def __init__(
 		self,
+		*,
 		channel_size: int,
 		perception_size: int,
 		hidden_layer_sizes: tuple[int, ...],
-		*,
 		activation_fn: Callable = nnx.relu,
 		step_size: float = 1.0,
 		cell_dropout_rate: float = 0.0,

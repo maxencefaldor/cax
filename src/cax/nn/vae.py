@@ -17,10 +17,10 @@ class Encoder(nnx.Module):
 
 	def __init__(
 		self,
+		*,
 		spatial_dims: Sequence[int],
 		features: Sequence[int],
 		latent_size: int,
-		*,
 		rngs: nnx.Rngs,
 	):
 		"""Initialize the Encoder module.
@@ -102,7 +102,12 @@ class Decoder(nnx.Module):
 	"""
 
 	def __init__(
-		self, spatial_dims: Sequence[int], features: Sequence[int], latent_size: int, rngs: nnx.Rngs
+		self,
+		*,
+		spatial_dims: Sequence[int],
+		features: Sequence[int],
+		latent_size: int,
+		rngs: nnx.Rngs,
 	):
 		"""Initialize the Decoder module.
 
@@ -170,6 +175,7 @@ class VAE(nnx.Module):
 
 	def __init__(
 		self,
+		*,
 		spatial_dims: tuple[int, int],
 		features: Sequence[int],
 		latent_size: int,

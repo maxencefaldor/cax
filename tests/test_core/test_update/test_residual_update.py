@@ -16,10 +16,10 @@ def residual_update_no_input():
 	hidden_layer_sizes = (32, 16)
 	rngs = nnx.Rngs(0)
 	return ResidualUpdate(
-		num_spatial_dims,
-		channel_size,
-		perception_size,
-		hidden_layer_sizes,
+		num_spatial_dims=num_spatial_dims,
+		channel_size=channel_size,
+		perception_size=perception_size,
+		hidden_layer_sizes=hidden_layer_sizes,
 		rngs=rngs,
 	)
 
@@ -34,10 +34,10 @@ def residual_update_with_input():
 	input_size = 2
 	rngs = nnx.Rngs(0)
 	return ResidualUpdate(
-		num_spatial_dims,
-		channel_size,
-		perception_size + input_size,
-		hidden_layer_sizes,
+		num_spatial_dims=num_spatial_dims,
+		channel_size=channel_size,
+		perception_size=perception_size + input_size,
+		hidden_layer_sizes=hidden_layer_sizes,
 		rngs=rngs,
 	)
 

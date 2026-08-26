@@ -29,8 +29,8 @@ class LeniaUpdate(Update[Array, Array, Array]):
 
 	def __init__(
 		self,
-		channel_size: int,
 		*,
+		channel_size: int,
 		T: float,
 		growth_fn: Callable = exponential_growth_fn,
 		rule_params: LeniaRuleParams,
