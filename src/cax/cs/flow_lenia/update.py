@@ -18,7 +18,6 @@ from collections.abc import Callable
 import jax
 import jax.numpy as jnp
 from jax import Array
-from jax.scipy.signal import convolve
 
 from ..lenia.growth import exponential_growth_fn
 from ..lenia.rule import LeniaRuleParams
@@ -238,40 +237,64 @@ def get_sobel_kernels(num_spatial_dims: int) -> Array:
 def sobel(A: Array) -> Array:
 	"""Compute gradients using Sobel filters, matching the reference Flow Lenia implementation.
 
-	Args:
-		A: Input array of shape (*spatial_dims, c), where c is the number of channels.
-
 	The domain is a torus, so the input is wrap-padded before the stencil is applied:
 	differentiation then commutes with translation exactly. This is a stated deviation
 	from the official implementation, whose `convolve2d(mode="same")` zero-pads the
 	boundary while its perception and reintegration both wrap — away from the boundary
-	the two are bitwise identical. `jax.scipy.signal.convolve` is the n-dimensional
-	sibling of the reference's `convolve2d` and lowers to `lax.conv_general_dilated`;
-	the stencil is fixed physics, so it stays a plain constant rather than an
-	`nnx.Conv`'s trainable weights. Packing every axis into one grouped convolution is
-	measurably faster but reorders the float32 summation, which costs bitwise
-	agreement with the reference.
+	the two agree to float32 roundoff.
+
+	All axes and channels are computed by a single grouped convolution. In isolation
+	that is several times faster than one convolution per axis; inside the fused
+	update step the two measure the same on CPU, and the grouped form is kept for the
+	single-kernel structure it hands to other backends. The stencil is fixed physics,
+	so it stays a plain constant rather than an `nnx.Conv`'s trainable weights. The
+	grouped accumulation orders the float32 sums differently from the reference's
+	`convolve2d`, a deviation of at most one unit in the last place — the same scale
+	at which any fixed summation order breaks exact symmetry under axis permutation.
+
+	Args:
+		A: Input array of shape (*spatial_dims, c), where c is the number of channels.
 
 	Returns:
 		Gradients of shape (*spatial_dims, num_spatial_dims, c), where axis -2 orders the
-		components by spatial axis. `convolve` flips the kernel, so each component is
-		+2 * 4^(num_spatial_dims - 1) times the partial derivative along its axis — in two
-		dimensions, exactly the reference implementation's [sobel_y(A), sobel_x(A)].
+		components by spatial axis. Each component is +2 * 4^(num_spatial_dims - 1) times
+		the partial derivative along its axis — in two dimensions, the reference
+		implementation's [sobel_y(A), sobel_x(A)].
 
 	"""
 	num_spatial_dims = A.ndim - 1
+	channel_size = A.shape[-1]
 	kernels = get_sobel_kernels(num_spatial_dims)
 
+	# The reference convolves (flipping the kernel); lax.conv cross-correlates, so flip.
+	flipped = jnp.flip(kernels, axis=tuple(range(1, num_spatial_dims + 1)))
+
+	# One grouped convolution: each channel is its own group, producing every axis
+	# gradient for that channel — rhs shape (*window, 1, channel_size * num_spatial_dims).
+	rhs = jnp.tile(
+		jnp.moveaxis(flipped, 0, -1)[..., None, :],
+		(*([1] * num_spatial_dims), 1, channel_size),
+	)
+	rhs = rhs.reshape(*([3] * num_spatial_dims), 1, channel_size * num_spatial_dims)
+
 	# Wrap-pad the spatial axes so every stencil window lives on the torus
-	pad_widths = [(1, 1)] * num_spatial_dims + [(0, 0)]
-	A = jnp.pad(A, pad_widths, mode="wrap")
+	padded = jnp.pad(A, [(1, 1)] * num_spatial_dims + [(0, 0)], mode="wrap")
 
-	# Compute gradients per channel and per axis (+d/daxis up to the Sobel scale)
-	def convolve_channel(a: Array, kernel: Array) -> Array:
-		return convolve(a, kernel, mode="valid")
+	# Channel-last layouts for any dimensionality: lhs (N, *spatial, C),
+	# rhs (*window, I, O), out (N, *spatial, C).
+	dimension_numbers = jax.lax.ConvDimensionNumbers(
+		lhs_spec=(0, num_spatial_dims + 1, *range(1, num_spatial_dims + 1)),
+		rhs_spec=(num_spatial_dims + 1, num_spatial_dims, *range(num_spatial_dims)),
+		out_spec=(0, num_spatial_dims + 1, *range(1, num_spatial_dims + 1)),
+	)
+	gradients = jax.lax.conv_general_dilated(
+		padded[None],
+		rhs,
+		window_strides=(1,) * num_spatial_dims,
+		padding="VALID",
+		dimension_numbers=dimension_numbers,
+		feature_group_count=channel_size,
+	)[0]  # (*spatial_dims, channel_size * num_spatial_dims)
 
-	grads = [
-		jax.vmap(convolve_channel, in_axes=(-1, None), out_axes=-1)(A, kernel) for kernel in kernels
-	]
-
-	return jnp.stack(grads, axis=-2)  # (*spatial_dims, num_spatial_dims, c)
+	gradients = gradients.reshape(*A.shape[:-1], channel_size, num_spatial_dims)
+	return jnp.moveaxis(gradients, -1, -2)  # (*spatial_dims, num_spatial_dims, c)
