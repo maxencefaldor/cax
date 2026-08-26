@@ -13,8 +13,7 @@ def test_reaction_diffusion_jit_init() -> None:
 
 	@jax.jit
 	def init_reaction_diffusion() -> ReactionDiffusion:
-		rngs = nnx.Rngs(0)
-		cs = ReactionDiffusion(rngs=rngs)
+		cs = ReactionDiffusion()
 		return cs
 
 	try:
@@ -25,8 +24,7 @@ def test_reaction_diffusion_jit_init() -> None:
 
 def test_reaction_diffusion_step() -> None:
 	"""Test that a single step produces a valid state."""
-	rngs = nnx.Rngs(0)
-	cs = ReactionDiffusion(rngs=rngs)
+	cs = ReactionDiffusion()
 
 	spatial_dims = (32, 32)
 	state = jnp.ones((*spatial_dims, 2))
@@ -41,8 +39,7 @@ def test_reaction_diffusion_step() -> None:
 
 def test_reaction_diffusion_multi_step() -> None:
 	"""Test that multi-step evolution works."""
-	rngs = nnx.Rngs(0)
-	cs = ReactionDiffusion(rngs=rngs)
+	cs = ReactionDiffusion()
 
 	spatial_dims = (32, 32)
 	state = jnp.ones((*spatial_dims, 2))
@@ -57,8 +54,7 @@ def test_reaction_diffusion_multi_step() -> None:
 
 def test_reaction_diffusion_render() -> None:
 	"""Test that render produces a valid RGB uint8 image."""
-	rngs = nnx.Rngs(0)
-	cs = ReactionDiffusion(rngs=rngs)
+	cs = ReactionDiffusion()
 
 	spatial_dims = (32, 32)
 	state = jnp.ones((*spatial_dims, 2)) * 0.5
@@ -73,7 +69,7 @@ def test_reaction_diffusion_perception_is_identity_and_laplacian() -> None:
 	"""Test the perception channels against a manual periodic Laplacian."""
 	from cax.cs.reaction_diffusion import ReactionDiffusionPerceive
 
-	perceive = ReactionDiffusionPerceive(rngs=nnx.Rngs(0))
+	perceive = ReactionDiffusionPerceive()
 	key = jax.random.key(0)
 	state = jax.random.uniform(key, (8, 8, 2))
 
@@ -99,7 +95,7 @@ def test_reaction_diffusion_stencil_is_not_trainable() -> None:
 	"""Test that the physics stencil never appears among the trainable parameters."""
 	from cax.cs.reaction_diffusion import ReactionDiffusion
 
-	reaction_diffusion = ReactionDiffusion(rngs=nnx.Rngs(0))
+	reaction_diffusion = ReactionDiffusion()
 	params = nnx.state(reaction_diffusion, nnx.Param)
 	assert not nnx.to_flat_state(params)
 
@@ -108,7 +104,7 @@ def test_gray_scott_state_stays_in_unit_interval() -> None:
 	"""Test that concentrations remain in [0, 1] over many steps."""
 	from cax.cs.reaction_diffusion import ReactionDiffusion
 
-	reaction_diffusion = ReactionDiffusion(rngs=nnx.Rngs(0))
+	reaction_diffusion = ReactionDiffusion()
 	key = jax.random.key(0)
 	state = jax.random.uniform(key, (32, 32, 2))
 

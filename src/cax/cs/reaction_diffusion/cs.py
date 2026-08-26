@@ -39,7 +39,6 @@ class ReactionDiffusion(ComplexSystem[Array, Array]):
 		feed_rate: float = 0.06,
 		kill_rate: float = 0.062,
 		dt: float = 1.0,
-		rngs: nnx.Rngs,
 	):
 		"""Initialize Reaction-Diffusion.
 
@@ -50,10 +49,9 @@ class ReactionDiffusion(ComplexSystem[Array, Array]):
 			feed_rate: Feed rate f — controls how quickly U is replenished.
 			kill_rate: Kill rate k — controls how quickly V is removed.
 			dt: Time step size for the Euler integration.
-			rngs: RNG key.
 
 		"""
-		self.perceive = ReactionDiffusionPerceive(num_spatial_dims=num_spatial_dims, rngs=rngs)
+		self.perceive = ReactionDiffusionPerceive(num_spatial_dims=num_spatial_dims)
 		self.update = ReactionDiffusionUpdate(
 			diffusion_rate_u=diffusion_rate_u,
 			diffusion_rate_v=diffusion_rate_v,

@@ -32,7 +32,6 @@ class Life(ComplexSystem[Array, Array]):
 		*,
 		birth: Array,
 		survival: Array,
-		rngs: nnx.Rngs,
 	):
 		"""Initialize Life.
 
@@ -41,7 +40,6 @@ class Life(ComplexSystem[Array, Array]):
 				cell with i alive neighbors should become alive, 0.0 otherwise.
 			survival: Array of shape (9,) defining survival conditions. Element i is 1.0 if a
 				live cell with i alive neighbors should stay alive, 0.0 otherwise.
-			rngs: rng key.
 
 		"""
 		self.perceive = LifePerceive()

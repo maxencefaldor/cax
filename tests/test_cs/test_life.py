@@ -3,7 +3,6 @@
 import jax
 import jax.numpy as jnp
 import pytest
-from flax import nnx
 
 from cax.cs.life import Life
 
@@ -13,10 +12,9 @@ def test_life_jit_init() -> None:
 
 	@jax.jit
 	def init_life() -> Life:
-		rngs = nnx.Rngs(0)
 		birth = jnp.zeros(9)
 		survival = jnp.zeros(9)
-		life = Life(birth=birth, survival=survival, rngs=rngs)
+		life = Life(birth=birth, survival=survival)
 		return life
 
 	try:
@@ -27,10 +25,8 @@ def test_life_jit_init() -> None:
 
 def test_blinker_oscillates_with_period_two() -> None:
 	"""Test the blinker: a period-2 oscillator under B3/S23."""
-	from flax import nnx
-
 	birth, survival = Life.birth_survival_from_string("B3/S23")
-	life = Life(birth=birth, survival=survival, rngs=nnx.Rngs(0))
+	life = Life(birth=birth, survival=survival)
 
 	state = jnp.zeros((8, 8, 1)).at[4, 3:6, 0].set(1.0)
 

@@ -73,7 +73,6 @@ Here, you can see the basic CAX API usage with Conway's Game of Life:
 ```python
 import jax
 import jax.numpy as jnp
-from flax import nnx
 
 from cax.cs.life import Life
 
@@ -85,10 +84,9 @@ channel_size = 1
 rule_golly = "B3/S23"  # Conway's Game of Life
 
 key = jax.random.key(seed)
-rngs = nnx.Rngs(seed)
 
 birth, survival = Life.birth_survival_from_string(rule_golly)
-cs = Life(birth=birth, survival=survival, rngs=rngs)
+cs = Life(birth=birth, survival=survival)
 
 state_init = jax.random.bernoulli(key, p=0.5, shape=(*spatial_dims, channel_size)).astype(
 	jnp.float32

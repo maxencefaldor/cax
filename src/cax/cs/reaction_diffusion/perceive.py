@@ -7,7 +7,6 @@ which represents the spatial diffusion component of the PDE.
 
 import jax
 import jax.numpy as jnp
-from flax import nnx
 from jax import Array
 
 from cax.core.perceive import Perceive, grad2_kernel, identity_kernel
@@ -25,12 +24,11 @@ class ReactionDiffusionPerceive(Perceive[Array, Array]):
 	`jax.lax.conv_general_dilated`, and never appears in the trainable parameters.
 	"""
 
-	def __init__(self, *, num_spatial_dims: int = 2, rngs: nnx.Rngs):
+	def __init__(self, *, num_spatial_dims: int = 2):
 		"""Initialize Reaction-Diffusion perceive.
 
 		Args:
 			num_spatial_dims: Number of spatial dimensions (default 2).
-			rngs: rng key (unused; accepted for interface uniformity).
 
 		"""
 		self.num_spatial_dims = num_spatial_dims

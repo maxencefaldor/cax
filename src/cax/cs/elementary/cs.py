@@ -29,7 +29,6 @@ class Elementary(ComplexSystem[Array, Array]):
 		self,
 		*,
 		wolfram_code: Array,
-		rngs: nnx.Rngs,
 	):
 		"""Initialize Elementary Cellular Automaton.
 
@@ -37,7 +36,6 @@ class Elementary(ComplexSystem[Array, Array]):
 			wolfram_code: Array of 8 binary values defining the Wolfram rule. Each element
 				corresponds to the output for one of the 8 possible three-cell neighborhood
 				configurations (111, 110, 101, 100, 011, 010, 001, 000).
-			rngs: rng key.
 
 		"""
 		self.perceive = ElementaryPerceive()

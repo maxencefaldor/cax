@@ -3,7 +3,6 @@
 import jax
 import jax.numpy as jnp
 import pytest
-from flax import nnx
 
 from cax.cs.elementary import Elementary
 
@@ -13,9 +12,8 @@ def test_elementary_jit_init() -> None:
 
 	@jax.jit
 	def init_elementary() -> Elementary:
-		rngs = nnx.Rngs(0)
 		wolfram_code = jnp.zeros(8)
-		elementary = Elementary(wolfram_code=wolfram_code, rngs=rngs)
+		elementary = Elementary(wolfram_code=wolfram_code)
 		return elementary
 
 	try:
@@ -26,11 +24,7 @@ def test_elementary_jit_init() -> None:
 
 def test_rule_110_known_rows() -> None:
 	"""Test rule 110 against hand-computed rows from a single seed."""
-	from flax import nnx
-
-	elementary = Elementary(
-		wolfram_code=Elementary.wolfram_code_from_rule_number(110), rngs=nnx.Rngs(0)
-	)
+	elementary = Elementary(wolfram_code=Elementary.wolfram_code_from_rule_number(110))
 	state = jnp.zeros((8, 1)).at[5].set(1.0)
 
 	_, states = elementary.rollout(state, num_steps=2)

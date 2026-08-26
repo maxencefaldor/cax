@@ -176,7 +176,9 @@ These are the decisions the codebase holds everywhere; new code follows them.
   from `params`, which is the initialization stream; a dedicated name keeps simulation
   noise independent of how many parameters were initialized and makes
   `nnx.split_rngs(..., only=...)` filtering correct. Constructors take keyword-only
-  `*, rngs: nnx.Rngs` even when unused, for interface uniformity.
+  `*, rngs: nnx.Rngs` exactly when the system draws randomness — at initialization
+  or at call time; a deterministic system takes none. A required argument that does
+  nothing misstates what the system is.
 - **Validation raises `ValueError` for anything a user can trigger**; `assert` is
   reserved for internal invariants (and `python -O` removes it).
 - **Every module that cites `[n]` carries its own `References:` block** in its module

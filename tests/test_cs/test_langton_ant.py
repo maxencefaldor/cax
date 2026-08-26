@@ -3,7 +3,6 @@
 import jax
 import jax.numpy as jnp
 import pytest
-from flax import nnx
 
 from cax.cs.langton_ant import LangtonAnt, LangtonAntState
 
@@ -13,9 +12,8 @@ def test_langton_ant_jit_init() -> None:
 
 	@jax.jit
 	def init_langton_ant() -> LangtonAnt:
-		rngs = nnx.Rngs(0)
 		turns = jnp.array([1, 3], dtype=jnp.int32)
-		langton_ant = LangtonAnt(turns=turns, rngs=rngs)
+		langton_ant = LangtonAnt(turns=turns)
 		return langton_ant
 
 	try:
@@ -52,9 +50,8 @@ def test_langton_ant_step_classic_rl() -> None:
 	- Flip cell from 0 to 1
 	- Move forward (East) -> col += 1
 	"""
-	rngs = nnx.Rngs(0)
 	turns = LangtonAnt.turns_from_rule_string("RL")
-	langton_ant = LangtonAnt(turns=turns, rngs=rngs)
+	langton_ant = LangtonAnt(turns=turns)
 
 	grid = jnp.zeros((5, 5, 1), dtype=jnp.float32)
 	position = jnp.array([2, 2], dtype=jnp.int32)
@@ -79,9 +76,8 @@ def test_langton_ant_step_on_color_1() -> None:
 	Starting facing North (0), turn left -> West (3).
 	Flip cell from 1 to 0. Move West -> col -= 1.
 	"""
-	rngs = nnx.Rngs(0)
 	turns = LangtonAnt.turns_from_rule_string("RL")
-	langton_ant = LangtonAnt(turns=turns, rngs=rngs)
+	langton_ant = LangtonAnt(turns=turns)
 
 	grid = jnp.zeros((5, 5, 1), dtype=jnp.float32)
 	grid = grid.at[2, 2, 0].set(1.0)
@@ -102,9 +98,8 @@ def test_langton_ant_step_on_color_1() -> None:
 
 def test_langton_ant_periodic_boundary() -> None:
 	"""Test that the ant wraps around grid boundaries."""
-	rngs = nnx.Rngs(0)
 	turns = LangtonAnt.turns_from_rule_string("RL")
-	langton_ant = LangtonAnt(turns=turns, rngs=rngs)
+	langton_ant = LangtonAnt(turns=turns)
 
 	grid = jnp.zeros((5, 5, 1), dtype=jnp.float32)
 	position = jnp.array([0, 2], dtype=jnp.int32)
@@ -134,9 +129,8 @@ def test_langton_ant_periodic_boundary() -> None:
 
 def test_langton_ant_multi_step() -> None:
 	"""Test that multi-step execution via __call__ works."""
-	rngs = nnx.Rngs(0)
 	turns = LangtonAnt.turns_from_rule_string("RL")
-	langton_ant = LangtonAnt(turns=turns, rngs=rngs)
+	langton_ant = LangtonAnt(turns=turns)
 
 	grid = jnp.zeros((11, 11, 1), dtype=jnp.float32)
 	position = jnp.array([5, 5], dtype=jnp.int32)
@@ -153,9 +147,8 @@ def test_langton_ant_multi_step() -> None:
 
 def test_langton_ant_render() -> None:
 	"""Test that render returns uint8 RGB with correct shape."""
-	rngs = nnx.Rngs(0)
 	turns = LangtonAnt.turns_from_rule_string("RL")
-	langton_ant = LangtonAnt(turns=turns, rngs=rngs)
+	langton_ant = LangtonAnt(turns=turns)
 
 	grid = jnp.zeros((8, 8, 1), dtype=jnp.float32)
 	position = jnp.array([4, 4], dtype=jnp.int32)
@@ -169,9 +162,8 @@ def test_langton_ant_render() -> None:
 
 def test_langton_ant_render_multicolor() -> None:
 	"""Test that render works for multi-color rules."""
-	rngs = nnx.Rngs(0)
 	turns = LangtonAnt.turns_from_rule_string("LLRR")
-	langton_ant = LangtonAnt(turns=turns, rngs=rngs)
+	langton_ant = LangtonAnt(turns=turns)
 
 	grid = jnp.zeros((8, 8, 1), dtype=jnp.float32)
 	grid = grid.at[3, 3, 0].set(2.0)

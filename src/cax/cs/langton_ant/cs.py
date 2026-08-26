@@ -34,7 +34,7 @@ class LangtonAnt(ComplexSystem[LangtonAntState, Array]):
 	(symmetric growth filling a square), and "LRRRRRLLR" (triangle-building ant).
 	"""
 
-	def __init__(self, *, turns: Array, rngs: nnx.Rngs):
+	def __init__(self, *, turns: Array):
 		"""Initialize Langton's Ant.
 
 		Args:
@@ -42,7 +42,6 @@ class LangtonAnt(ComplexSystem[LangtonAntState, Array]):
 				encoding turn directions for each cell color. Values correspond to
 				clockwise rotation in multiples of 90 degrees: 0=no turn, 1=right,
 				2=u-turn, 3=left.
-			rngs: rng key.
 
 		"""
 		self.perceive = LangtonAntPerceive()

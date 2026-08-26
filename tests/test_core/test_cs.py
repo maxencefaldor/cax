@@ -14,7 +14,7 @@ from cax.cs.elementary import Elementary
 def elementary() -> Elementary:
 	"""Return a rule 110 Elementary Cellular Automaton."""
 	wolfram_code = Elementary.wolfram_code_from_rule_number(110)
-	return Elementary(wolfram_code=wolfram_code, rngs=nnx.Rngs(0))
+	return Elementary(wolfram_code=wolfram_code)
 
 
 def state_init(width: int = 32) -> Array:
