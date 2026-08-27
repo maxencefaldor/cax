@@ -54,6 +54,8 @@ nav:
     - 50 - VAE: examples/50_vae.ipynb
     - 51 - RRCNN: examples/51_rrcnn.ipynb
     - 52 - Growing NCA with Evolution Strategies: examples/52_growing_nca_es.ipynb
+    - 53 - Leniabreeder: examples/53_leniabreeder.ipynb
+    - 54 - Lenia Gradients: examples/54_lenia_grad.ipynb
   - Contributing: contributing.md
 
 repo_url: https://github.com/maxencefaldor/cax
