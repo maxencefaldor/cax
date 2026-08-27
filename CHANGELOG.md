@@ -4,6 +4,35 @@ All notable changes to CAX are documented here. Versions follow
 [semantic versioning](https://semver.org): while CAX is pre-1.0, breaking changes
 raise the minor version.
 
+## 0.4.1
+
+A documentation and repository release: no API changes.
+
+### Added
+
+- `examples/54_lenia_grad.ipynb` — gradient descent through Lenia. Optimizes a
+  creature to travel further, grows a target image from a rule, and finds the
+  smallest perturbation that kills a soliton. Its opening section maps what a
+  gradient reaches in a Lenia rule: the channel wiring is integer and cannot be
+  differentiated, normalized parameters are flat along their scale direction, and
+  the kernel radius is differentiable exactly when the kernel core vanishes at its
+  support boundary — which the canonical exponential core does and the Gaussian
+  core does not.
+- `examples/55_lenia_grad_in_depth.ipynb` — the analysis companion: validating a
+  gradient against finite differences, measuring the usable rollout length from a
+  Lyapunov exponent, the two ways the gradient goes blind, the non-identifiability
+  of `free_kernel_fn`, and what sharing a growth budget across channels costs.
+- `tests/test_cs/test_lenia_grad.py` — the differentiability facts those notebooks
+  rest on, as tests.
+
+### Changed
+
+- Notebooks are committed without outputs, and a `notebooks` CI job enforces it.
+  Executed notebooks embed base64 media that does not delta-compress, so re-running
+  one added its full size to the repository permanently; `examples/` drops from
+  59.5 MB to 0.4 MB and the source distribution shrinks with it. Example pages in
+  the documentation now show code without stored results.
+
 ## 0.4.0
 
 The first release since 0.3.3, covering both a backlog of unreleased work and a
