@@ -200,6 +200,24 @@ These are the decisions the codebase holds everywhere; new code follows them.
   other (grid Lenia's Gaussian carries a 1/2 factor, Particle Lenia's does not).
   Deviations are bugs unless the docstring states them as decisions.
 
+### Notebooks
+
+Notebooks are committed **without outputs**. Run them locally to check they work, then
+clear the outputs before committing:
+
+```sh
+uv run jupyter nbconvert --clear-output --inplace examples/*.ipynb
+```
+
+An executed notebook embeds its images and videos as base64. Those blobs do not
+delta-compress, so every re-run of an executed notebook adds its full size to the
+repository permanently — two example notebooks once accounted for 55 MB of the working
+tree this way. CI rejects any notebook that carries outputs.
+
+The documentation renders notebooks without executing them, so a notebook's committed
+form is what readers see: keep the prose and code self-explanatory rather than relying
+on the outputs to carry the explanation.
+
 ### Common Pitfalls
 
 - Avoid Python loops over cells - use vectorized operations
