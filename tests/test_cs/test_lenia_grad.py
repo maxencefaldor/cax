@@ -1,0 +1,174 @@
+"""Tests for gradient flow through Lenia.
+
+These pin down the differentiability facts that `examples/54_lenia_grad.ipynb` relies on:
+gradients flow through entire rollouts, normalized parameters are flat along their scale
+direction, and the kernel radius is differentiable exactly when the kernel core vanishes
+at its support boundary.
+"""
+
+import jax
+import jax.numpy as jnp
+
+from cax.cs.lenia import Lenia, LeniaRuleParams
+from cax.cs.lenia.growth import LeniaGrowthParams
+from cax.cs.lenia.kernel import (
+	LeniaKernelParams,
+	exponential_kernel_core,
+	exponential_kernel_fn,
+	gaussian_kernel_core,
+	polynomial_kernel_core,
+)
+
+
+def make_rule(num_kernels: int = 1) -> LeniaRuleParams:
+	"""Build a small single-channel rule with `num_kernels` rank-1 kernels."""
+	return LeniaRuleParams(
+		channel_source=jnp.zeros((num_kernels,), jnp.int32),
+		channel_target=jnp.zeros((num_kernels,), jnp.int32),
+		weight=jnp.linspace(1.0, 2.0, num_kernels),
+		kernel_params=LeniaKernelParams(
+			r=jnp.linspace(0.7, 1.0, num_kernels),
+			beta=jnp.ones((num_kernels, 1)),
+		),
+		growth_params=LeniaGrowthParams(
+			mean=jnp.full((num_kernels,), 0.15),
+			std=jnp.full((num_kernels,), 0.02),
+		),
+	)
+
+
+def make_state(key: jax.Array) -> jax.Array:
+	"""Sample a smooth blob of mass at the center of a small grid."""
+	state = jnp.zeros((32, 32, 1))
+
+	return state.at[12:20, 12:20].set(jax.random.uniform(key, (8, 8, 1)))
+
+
+def rollout_loss(rule_params: LeniaRuleParams, state: jax.Array, **kwargs) -> jax.Array:
+	"""Compute the mean state after a short rollout, building the system inside."""
+	lenia = Lenia(
+		spatial_dims=(32, 32), channel_size=1, R=5, T=10, rule_params=rule_params, **kwargs
+	)
+
+	def step_fn(state: jax.Array, _: None) -> tuple[jax.Array, None]:
+		return lenia.update(state, lenia.perceive(state)), None
+
+	return jnp.mean(jax.lax.scan(step_fn, state, length=8)[0])
+
+
+def float_and_static(rule_params: LeniaRuleParams) -> tuple[LeniaRuleParams, LeniaRuleParams]:
+	"""Split a rule into its float leaves and its integer leaves."""
+
+	def is_inexact(leaf: jax.Array) -> bool:
+		return jnp.issubdtype(leaf.dtype, jnp.inexact)
+
+	params = jax.tree.map(lambda x: x if is_inexact(x) else None, rule_params)
+	static = jax.tree.map(lambda x: None if is_inexact(x) else x, rule_params)
+
+	return params, static
+
+
+def test_scan_rollout_matches_driver_bitwise() -> None:
+	"""Test that scanning perceive/update reproduces the driver's states exactly."""
+	rule_params = make_rule()
+	state = make_state(jax.random.key(0))
+	lenia = Lenia(spatial_dims=(32, 32), channel_size=1, R=5, T=10, rule_params=rule_params)
+
+	def step_fn(state: jax.Array, _: None) -> tuple[jax.Array, jax.Array]:
+		next_state = lenia.update(state, lenia.perceive(state))
+		return next_state, next_state
+
+	final_scan, states_scan = jax.lax.scan(step_fn, state, length=8)
+	final_driver, states_driver = lenia(state, num_steps=8, return_states=True)
+
+	assert jnp.array_equal(final_scan, final_driver)
+	assert jnp.array_equal(states_scan, states_driver)
+
+
+def test_gradient_flows_through_rollout() -> None:
+	"""Test that the gradient of a rollout is finite, and nonzero for the growth params."""
+	params, static = float_and_static(make_rule())
+	state = make_state(jax.random.key(0))
+
+	def loss_fn(params: LeniaRuleParams) -> jax.Array:
+		return rollout_loss(
+			jax.tree.map(
+				lambda p, s: s if p is None else p, params, static, is_leaf=lambda x: x is None
+			),
+			state,
+		)
+
+	grads = jax.grad(loss_fn)(params)
+
+	assert all(jnp.all(jnp.isfinite(leaf)) for leaf in jax.tree.leaves(grads))
+	assert jnp.linalg.norm(grads.growth_params.mean) > 0.0
+	assert jnp.linalg.norm(grads.growth_params.std) > 0.0
+
+
+def test_normalized_parameters_have_zero_scale_gradient() -> None:
+	"""Test Euler's relation: the gradient is orthogonal to each normalized parameter.
+
+	The kernel weights are divided by their sum and the kernel by its own integral, so the
+	loss is scale-free in `weight` and in each kernel's `beta`. For a degree-0 homogeneous
+	function, Euler's theorem forces `sum_k theta_k * dL/dtheta_k = 0`.
+	"""
+	rule_params = make_rule(num_kernels=3)
+	params, static = float_and_static(rule_params)
+	state = make_state(jax.random.key(0))
+
+	def loss_fn(params: LeniaRuleParams) -> jax.Array:
+		return rollout_loss(
+			jax.tree.map(
+				lambda p, s: s if p is None else p, params, static, is_leaf=lambda x: x is None
+			),
+			state,
+		)
+
+	grads = jax.grad(loss_fn)(params)
+
+	# The repartition between kernels carries gradient; only the overall scale is flat.
+	assert jnp.linalg.norm(grads.weight) > 0.0
+	scale_component = jnp.sum(rule_params.weight * grads.weight)
+	assert jnp.abs(scale_component) < 1e-6 * jnp.linalg.norm(grads.weight)
+
+	beta_scale = jnp.sum(rule_params.kernel_params.beta * grads.kernel_params.beta, axis=-1)
+	assert jnp.all(jnp.abs(beta_scale) < 1e-6)
+
+
+def test_kernel_cores_at_the_support_boundary() -> None:
+	"""Test which cores vanish where the support mask cuts them.
+
+	The kernel is `mask * beta[segment] * core(position)` with a hard mask `radius < r`,
+	so `r` is differentiable exactly when the core is zero at the boundary. The Gaussian
+	core is the exception, which is why the gradient of `r` under it is untrustworthy.
+	"""
+	edge = jnp.array(1.0)
+
+	assert exponential_kernel_core(edge) == 0.0
+	assert polynomial_kernel_core(edge) == 0.0
+	assert gaussian_kernel_core(edge) > 0.0
+
+
+def test_radius_gradient_matches_finite_difference_under_exponential_core() -> None:
+	"""Test that the autodiff gradient of the kernel radius is a real derivative."""
+	rule_params = make_rule()
+	params, static = float_and_static(rule_params)
+	state = make_state(jax.random.key(0))
+
+	def loss_of_r(r: jax.Array) -> jax.Array:
+		bumped = LeniaRuleParams(
+			channel_source=static.channel_source,
+			channel_target=static.channel_target,
+			weight=params.weight,
+			kernel_params=LeniaKernelParams(r=r, beta=params.kernel_params.beta),
+			growth_params=params.growth_params,
+		)
+		return rollout_loss(bumped, state, kernel_fn=exponential_kernel_fn)
+
+	r = rule_params.kernel_params.r
+	autodiff = jax.grad(lambda r: loss_of_r(r))(r)[0]
+	eps = 1e-3
+	finite_difference = (loss_of_r(r + eps) - loss_of_r(r - eps)) / (2 * eps)
+
+	assert jnp.abs(autodiff) > 0.0
+	assert jnp.abs(finite_difference - autodiff) < 0.2 * jnp.abs(autodiff)
