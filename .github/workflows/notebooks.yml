@@ -1,0 +1,60 @@
+name: notebooks
+
+# Notebooks are committed without outputs. Executed notebooks embed base64 video and
+# images, which do not delta-compress, so every re-run of an executed notebook adds its
+# full size to the repository forever. Run them locally to check they work, then commit
+# the clean version.
+
+on:
+  push:
+    paths:
+      - "**.ipynb"
+      - ".github/workflows/notebooks.yml"
+  pull_request:
+    paths:
+      - "**.ipynb"
+      - ".github/workflows/notebooks.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: notebooks-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  clean:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Check that notebooks carry no outputs
+        run: |
+          python - <<'EOF'
+          import json
+          import subprocess
+          import sys
+          from pathlib import Path
+
+          tracked = subprocess.run(
+              ["git", "ls-files", "*.ipynb"], capture_output=True, text=True, check=True
+          ).stdout.split()
+
+          dirty = []
+          for path in sorted(Path(name) for name in tracked):
+              notebook = json.loads(path.read_text())
+              for index, cell in enumerate(notebook.get("cells", [])):
+                  if cell.get("cell_type") != "code":
+                      continue
+                  if cell.get("outputs") or cell.get("execution_count") is not None:
+                      dirty.append(f"{path}: cell {index}")
+                      break
+
+          if dirty:
+              print("Notebooks must be committed without outputs. Found:\n")
+              for entry in dirty:
+                  print(f"  {entry}")
+              print("\nStrip them with:")
+              print("  uv run jupyter nbconvert --clear-output --inplace examples/*.ipynb")
+              sys.exit(1)
+
+          print("All notebooks are clean.")
+          EOF
