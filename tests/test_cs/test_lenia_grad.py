@@ -12,9 +12,11 @@ import jax.numpy as jnp
 from cax.cs.lenia import Lenia, LeniaRuleParams
 from cax.cs.lenia.growth import LeniaGrowthParams
 from cax.cs.lenia.kernel import (
+	FreeKernelParams,
 	LeniaKernelParams,
 	exponential_kernel_core,
 	exponential_kernel_fn,
+	free_kernel_fn,
 	gaussian_kernel_core,
 	polynomial_kernel_core,
 )
@@ -44,7 +46,9 @@ def make_state(key: jax.Array) -> jax.Array:
 	return state.at[12:20, 12:20].set(jax.random.uniform(key, (8, 8, 1)))
 
 
-def rollout_loss(rule_params: LeniaRuleParams, state: jax.Array, **kwargs) -> jax.Array:
+def rollout_loss(
+	rule_params: LeniaRuleParams, state: jax.Array, *, num_steps: int = 8, **kwargs
+) -> jax.Array:
 	"""Compute the mean state after a short rollout, building the system inside."""
 	lenia = Lenia(
 		spatial_dims=(32, 32), channel_size=1, R=5, T=10, rule_params=rule_params, **kwargs
@@ -53,7 +57,7 @@ def rollout_loss(rule_params: LeniaRuleParams, state: jax.Array, **kwargs) -> ja
 	def step_fn(state: jax.Array, _: None) -> tuple[jax.Array, None]:
 		return lenia.update(state, lenia.perceive(state)), None
 
-	return jnp.mean(jax.lax.scan(step_fn, state, length=8)[0])
+	return jnp.mean(jax.lax.scan(step_fn, state, length=num_steps)[0])
 
 
 def float_and_static(rule_params: LeniaRuleParams) -> tuple[LeniaRuleParams, LeniaRuleParams]:
@@ -172,3 +176,66 @@ def test_radius_gradient_matches_finite_difference_under_exponential_core() -> N
 
 	assert jnp.abs(autodiff) > 0.0
 	assert jnp.abs(finite_difference - autodiff) < 0.2 * jnp.abs(autodiff)
+
+
+def test_off_band_potential_collapses_the_rule_gradient() -> None:
+	"""Test that a state far from the growth band leaves the rule almost invisible.
+
+	The growth mapping is a Gaussian bell. A uniform state drives the potential to about
+	0.5, many standard deviations from a growth mean of 0.15, so the bell is numerically
+	flat there and the rule parameters — which reach the loss only through it — collapse
+	to a gradient some fifteen orders of magnitude below their in-band value. In a narrow
+	enough band the bell underflows and the gradient is exactly zero.
+
+	The state gradient survives either way, because the update adds growth to the state
+	the cell already had, and that path does not pass through the bell.
+	"""
+	rule_params = make_rule()
+	params, static = float_and_static(rule_params)
+	state = jax.random.uniform(jax.random.key(0), (32, 32, 1))
+
+	def merge(params: LeniaRuleParams) -> LeniaRuleParams:
+		return jax.tree.map(
+			lambda p, s: s if p is None else p, params, static, is_leaf=lambda x: x is None
+		)
+
+	def rule_gradient_norm(num_steps: int) -> jax.Array:
+		grads = jax.grad(lambda params: rollout_loss(merge(params), state, num_steps=num_steps))(
+			params
+		)
+		return jnp.sqrt(sum(jnp.sum(jnp.square(leaf)) for leaf in jax.tree.leaves(grads)))
+
+	# One step in, the potential is still off-band and the rule is invisible.
+	assert rule_gradient_norm(1) < 1e-12
+
+	# By the fourth step the state has relaxed into the band and the rule matters again.
+	assert rule_gradient_norm(4) > 1e-2
+
+	state_grads = jax.grad(lambda state: rollout_loss(rule_params, state, num_steps=1))(state)
+	assert jnp.linalg.norm(state_grads) > 1e-3
+
+
+def test_free_kernel_is_invariant_under_its_scale_gauge() -> None:
+	"""Test that (r, a, w) -> (s * r, a / s, w / s) is the same free kernel.
+
+	`free_kernel_fn` places a bump at absolute radius `a * r` with width `w * r`, so the
+	three parameters carry only two degrees of freedom. Fitting a trajectory can recover
+	`a * r` and `w * r` but never `r` on its own.
+	"""
+	radius = jnp.linspace(0.0, 1.2, 256)
+	kernel_params = FreeKernelParams(
+		r=jnp.array(0.9),
+		b=jnp.array([1.0, 0.4]),
+		a=jnp.array([0.5, 0.8]),
+		w=jnp.array([0.15, 0.05]),
+	)
+	kernel = free_kernel_fn(radius, kernel_params)
+
+	for scale in (0.7, 1.4):
+		rescaled = FreeKernelParams(
+			r=kernel_params.r * scale,
+			b=kernel_params.b,
+			a=kernel_params.a / scale,
+			w=kernel_params.w / scale,
+		)
+		assert jnp.allclose(free_kernel_fn(radius, rescaled), kernel, atol=1e-6)
