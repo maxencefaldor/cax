@@ -8,7 +8,7 @@ raise the minor version.
 
 ### Added
 
-- `examples/56_growing_nca_rl.ipynb` — a Growing NCA trained as a policy rather
+- `examples/53_growing_nca_rl.ipynb` — a Growing NCA trained as a policy rather
   than by backpropagating through its whole development. The system is rolled out
   for half of its 128 steps and everything past that horizon is summarized by a
   learned value function, so cost scales with the horizon rather than with the
@@ -52,7 +52,7 @@ A documentation and repository release: no API changes.
 
 ### Added
 
-- `examples/54_lenia_grad.ipynb` — gradient descent through Lenia. Optimizes a
+- `examples/55_lenia_grad.ipynb` — gradient descent through Lenia. Optimizes a
   creature to travel further, grows a target image from a rule, and finds the
   smallest perturbation that kills a soliton. Its opening section maps what a
   gradient reaches in a Lenia rule: the channel wiring is integer and cannot be
@@ -60,7 +60,7 @@ A documentation and repository release: no API changes.
   the kernel radius is differentiable exactly when the kernel core vanishes at its
   support boundary — which the canonical exponential core does and the Gaussian
   core does not.
-- `examples/55_lenia_grad_in_depth.ipynb` — the analysis companion: validating a
+- `examples/56_lenia_grad_in_depth.ipynb` — the analysis companion: validating a
   gradient against finite differences, measuring the usable rollout length from a
   Lyapunov exponent, the two ways the gradient goes blind, the non-identifiability
   of `free_kernel_fn`, and what sharing a growth budget across channels costs.

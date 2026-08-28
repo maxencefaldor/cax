@@ -55,10 +55,10 @@ nav:
     - 51 - RRCNN: examples/51_rrcnn.ipynb
   - Optimisation:
     - 52 - Growing NCA with Evolution Strategies: examples/52_growing_nca_es.ipynb
-    - 56 - Growing NCA with Reinforcement Learning: examples/56_growing_nca_rl.ipynb
-    - 53 - Leniabreeder: examples/53_leniabreeder.ipynb
-    - 54 - Lenia Gradients: examples/54_lenia_grad.ipynb
-    - 55 - Lenia Gradients in Depth: examples/55_lenia_grad_in_depth.ipynb
+    - 53 - Growing NCA with Reinforcement Learning: examples/53_growing_nca_rl.ipynb
+    - 54 - Leniabreeder: examples/54_leniabreeder.ipynb
+    - 55 - Lenia Gradients: examples/55_lenia_grad.ipynb
+    - 56 - Lenia Gradients in Depth: examples/56_lenia_grad_in_depth.ipynb
   - Contributing: contributing.md
 
 repo_url: https://github.com/maxencefaldor/cax

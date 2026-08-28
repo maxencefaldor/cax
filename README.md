@@ -64,7 +64,7 @@ The library is thoroughly tested and [documented](https://maxencefaldor.github.i
 | Texture Neural Cellular Automata | [Niklasson et al. (2021)](https://distill.pub/selforg/2021/textures/) | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/maxencefaldor/cax/blob/main/examples/46_texture_nca.ipynb) |
 | 1D-ARC Neural Cellular Automata | [Faldor et al. (2024)](https://arxiv.org/abs/2410.02651) | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/maxencefaldor/cax/blob/main/examples/47_1d_arc_nca.ipynb) |
 | Attention-based Neural Cellular Automata | [Tesfaldet et al. (2022)](https://arxiv.org/abs/2211.01233) | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/maxencefaldor/cax/blob/main/examples/48_attention_nca.ipynb) |
-| Leniabreeder | [Faldor & Cully (2024)](https://arxiv.org/abs/2406.04235) | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/maxencefaldor/cax/blob/main/examples/53_leniabreeder.ipynb) |
+| Leniabreeder | [Faldor & Cully (2024)](https://arxiv.org/abs/2406.04235) | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/maxencefaldor/cax/blob/main/examples/54_leniabreeder.ipynb) |
 
 ## Getting Started 🚦
 

@@ -1,6 +1,6 @@
 """Tests for gradient flow through Lenia.
 
-These pin down the differentiability facts that `examples/54_lenia_grad.ipynb` relies on:
+These pin down the differentiability facts that `examples/55_lenia_grad.ipynb` relies on:
 gradients flow through entire rollouts, normalized parameters are flat along their scale
 direction, and the kernel radius is differentiable exactly when the kernel core vanishes
 at its support boundary.
