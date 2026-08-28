@@ -5,7 +5,9 @@ from functools import cache
 from urllib.error import URLError
 from urllib.request import urlopen
 
+import jax.numpy as jnp
 import PIL.Image
+from jax import Array
 from PIL.Image import Image
 
 _FETCH_TIMEOUT_S = 30.0
@@ -111,3 +113,29 @@ def get_emoji(emoji: str) -> Image:
 		f"/png/128/{filename}"
 	)
 	return get_image_from_url(url)
+
+
+def get_emoji_array(emoji: str, size: int, pad_width: int = 0) -> Array:
+	"""Fetch an emoji as a padded RGBA array.
+
+	The glyph is resized to ``size`` and framed in transparent pixels, which is what a
+	growing cellular automaton needs: the target sits in the middle of a larger grid, so
+	the automaton has somewhere to overshoot into and can be penalised for doing so.
+
+	Args:
+		emoji: The emoji character or sequence to fetch.
+		size: Width and height, in pixels, to resize the glyph to.
+		pad_width: Transparent pixels to add on each side.
+
+	Returns:
+		An array of shape ``(size + 2 * pad_width, size + 2 * pad_width, 4)`` holding
+		RGBA values in the unit interval.
+
+	Raises:
+		ValueError: If the emoji has no Noto glyph under this naming scheme.
+		ConnectionError: If the download fails.
+
+	"""
+	image_pil = get_emoji(emoji).resize((size, size), resample=PIL.Image.Resampling.LANCZOS)
+	array = jnp.asarray(image_pil, dtype=jnp.float32) / 255.0
+	return jnp.pad(array, ((pad_width, pad_width), (pad_width, pad_width), (0, 0)))

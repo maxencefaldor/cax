@@ -4,10 +4,16 @@ import io
 from collections.abc import Generator
 from unittest.mock import MagicMock, patch
 
+import jax.numpy as jnp
 import PIL.Image
 import pytest
 
-from cax.utils.emoji import get_emoji, get_emoji_filename, get_image_from_url
+from cax.utils.emoji import (
+	get_emoji,
+	get_emoji_array,
+	get_emoji_filename,
+	get_image_from_url,
+)
 
 
 @pytest.fixture
@@ -114,3 +120,31 @@ def test_get_emoji_pins_its_source(mock_urlopen: MagicMock, mock_pil_image: Magi
 	url = mock_urlopen.call_args[0][0]
 	assert "refs/heads/" not in url
 	assert "@" in url, "the source revision should be pinned in the URL"
+
+
+def test_get_emoji_array() -> None:
+	"""The array is resized, scaled to the unit interval, and framed in transparency."""
+	glyph = PIL.Image.new("RGBA", (128, 128), (255, 128, 0, 255))
+
+	with patch("cax.utils.emoji.get_emoji", return_value=glyph):
+		array = get_emoji_array("🦎", size=8, pad_width=2)
+
+	assert array.shape == (12, 12, 4)
+	assert array.dtype == jnp.float32
+	assert jnp.allclose(array[2:10, 2:10], jnp.array([1.0, 128 / 255, 0.0, 1.0]))
+
+	# The frame is transparent, so a growing automaton is penalised for overshooting.
+	assert jnp.all(array[:2] == 0.0)
+	assert jnp.all(array[-2:] == 0.0)
+	assert jnp.all(array[:, :2] == 0.0)
+	assert jnp.all(array[:, -2:] == 0.0)
+
+
+def test_get_emoji_array_without_padding() -> None:
+	"""Padding is optional, so the array is exactly the requested size."""
+	glyph = PIL.Image.new("RGBA", (128, 128), (0, 0, 0, 255))
+
+	with patch("cax.utils.emoji.get_emoji", return_value=glyph):
+		array = get_emoji_array("🦎", size=16)
+
+	assert array.shape == (16, 16, 4)

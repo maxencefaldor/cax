@@ -4,13 +4,16 @@ import jax.numpy as jnp
 import pytest
 from jax import Array
 
+from cax.core.perceive.kernels import HEX_BASIS
 from cax.utils.render import (
 	clip_and_uint8,
+	hex_to_square,
 	hsv_to_rgb,
 	render_array_with_channels_to_rgb,
 	render_array_with_channels_to_rgba,
 	rgb_to_hsv,
 	rgba_to_rgb,
+	square_to_hex,
 )
 
 
@@ -183,3 +186,42 @@ def test_render_array_with_channels_to_rgba(input_array: Array, expected_rgba: A
 	result = render_array_with_channels_to_rgba(input_array)
 	assert result.shape == expected_rgba.shape
 	assert jnp.allclose(result, expected_rgba, atol=1e-6)
+
+
+def test_hex_to_square_unshears_the_lattice() -> None:
+	"""A disc that is round on the lattice should be drawn round, not leaning.
+
+	A bounding box cannot see this --- a leaning ellipse still fits a square box --- so the
+	shape is measured by the spread of its mass, whose two principal axes are equal only
+	for a circle.
+	"""
+	size = 96
+	rows, columns = jnp.meshgrid(jnp.arange(size), jnp.arange(size), indexing="ij")
+	position = jnp.stack([rows, columns], axis=-1).astype(jnp.float32) @ HEX_BASIS
+	center = jnp.array([size / 2, size / 2]) @ HEX_BASIS
+	disc = (jnp.linalg.norm(position - center, axis=-1) < size / 4)[..., None].astype(jnp.float32)
+
+	def elongation(image: Array) -> float:
+		coordinates = jnp.stack(
+			jnp.meshgrid(jnp.arange(image.shape[0]), jnp.arange(image.shape[1]), indexing="ij"),
+			axis=-1,
+		)
+		weight = (image > 0.5).astype(jnp.float32)
+		weight = weight / jnp.sum(weight)
+		offset = coordinates - jnp.sum(coordinates * weight[..., None], axis=(0, 1))
+		covariance = jnp.einsum("ija,ijb,ij->ab", offset, offset, weight)
+		spread = jnp.linalg.eigvalsh(covariance)
+		return float(jnp.sqrt(spread[1] / spread[0]))
+
+	assert elongation(disc[..., 0]) > 1.5
+	assert elongation(hex_to_square(disc)[..., 0]) < 1.05
+
+
+def test_hex_resampling_handles_batches() -> None:
+	"""Leading axes are batch, so a stacked trajectory resamples like a single image."""
+	single = jnp.zeros((16, 16, 3)).at[8, 8, :].set(1.0)
+	stacked = jnp.stack([single, single])
+
+	assert hex_to_square(stacked).shape == stacked.shape
+	assert jnp.allclose(hex_to_square(stacked)[0], hex_to_square(single))
+	assert square_to_hex(jnp.zeros((2, 3, 16, 16, 1))).shape == (2, 3, 16, 16, 1)

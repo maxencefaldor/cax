@@ -8,6 +8,12 @@ raise the minor version.
 
 ### Fixed
 
+- `examples/46_texture_nca.ipynb` matches its target. Its `gram_matrix` summed over the
+  wrong einsum index and returned an array that kept a spatial position instead of
+  correlating channel against channel, so the quantity being minimised was not a texture
+  statistic and training barely moved: the loss fell from 7604 to 5402 over 2000 steps and
+  the result looked nothing like the target. Nothing raised, because the shapes still
+  matched between source and target.
 - `get_emoji` accepts emoji written with more than one codepoint. It built its filename
   with `ord`, which raises on any sequence, so joined glyphs like 👨‍💻, skin tone
   modifiers like 👍🏽, and even ❤️ — a heart followed by a variation selector — all
@@ -18,6 +24,13 @@ raise the minor version.
 
 ### Changed
 
+- `examples/46_texture_nca.ipynb` matches feature distributions by sliced optimal
+  transport rather than by Gram matrices, as the reference implementation does. Gram
+  matrices give washed-out colour, which survived the fix above: the structure came back
+  but the palette did not.
+- The optimisation examples are renumbered to 60-66, making room in the neural cellular
+  automata block for the two examples added above.
+
 - Emoji glyphs are fetched from a pinned revision over a CDN rather than from a branch
   of the Noto Emoji repository. An unpinned URL made CAX's behaviour depend on the
   current state of another project's default branch, where a rename would have broken
@@ -25,7 +38,24 @@ raise the minor version.
 
 ### Added
 
-- `examples/53_growing_nca_rl.ipynb` — a Growing NCA trained as a policy rather
+- `examples/49_isotropic_nca.ipynb` --- a neural cellular automaton with no preferred
+  direction, after [Growing Isotropic Neural Cellular
+  Automata](https://arxiv.org/abs/2205.01681). Every cell carries its own orientation and
+  reads gradients rotated into that frame, so the pattern is grown at an angle nobody
+  chose; the loss compares in polar coordinates and minimises over every rotation.
+- `examples/50_difflogic_ca.ipynb` --- a cellular automaton whose rule is made of logic
+  gates, after [Differentiable Logic Cellular
+  Automata](https://google-research.github.io/self-organising-systems/difflogic-ca/). Each
+  gate is a softmax over the sixteen boolean functions of two inputs while training and an
+  `argmax` afterwards, which leaves a discrete circuit. It recovers Conway's Game of Life
+  exactly: all 512 neighbourhoods, and every cell of a 64x64 board over 64 steps.
+- `grad2_kernel` takes a `neighborhood`, `"von_neumann"` or `"moore"`. The default stencil
+  favors the grid axes, which a system asked to behave the same in every direction picks
+  up on; the Moore diagonals cut that bias from 50% to 20% on a rotated quartic.
+- `get_emoji_array` fetches an emoji already resized, scaled to the unit interval and
+  framed in transparency. Five notebooks each carried their own copy of it.
+
+- `examples/63_growing_nca_rl.ipynb` — a Growing NCA trained as a policy rather
   than by backpropagating through its whole development. The system is rolled out
   for half of its 128 steps and everything past that horizon is summarized by a
   learned value function, so cost scales with the horizon rather than with the
@@ -69,7 +99,7 @@ A documentation and repository release: no API changes.
 
 ### Added
 
-- `examples/55_lenia_grad.ipynb` — gradient descent through Lenia. Optimizes a
+- `examples/65_lenia_grad.ipynb` — gradient descent through Lenia. Optimizes a
   creature to travel further, grows a target image from a rule, and finds the
   smallest perturbation that kills a soliton. Its opening section maps what a
   gradient reaches in a Lenia rule: the channel wiring is integer and cannot be
@@ -77,7 +107,7 @@ A documentation and repository release: no API changes.
   the kernel radius is differentiable exactly when the kernel core vanishes at its
   support boundary — which the canonical exponential core does and the Gaussian
   core does not.
-- `examples/56_lenia_grad_in_depth.ipynb` — the analysis companion: validating a
+- `examples/66_lenia_grad_in_depth.ipynb` — the analysis companion: validating a
   gradient against finite differences, measuring the usable rollout length from a
   Lyapunov exponent, the two ways the gradient goes blind, the non-identifiability
   of `free_kernel_fn`, and what sharing a growth budget across channels costs.

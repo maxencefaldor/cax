@@ -1,7 +1,10 @@
 """Utilities for rendering."""
 
+import jax
 import jax.numpy as jnp
 from jax import Array
+
+from cax.core.perceive.kernels import HEX_BASIS
 
 
 def rgba_to_rgb(array: Array) -> Array:
@@ -243,3 +246,73 @@ def soft_disk_mask(min_distance_sq: Array, radius: float) -> Array:
 
 	"""
 	return jnp.clip(1.0 - min_distance_sq / (radius**2), 0.0, 1.0)
+
+
+def _resample(array: Array, transform: Array) -> Array:
+	"""Resample the two spatial axes through a change of basis, wrapping at the edges.
+
+	Leading axes are treated as batch, so a stacked trajectory resamples like a single
+	image does.
+	"""
+	height, width = array.shape[-3], array.shape[-2]
+	rows, columns = jnp.meshgrid(
+		jnp.arange(height, dtype=jnp.float32),
+		jnp.arange(width, dtype=jnp.float32),
+		indexing="ij",
+	)
+	index = jnp.stack([rows, columns], axis=-1) @ transform
+	coordinates = [index[..., 0] % height, index[..., 1] % width]
+
+	def sample(image: Array) -> Array:
+		return jnp.stack(
+			[
+				jax.scipy.ndimage.map_coordinates(image[..., c], coordinates, order=1, mode="wrap")
+				for c in range(image.shape[-1])
+			],
+			axis=-1,
+		)
+
+	flat = array.reshape(-1, height, width, array.shape[-1])
+	return jax.vmap(sample)(flat).reshape(array.shape)
+
+
+def hex_to_square(array: Array) -> Array:
+	"""Resample a triangular-lattice array onto a square pixel grid.
+
+	A triangular lattice is stored in an ordinary square array whose axes stand for the
+	lattice vectors `(1, 0)` and `(1/2, sqrt(3)/2)` rather than for a Cartesian frame.
+	Drawn directly such an array leans over, because the viewer reads its axes as
+	perpendicular when they are sixty degrees apart. This maps each output pixel back
+	through the basis and samples there, so what is drawn is the lattice as it actually
+	sits in the plane.
+
+	The lattice is treated as periodic, matching the wrap-around a cellular automaton on a
+	torus already assumes.
+
+	Args:
+		array: Values on a triangular lattice, with shape `(..., height, width, channels)`.
+			Leading axes are treated as batch.
+
+	Returns:
+		An array of the same shape, holding the lattice resampled onto square pixels.
+
+	"""
+	return _resample(array, jnp.linalg.inv(HEX_BASIS))
+
+
+def square_to_hex(array: Array) -> Array:
+	"""Resample a square-pixel array onto a triangular lattice.
+
+	The inverse of `hex_to_square`, and what a picture needs before it is placed on a
+	triangular lattice: written in directly it would be sheared, and a shape that is no
+	longer itself is no longer sustained by a rule that was tuned to it.
+
+	Args:
+		array: Values on square pixels, with shape `(..., height, width, channels)`.
+			Leading axes are treated as batch.
+
+	Returns:
+		An array of the same shape, holding the picture resampled onto the lattice.
+
+	"""
+	return _resample(array, HEX_BASIS)
