@@ -40,6 +40,7 @@ nav:
   - Particle Systems:
     - 30 - Particle Life: examples/30_particle_life.ipynb
     - 31 - Boids: examples/31_boids.ipynb
+    - 32 - Neural Particle Automata: examples/32_neural_particle_automata.ipynb
   - Neural Cellular Automata:
     - 40 - Growing NCA: examples/40_growing_nca.ipynb
     - 41 - Growing Conditional NCA: examples/41_growing_conditional_nca.ipynb

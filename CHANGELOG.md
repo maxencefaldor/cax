@@ -52,6 +52,16 @@ raise the minor version.
 - `grad2_kernel` takes a `neighborhood`, `"von_neumann"` or `"moore"`. The default stencil
   favors the grid axes, which a system asked to behave the same in every direction picks
   up on; the Moore diagonals cut that bias from 50% to 20% on a rotated quartic.
+- `examples/32_neural_particle_automata.ipynb` --- a growing neural cellular automaton
+  whose cells are particles rather than pixels, after [Neural Particle
+  Automata](https://arxiv.org/abs/2601.16096). Each cell carries a position as well as a
+  state and the rule moves both, so the neighborhood is something the automaton decides as
+  it goes rather than something the lattice fixes.
+- `SPHPerceive` gathers a particle's neighborhood by smoothed particle hydrodynamics: sums
+  over whatever lies within a radius, weighted by a kernel that falls smoothly to zero at
+  the edge, which is what keeps it differentiable while neighbors come and go. It reports
+  the state, the neighborhood average, the state gradient and the density gradient --- the
+  last having no counterpart on a lattice, where cells are evenly spaced by construction.
 - `get_emoji_array` fetches an emoji already resized, scaled to the unit interval and
   framed in transparency. Five notebooks each carried their own copy of it.
 
