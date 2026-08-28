@@ -50,14 +50,15 @@ nav:
     - 46 - Texture NCA: examples/46_texture_nca.ipynb
     - 47 - 1D ARC NCA: examples/47_1d_arc_nca.ipynb
     - 48 - Attention NCA: examples/48_attention_nca.ipynb
-  - Other:
+  - Neural Networks:
     - 50 - VAE: examples/50_vae.ipynb
     - 51 - RRCNN: examples/51_rrcnn.ipynb
+  - Optimisation:
     - 52 - Growing NCA with Evolution Strategies: examples/52_growing_nca_es.ipynb
+    - 56 - Growing NCA with Reinforcement Learning: examples/56_growing_nca_rl.ipynb
     - 53 - Leniabreeder: examples/53_leniabreeder.ipynb
     - 54 - Lenia Gradients: examples/54_lenia_grad.ipynb
     - 55 - Lenia Gradients in Depth: examples/55_lenia_grad_in_depth.ipynb
-    - 56 - Growing NCA with Reinforcement Learning: examples/56_growing_nca_rl.ipynb
   - Contributing: contributing.md
 
 repo_url: https://github.com/maxencefaldor/cax
