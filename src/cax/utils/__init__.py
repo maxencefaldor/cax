@@ -1,7 +1,7 @@
 """Utilities for rendering, emoji, and safe numerics."""
 
 from .dynamics import damped_euler_step, toroidal_difference
-from .emoji import get_emoji
+from .emoji import get_emoji, get_emoji_filename
 from .numerics import safe_divide, safe_norm
 from .render import (
 	clip_and_uint8,
@@ -19,6 +19,7 @@ __all__ = [
 	"clip_and_uint8",
 	"damped_euler_step",
 	"get_emoji",
+	"get_emoji_filename",
 	"hsv_to_rgb",
 	"nearest_point",
 	"pixel_grid",

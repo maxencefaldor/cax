@@ -10,6 +10,23 @@ from PIL.Image import Image
 
 _FETCH_TIMEOUT_S = 30.0
 
+_NOTO_EMOJI_COMMIT = "8998f5dd683424a73e2314a8c1f1e359c19e8742"
+"""The revision of Noto Emoji glyphs are fetched from.
+
+Pinned rather than tracking a branch: an unpinned URL makes CAX's behaviour depend on the
+current state of another project's default branch, so a rename there would break every
+installed version of CAX at once. Bump this deliberately to pick up newly added emoji.
+"""
+
+_EMOJI_PRESENTATION = "️"
+"""Variation selector 16, which asks for the emoji rather than the text rendering.
+
+Noto names its files by the base codepoints alone, so this is dropped when building one.
+"""
+
+_REGIONAL_INDICATORS = range(0x1F1E6, 0x1F200)
+"""Codepoints that pair up to form flags, which Noto stores separately by country code."""
+
 
 def get_image_from_url(url: str) -> Image:
 	"""Fetch an image from a given URL.
@@ -38,24 +55,59 @@ def get_image_from_url(url: str) -> Image:
 	return image_pil
 
 
+def get_emoji_filename(emoji: str) -> str:
+	"""Build the Noto Emoji filename for an emoji.
+
+	Noto names a glyph after the codepoints that spell it, in lowercase hexadecimal,
+	joined by underscores. Sequences are spelled out in full, so the zero-width joiner of
+	a glyph like 👨‍💻 is part of the name, while the variation selector that merely asks
+	for an emoji presentation is not.
+
+	Args:
+		emoji: The emoji character or sequence.
+
+	Returns:
+		The filename, such as ``emoji_u1f468_200d_1f4bb.png``.
+
+	Raises:
+		ValueError: If ``emoji`` is empty, or is a flag. Noto keeps flags apart from the
+			rest, named by country code rather than by codepoint.
+
+	"""
+	codepoints = [ord(character) for character in emoji if character != _EMOJI_PRESENTATION]
+	if not codepoints:
+		raise ValueError("Cannot build a filename for an empty emoji.")
+	if any(codepoint in _REGIONAL_INDICATORS for codepoint in codepoints):
+		raise ValueError(
+			f"Flags such as {emoji!r} are not available: Noto Emoji stores them apart "
+			f"from the other glyphs, named by country code rather than by codepoint."
+		)
+
+	return "emoji_u" + "_".join(f"{codepoint:x}" for codepoint in codepoints) + ".png"
+
+
 @cache
 def get_emoji(emoji: str) -> Image:
 	"""Fetch and return an emoji as a PIL Image.
 
-	The emoji glyph is downloaded from Google's Noto Emoji repository (PNG, 128 px) and
-	cached in memory, so repeated calls for the same glyph fetch once. The image is
-	returned as a PIL Image without further processing. Callers may convert to arrays or
-	resize as needed.
+	The glyph is downloaded from Google's Noto Emoji (PNG, 128 px) and cached in memory,
+	so repeated calls for the same emoji fetch once. The image is returned without further
+	processing; callers may convert to arrays or resize as needed.
 
 	Args:
-		emoji: The emoji character to fetch.
+		emoji: The emoji character or sequence to fetch.
 
 	Returns:
 		A ``PIL.Image.Image`` instance containing the emoji.
 
+	Raises:
+		ValueError: If the emoji has no Noto glyph under this naming scheme.
+		ConnectionError: If the download fails.
+
 	"""
-	# Get the emoji image
-	code = hex(ord(emoji))[2:].lower()
-	url = f"https://raw.githubusercontent.com/googlefonts/noto-emoji/refs/heads/main/png/128/emoji_u{code}.png"
-	image_pil = get_image_from_url(url)
-	return image_pil
+	filename = get_emoji_filename(emoji)
+	url = (
+		f"https://cdn.jsdelivr.net/gh/googlefonts/noto-emoji@{_NOTO_EMOJI_COMMIT}"
+		f"/png/128/{filename}"
+	)
+	return get_image_from_url(url)

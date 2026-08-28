@@ -6,6 +6,23 @@ raise the minor version.
 
 ## Unreleased
 
+### Fixed
+
+- `get_emoji` accepts emoji written with more than one codepoint. It built its filename
+  with `ord`, which raises on any sequence, so joined glyphs like 👨‍💻, skin tone
+  modifiers like 👍🏽, and even ❤️ — a heart followed by a variation selector — all
+  failed. Names are now spelled from every codepoint, dropping only the selector that
+  asks for an emoji presentation, which Noto omits from its filenames. Flags raise a
+  `ValueError` explaining that Noto stores them separately, rather than failing as a
+  download error.
+
+### Changed
+
+- Emoji glyphs are fetched from a pinned revision over a CDN rather than from a branch
+  of the Noto Emoji repository. An unpinned URL made CAX's behaviour depend on the
+  current state of another project's default branch, where a rename would have broken
+  every installed version at once.
+
 ### Added
 
 - `examples/53_growing_nca_rl.ipynb` — a Growing NCA trained as a policy rather
