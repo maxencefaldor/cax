@@ -1,15 +1,25 @@
 """Particle Lenia rule parameters module."""
 
-from flax import nnx
+from dataclasses import dataclass, field
+
+import jax
 
 from .growth import ParticleLeniaGrowthParams
 from .kernel import ParticleLeniaKernelParams
 
 
-@nnx.dataclass
-class ParticleLeniaRuleParams(nnx.Pytree):
-	"""Particle Lenia rule parameters class."""
+@jax.tree_util.register_dataclass
+@dataclass(frozen=True)
+class ParticleLeniaRuleParams:
+	"""Particle Lenia rule parameters class.
 
-	c_rep: float = nnx.static()
-	kernel_params: ParticleLeniaKernelParams = nnx.data()
-	growth_params: ParticleLeniaGrowthParams = nnx.data()
+	Attributes:
+		c_rep: Repulsion strength. Static: part of the structure, not a leaf.
+		kernel_params: Kernel parameters.
+		growth_params: Growth parameters.
+
+	"""
+
+	c_rep: float = field(metadata={"static": True})
+	kernel_params: ParticleLeniaKernelParams
+	growth_params: ParticleLeniaGrowthParams

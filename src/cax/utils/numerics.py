@@ -8,7 +8,6 @@ singular kernel evaluated where its argument can be degenerate goes through one 
 helpers (or repeats their double-`where` pattern inline, with a comment naming it).
 """
 
-import jax
 import jax.numpy as jnp
 from jax import Array
 
@@ -55,22 +54,3 @@ def safe_norm(vector: Array, *, axis: int = -1, keepdims: bool = False) -> Array
 	is_positive = squared > 0.0
 	squared_safe = jnp.where(is_positive, squared, jnp.ones_like(squared))
 	return jnp.where(is_positive, jnp.sqrt(squared_safe), jnp.zeros_like(squared))
-
-
-def detach(tree: Array) -> Array:
-	"""Copy a pytree's containers, so storing it cannot alias the caller's object.
-
-	Modules that keep a caller-supplied parameter object are storing part of the
-	caller's state. Flax writes a module's state back after a transformed call, so an
-	aliased container built inside `jax.jit` or `jax.grad` has tracers written into it
-	— corrupting the caller's object and leaking a tracer out of the trace. Rebuilding
-	the containers shares the leaf arrays but gives the module its own structure.
-
-	Args:
-		tree: A pytree to copy.
-
-	Returns:
-		A pytree with the same leaves and freshly built containers.
-
-	"""
-	return jax.tree.map(lambda leaf: leaf, tree)

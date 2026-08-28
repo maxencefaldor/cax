@@ -5,18 +5,27 @@ References:
 
 """
 
-from flax import nnx
+from dataclasses import dataclass
+
+import jax
 from jax import Array
 
 from .kernel import bell
 
 
-@nnx.dataclass
-class LeniaGrowthParams(nnx.Pytree):
-	"""Growth parameters."""
+@jax.tree_util.register_dataclass
+@dataclass(frozen=True)
+class LeniaGrowthParams:
+	"""Growth parameters.
 
-	mean: Array = nnx.data()
-	std: Array = nnx.data()
+	Attributes:
+		mean: Center of the growth bell.
+		std: Width of the growth bell.
+
+	"""
+
+	mean: Array
+	std: Array
 
 
 def exponential_growth_fn(u: Array, growth_params: LeniaGrowthParams) -> Array:

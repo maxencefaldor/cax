@@ -191,6 +191,13 @@ These are the decisions the codebase holds everywhere; new code follows them.
   the Lenia family while Gray-Scott keeps `dt`: each system reads like its own
   reference, and that rule — not surface-identical names — is the library's
   uniformity.
+- **States and params are values; systems are objects.** `*State` and `*Params`
+  classes are frozen `register_dataclass` pytrees: data the caller owns, immutable,
+  and safe to pass through any JAX transformation. NNX objects (`nnx.Module`,
+  `Pool`, `Buffer`) are reserved for state the library manages, where reference
+  semantics — updates propagating back through transforms — is wanted. Storing a
+  reference-semantics object on both sides of an ownership boundary is how a
+  caller's data gets corrupted by a transform's write-back.
 - **`spatial_dims` is a shape; `num_spatial_dims` is a rank.** Grid systems take
   the full spatial shape — Lenia's FFT kernels are precomputed at grid size — while
   particle systems take only the dimensionality. The similar names carry a real

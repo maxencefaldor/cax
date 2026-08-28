@@ -13,7 +13,6 @@ from flax import nnx
 from jax import Array
 
 from cax.core.update import Update
-from cax.utils.numerics import detach
 
 from .growth import exponential_growth_fn
 from .rule import LeniaRuleParams
@@ -59,7 +58,7 @@ class LeniaUpdate(Update[Array, Array, Array]):
 		self.reshape_kernel_to_channel = self._reshape_kernel_to_channel(rule_params)
 
 		self.growth_fn = growth_fn
-		self.growth_params = nnx.data(detach(rule_params.growth_params))
+		self.growth_params = nnx.data(rule_params.growth_params)
 
 	def __call__(self, state: Array, perception: Array, input: Array | None = None) -> Array:
 		"""Process the current state, perception, and input to produce a new state.

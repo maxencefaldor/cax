@@ -8,6 +8,7 @@ References:
 """
 
 from collections.abc import Callable
+from dataclasses import dataclass
 
 import jax
 import jax.numpy as jnp
@@ -15,22 +16,38 @@ from flax import nnx
 from jax import Array
 
 
-@nnx.dataclass
-class LeniaKernelParams(nnx.Pytree):
-	"""Kernel parameters."""
+@jax.tree_util.register_dataclass
+@dataclass(frozen=True)
+class LeniaKernelParams:
+	"""Kernel parameters.
 
-	r: Array = nnx.data()
-	beta: Array = nnx.data()
+	Attributes:
+		r: Kernel radius, relative to the space resolution `R`.
+		beta: Ring heights, one row per kernel; `nan` marks unused rings.
+
+	"""
+
+	r: Array
+	beta: Array
 
 
-@nnx.dataclass
-class FreeKernelParams(nnx.Pytree):
-	"""Free kernel parameters from [2]."""
+@jax.tree_util.register_dataclass
+@dataclass(frozen=True)
+class FreeKernelParams:
+	"""Free kernel parameters from [2].
 
-	r: Array = nnx.data()
-	b: Array = nnx.data()
-	a: Array = nnx.data()
-	w: Array = nnx.data()
+	Attributes:
+		r: Kernel radius scale.
+		b: Bump heights.
+		a: Bump positions, relative to `r`.
+		w: Bump widths, relative to `r`.
+
+	"""
+
+	r: Array
+	b: Array
+	a: Array
+	w: Array
 
 
 def bell(x: Array, mean: Array | float, std: Array | float) -> Array:

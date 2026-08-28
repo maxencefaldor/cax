@@ -14,7 +14,6 @@ from flax import nnx
 from jax import Array
 
 from cax.core.perceive import Perceive
-from cax.utils.numerics import detach
 
 from .growth import peak_growth_fn
 from .kernel import peak_kernel_fn
@@ -54,10 +53,10 @@ class ParticleLeniaPerceive(Perceive[ParticleLeniaState, Array]):
 		self.num_spatial_dims = num_spatial_dims
 
 		self.kernel_fn = kernel_fn
-		self.kernel_params = nnx.data(detach(rule_params.kernel_params))
+		self.kernel_params = nnx.data(rule_params.kernel_params)
 
 		self.growth_fn = growth_fn
-		self.growth_params = nnx.data(detach(rule_params.growth_params))
+		self.growth_params = nnx.data(rule_params.growth_params)
 
 		self.c_rep = rule_params.c_rep
 

@@ -6,18 +6,27 @@ References:
 
 """
 
-from flax import nnx
+from dataclasses import dataclass
+
+import jax
 from jax import Array
 
 from .kernel import bell
 
 
-@nnx.dataclass
-class ParticleLeniaGrowthParams(nnx.Pytree):
-	"""Growth parameters."""
+@jax.tree_util.register_dataclass
+@dataclass(frozen=True)
+class ParticleLeniaGrowthParams:
+	"""Growth parameters.
 
-	mean: Array = nnx.data()
-	std: Array = nnx.data()
+	Attributes:
+		mean: Center of the growth bump.
+		std: Width of the growth bump.
+
+	"""
+
+	mean: Array
+	std: Array
 
 
 def peak_growth_fn(u: Array, growth_params: ParticleLeniaGrowthParams) -> Array:

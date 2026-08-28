@@ -6,18 +6,28 @@ References:
 
 """
 
+from dataclasses import dataclass
+
+import jax
 import jax.numpy as jnp
-from flax import nnx
 from jax import Array
 
 
-@nnx.dataclass
-class ParticleLeniaKernelParams(nnx.Pytree):
-	"""Kernel parameters."""
+@jax.tree_util.register_dataclass
+@dataclass(frozen=True)
+class ParticleLeniaKernelParams:
+	"""Kernel parameters.
 
-	weight: Array = nnx.data()
-	mean: Array = nnx.data()
-	std: Array = nnx.data()
+	Attributes:
+		weight: Kernel weight.
+		mean: Center of the kernel bump.
+		std: Width of the kernel bump.
+
+	"""
+
+	weight: Array
+	mean: Array
+	std: Array
 
 
 def bell(x: Array, mean: Array, std: Array) -> Array:

@@ -4,6 +4,22 @@ All notable changes to CAX are documented here. Versions follow
 [semantic versioning](https://semver.org): while CAX is pre-1.0, breaking changes
 raise the minor version.
 
+## Unreleased
+
+### Changed
+
+- `*Params` classes are now frozen dataclass pytrees, matching the `*State`
+  convention: values the caller owns — immutable, and safe to pass through any JAX
+  transformation. Previously they were NNX objects, whose reference semantics let a
+  system share the caller's object and expose it to the write-back that NNX
+  transforms perform by design; 0.4.2 patched that at the boundary, this removes
+  the boundary. The unexported `cax.utils.numerics.detach` workaround is deleted.
+
+  Construction is unchanged. The one visible difference is immutability: assigning
+  to a field of a params object now raises `FrozenInstanceError`; build a new one
+  with `dataclasses.replace` instead. `ParticleLeniaRuleParams.c_rep` remains
+  static (part of the structure, not a leaf), as before.
+
 ## 0.4.2
 
 ### Fixed
