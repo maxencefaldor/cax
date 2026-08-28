@@ -7,6 +7,7 @@ at its support boundary.
 """
 
 import jax
+import jax.core
 import jax.numpy as jnp
 
 from cax.cs.lenia import Lenia, LeniaRuleParams
@@ -239,3 +240,57 @@ def test_free_kernel_is_invariant_under_its_scale_gauge() -> None:
 			w=kernel_params.w / scale,
 		)
 		assert jnp.allclose(free_kernel_fn(radius, rescaled), kernel, atol=1e-6)
+
+
+def test_building_a_system_under_jit_leaves_the_rule_intact() -> None:
+	"""Test that a traced call does not write tracers into the caller's rule.
+
+	A module that stores a caller-supplied parameter object is holding part of the
+	caller's state, and flax writes a module's state back after a transformed call. An
+	aliased container built inside `jax.jit` therefore has tracers written into it,
+	corrupting the rule for every later use and leaking a tracer out of the trace.
+	"""
+	from cax.cs.lenia import load_pattern
+
+	pattern, rule_params = load_pattern("Orbium")
+	state = jnp.zeros((32, 32, 1)).at[6:26, 6:26].set(pattern)
+
+	@jax.jit
+	def loss(state: jax.Array) -> jax.Array:
+		lenia = Lenia(spatial_dims=(32, 32), channel_size=1, R=13, T=10, rule_params=rule_params)
+		return jnp.sum(lenia(state, num_steps=4))
+
+	loss(state)
+
+	for leaf in jax.tree.leaves(rule_params):
+		assert not isinstance(leaf, jax.core.Tracer)
+
+
+def test_the_driver_composes_with_nested_transformations() -> None:
+	"""Test that `jax.jvp` still works after `jax.jit` of `jax.grad` over the driver.
+
+	Writing tracers into a shared rule used to make a later, unrelated transformation
+	fail with an `UnexpectedTracerError`. That failure was order dependent and so is not
+	itself a reliable regression test — `test_building_a_system_under_jit_leaves_the_rule_intact`
+	covers the cause. This covers the pattern end to end.
+	"""
+	from cax.cs.lenia import load_pattern
+
+	pattern, rule_params = load_pattern("Orbium")
+	state = jnp.zeros((64, 64, 1)).at[22:42, 22:42].set(pattern)
+
+	def build() -> Lenia:
+		return Lenia(spatial_dims=(64, 64), channel_size=1, R=13, T=10, rule_params=rule_params)
+
+	@jax.jit
+	def descend(state: jax.Array) -> jax.Array:
+		return state - 0.01 * jax.grad(lambda s: jnp.sum(build()(s, num_steps=16)))(state)
+
+	for _ in range(2):
+		state = descend(state)
+
+	jax.jvp(
+		lambda s: build()(s, num_steps=16, return_states=True)[1],
+		(state,),
+		(jnp.ones_like(state),),
+	)
