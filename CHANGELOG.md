@@ -4,6 +4,23 @@ All notable changes to CAX are documented here. Versions follow
 [semantic versioning](https://semver.org): while CAX is pre-1.0, breaking changes
 raise the minor version.
 
+## 0.4.2
+
+### Fixed
+
+- `Lenia` and `ParticleLenia` no longer alias the caller's parameter objects.
+  They stored `rule_params.growth_params` and `rule_params.kernel_params`
+  directly, and because Flax writes a module's state back after a transformed
+  call, constructing a system inside `jax.jit` or `jax.grad` wrote tracers into
+  the caller's own `rule_params` — silently replacing its arrays with dead
+  tracers, which then surfaced as an `UnexpectedTracerError` in a later,
+  unrelated transformation. Systems now copy the containers, sharing the leaf
+  arrays, via the new `cax.utils.numerics.detach`.
+
+  This only affected building a system inside a transformation, which is the
+  usual pattern when differentiating with respect to rule parameters; a system
+  built once and called normally was never impacted.
+
 ## 0.4.1
 
 A documentation and repository release: no API changes.
