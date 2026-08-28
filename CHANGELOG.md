@@ -6,6 +6,15 @@ raise the minor version.
 
 ## Unreleased
 
+### Added
+
+- `examples/56_growing_nca_rl.ipynb` — a Growing NCA trained as a policy rather
+  than by backpropagating through its whole development. The system is rolled out
+  for half of its 128 steps and everything past that horizon is summarized by a
+  learned value function, so cost scales with the horizon rather than with the
+  length of the process. The automaton is differentiable, so the gradient is taken
+  analytically through the rollout instead of estimated.
+
 ### Changed
 
 - `*Params` classes are now frozen dataclass pytrees, matching the `*State`

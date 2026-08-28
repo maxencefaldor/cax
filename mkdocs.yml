@@ -57,6 +57,7 @@ nav:
     - 53 - Leniabreeder: examples/53_leniabreeder.ipynb
     - 54 - Lenia Gradients: examples/54_lenia_grad.ipynb
     - 55 - Lenia Gradients in Depth: examples/55_lenia_grad_in_depth.ipynb
+    - 56 - Growing NCA with Reinforcement Learning: examples/56_growing_nca_rl.ipynb
   - Contributing: contributing.md
 
 repo_url: https://github.com/maxencefaldor/cax
