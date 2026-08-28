@@ -4,11 +4,13 @@ on:
   push:
     paths:
       - "**.py"
+      - "**.ipynb"
       - "pyproject.toml"
       - ".github/workflows/ruff.yml"
   pull_request:
     paths:
       - "**.py"
+      - "**.ipynb"
       - "pyproject.toml"
       - ".github/workflows/ruff.yml"
   workflow_dispatch:
