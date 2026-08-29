@@ -9,8 +9,8 @@ authors:
     given-names: "Maxence"
     email: "maxencefaldor@gmail.com"
     orcid: "https://orcid.org/0000-0003-4743-9494"
-version: "0.4.0"
-date-released: "2026-08-26"
+version: "0.4.3"
+date-released: "2026-08-29"
 repository-code: "https://github.com/maxencefaldor/cax"
 license: "MIT"
 keywords:

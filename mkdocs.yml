@@ -28,10 +28,10 @@ nav:
     - Utils: api/utils.md
   - Getting Started: examples/00_getting_started.ipynb
   - Discrete Cellular Automata:
-    - 10 - Elementary: examples/10_elementary.ipynb
-    - 11 - Life: examples/11_life.ipynb
+    - 10 - Elementary Cellular Automata: examples/10_elementary.ipynb
+    - 11 - Conway's Game of Life: examples/11_life.ipynb
     - 12 - Langton's Ant: examples/12_langton_ant.ipynb
-    - 13 - Sandpile: examples/13_sandpile.ipynb
+    - 13 - Abelian Sandpile: examples/13_sandpile.ipynb
   - Lenia:
     - 20 - Lenia: examples/20_lenia.ipynb
     - 21 - Flow Lenia: examples/21_flow_lenia.ipynb
@@ -42,25 +42,25 @@ nav:
     - 31 - Boids: examples/31_boids.ipynb
     - 32 - Neural Particle Automata: examples/32_neural_particle_automata.ipynb
   - Neural Cellular Automata:
-    - 40 - Growing NCA: examples/40_growing_nca.ipynb
+    - 40 - Growing Neural Cellular Automata: examples/40_growing_nca.ipynb
     - 41 - Growing Conditional NCA: examples/41_growing_conditional_nca.ipynb
     - 42 - Growing Unsupervised NCA: examples/42_growing_unsupervised_nca.ipynb
-    - 43 - Diffusing NCA: examples/43_diffusing_nca.ipynb
-    - 44 - Self-classifying MNIST: examples/44_self_classifying_mnist.ipynb
-    - 45 - Self-autoencoding MNIST: examples/45_self_autoencoding_mnist.ipynb
-    - 46 - Texture NCA: examples/46_texture_nca.ipynb
-    - 47 - 1D ARC NCA: examples/47_1d_arc_nca.ipynb
-    - 48 - Attention NCA: examples/48_attention_nca.ipynb
-    - 49 - Isotropic NCA: examples/49_isotropic_nca.ipynb
-    - 50 - Differentiable Logic CA: examples/50_difflogic_ca.ipynb
+    - 43 - Diffusing Neural Cellular Automata: examples/43_diffusing_nca.ipynb
+    - 44 - Self-classifying MNIST Digits: examples/44_self_classifying_mnist.ipynb
+    - 45 - Self-autoencoding MNIST Digits: examples/45_self_autoencoding_mnist.ipynb
+    - 46 - Texture Neural Cellular Automata: examples/46_texture_nca.ipynb
+    - 47 - 1D-ARC Neural Cellular Automata: examples/47_1d_arc_nca.ipynb
+    - 48 - Attention-based Neural Cellular Automata: examples/48_attention_nca.ipynb
+    - 49 - Isotropic Neural Cellular Automata: examples/49_isotropic_nca.ipynb
+    - 50 - Differentiable Logic Cellular Automata: examples/50_difflogic_ca.ipynb
   - Neural Networks:
-    - 60 - VAE: examples/60_vae.ipynb
-    - 61 - RRCNN: examples/61_rrcnn.ipynb
+    - 60 - Variational Autoencoder: examples/60_vae.ipynb
+    - 61 - Recurrent Residual CNN: examples/61_rrcnn.ipynb
   - Optimisation:
     - 62 - Growing NCA with Evolution Strategies: examples/62_growing_nca_es.ipynb
     - 63 - Growing NCA with Reinforcement Learning: examples/63_growing_nca_rl.ipynb
     - 64 - Leniabreeder: examples/64_leniabreeder.ipynb
-    - 65 - Lenia Gradients: examples/65_lenia_grad.ipynb
+    - 65 - Gradient Descent in Lenia: examples/65_lenia_grad.ipynb
     - 66 - Lenia Gradients in Depth: examples/66_lenia_grad_in_depth.ipynb
   - Contributing: contributing.md
 

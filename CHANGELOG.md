@@ -4,37 +4,7 @@ All notable changes to CAX are documented here. Versions follow
 [semantic versioning](https://semver.org): while CAX is pre-1.0, breaking changes
 raise the minor version.
 
-## Unreleased
-
-### Fixed
-
-- `examples/46_texture_nca.ipynb` matches its target. Its `gram_matrix` summed over the
-  wrong einsum index and returned an array that kept a spatial position instead of
-  correlating channel against channel, so the quantity being minimised was not a texture
-  statistic and training barely moved: the loss fell from 7604 to 5402 over 2000 steps and
-  the result looked nothing like the target. Nothing raised, because the shapes still
-  matched between source and target.
-- `get_emoji` accepts emoji written with more than one codepoint. It built its filename
-  with `ord`, which raises on any sequence, so joined glyphs like 👨‍💻, skin tone
-  modifiers like 👍🏽, and even ❤️ — a heart followed by a variation selector — all
-  failed. Names are now spelled from every codepoint, dropping only the selector that
-  asks for an emoji presentation, which Noto omits from its filenames. Flags raise a
-  `ValueError` explaining that Noto stores them separately, rather than failing as a
-  download error.
-
-### Changed
-
-- `examples/46_texture_nca.ipynb` matches feature distributions by sliced optimal
-  transport rather than by Gram matrices, as the reference implementation does. Gram
-  matrices give washed-out colour, which survived the fix above: the structure came back
-  but the palette did not.
-- The optimisation examples are renumbered to 60-66, making room in the neural cellular
-  automata block for the two examples added above.
-
-- Emoji glyphs are fetched from a pinned revision over a CDN rather than from a branch
-  of the Noto Emoji repository. An unpinned URL made CAX's behaviour depend on the
-  current state of another project's default branch, where a rename would have broken
-  every installed version at once.
+## 0.4.3
 
 ### Added
 
@@ -92,6 +62,17 @@ raise the minor version.
 
 ### Changed
 
+- `examples/46_texture_nca.ipynb` matches feature distributions by sliced optimal
+  transport rather than by Gram matrices, as the reference implementation does. Gram
+  matrices give washed-out colour, which survived the fix above: the structure came back
+  but the palette did not.
+- The optimisation examples are renumbered to 60-66, making room in the neural cellular
+  automata block for the two examples added above.
+
+- Emoji glyphs are fetched from a pinned revision over a CDN rather than from a branch
+  of the Noto Emoji repository. An unpinned URL made CAX's behaviour depend on the
+  current state of another project's default branch, where a rename would have broken
+  every installed version at once.
 - `*Params` classes are now frozen dataclass pytrees, matching the `*State`
   convention: values the caller owns — immutable, and safe to pass through any JAX
   transformation. Previously they were NNX objects, whose reference semantics let a
@@ -103,6 +84,22 @@ raise the minor version.
   to a field of a params object now raises `FrozenInstanceError`; build a new one
   with `dataclasses.replace` instead. `ParticleLeniaRuleParams.c_rep` remains
   static (part of the structure, not a leaf), as before.
+
+### Fixed
+
+- `examples/46_texture_nca.ipynb` matches its target. Its `gram_matrix` summed over the
+  wrong einsum index and returned an array that kept a spatial position instead of
+  correlating channel against channel, so the quantity being minimised was not a texture
+  statistic and training barely moved: the loss fell from 7604 to 5402 over 2000 steps and
+  the result looked nothing like the target. Nothing raised, because the shapes still
+  matched between source and target.
+- `get_emoji` accepts emoji written with more than one codepoint. It built its filename
+  with `ord`, which raises on any sequence, so joined glyphs like 👨‍💻, skin tone
+  modifiers like 👍🏽, and even ❤️ — a heart followed by a variation selector — all
+  failed. Names are now spelled from every codepoint, dropping only the selector that
+  asks for an emoji presentation, which Noto omits from its filenames. Flags raise a
+  `ValueError` explaining that Noto stores them separately, rather than failing as a
+  download error.
 
 ## 0.4.2
 
