@@ -57,6 +57,24 @@ raise the minor version.
   Automata](https://arxiv.org/abs/2601.16096). Each cell carries a position as well as a
   state and the rule moves both, so the neighborhood is something the automaton decides as
   it goes rather than something the lattice fixes.
+- `SPHPerceive` takes `fused`, which computes the same sums with Pallas kernels instead of
+  array operations. The four quantities a particle perceives are four sums over the same
+  pairs, and as array operations each one walks an array with an entry per pair;
+  accumulated together in registers they do not. A kernel is opaque to automatic
+  differentiation, so its derivative is worked out by hand and checked against the array
+  version at every size, including sizes the tiling does not divide. It is GPU-only, and
+  worth about five times the array path on a perception at a few thousand particles ---
+  more on the backward than the forward, which is where the array version builds its
+  largest intermediates. What it really buys is space, an entry per particle rather than
+  per pair, so a cloud can grow past the size the array route cannot fit at all.
+
+  Nothing about it is specialized to a cloud size. The tile shape is chosen from the
+  particle count, and a count the tiles do not divide is padded and masked, the way an
+  attention kernel handles a sequence length that is not a multiple of its block. The
+  backward runs twice --- a particle's volume scales how every neighbor reads it, so that
+  cotangent has to be complete before the positions can be resolved --- and each pass
+  computes only the cotangents it uses rather than all of them.
+
 - `SPHPerceive` gathers a particle's neighborhood by smoothed particle hydrodynamics: sums
   over whatever lies within a radius, weighted by a kernel that falls smoothly to zero at
   the edge, which is what keeps it differentiable while neighbors come and go. It reports

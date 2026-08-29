@@ -166,3 +166,94 @@ def test_log_normalize_keeps_direction_and_compresses_length(cloud: Particles) -
 		raw_length * compressed_length + 1e-9
 	)
 	assert float(jnp.min(cosine)) > 0.999
+
+
+gpu_only = pytest.mark.skipif(
+	jax.default_backend() != "gpu", reason="the fused kernels are written for GPU"
+)
+
+
+def both_ways(num_particles: int, *, fused: bool) -> SPHPerceive:
+	"""Build the same perception either way, so the two can be compared."""
+	return SPHPerceive(support_radius=0.2, mass=1.0 / num_particles, period=1.0, fused=fused)
+
+
+@gpu_only
+def test_fused_matches_the_array_path() -> None:
+	"""The kernels are only worth having if they compute what the array version computes.
+
+	Everything downstream rests on this: a perception that is close but not equal trains a
+	different model, quietly.
+	"""
+	num_particles, channel_size = 1024, 16
+	particles = Particles(
+		position=jax.random.uniform(jax.random.key(1), (num_particles, 2)),
+		state=jax.random.normal(jax.random.key(2), (num_particles, channel_size)) * 0.3,
+	)
+
+	array = both_ways(num_particles, fused=False)(particles)
+	fused = both_ways(num_particles, fused=True)(particles)
+
+	assert fused.shape == array.shape
+	assert jnp.max(jnp.abs(fused - array)) / jnp.max(jnp.abs(array)) < 1e-3
+
+
+@gpu_only
+def test_fused_gradients_match_the_array_path() -> None:
+	"""A kernel is opaque to autodiff, so its derivative is written by hand.
+
+	A wrong derivative does not raise; it trains something else. This is the check that the
+	hand-derived backward is the derivative of the forward beside it.
+	"""
+	num_particles, channel_size = 1024, 16
+	particles = Particles(
+		position=jax.random.uniform(jax.random.key(1), (num_particles, 2)),
+		state=jax.random.normal(jax.random.key(2), (num_particles, channel_size)) * 0.3,
+	)
+
+	def loss(particles: Particles, fused: bool) -> jax.Array:
+		return jnp.sum(jnp.square(both_ways(num_particles, fused=fused)(particles)))
+
+	array = jax.grad(lambda p: loss(p, False))(particles)
+	fused = jax.grad(lambda p: loss(p, True))(particles)
+
+	for ours, theirs in ((fused.position, array.position), (fused.state, array.state)):
+		assert jnp.max(jnp.abs(ours - theirs)) / jnp.max(jnp.abs(theirs)) < 1e-3
+
+
+@gpu_only
+def test_fused_maps_over_a_batch() -> None:
+	"""The kernel takes one cloud, but training perceives a batch of them."""
+	num_particles, channel_size = 1024, 8
+	batch = Particles(
+		position=jax.random.uniform(jax.random.key(1), (3, num_particles, 2)),
+		state=jax.random.normal(jax.random.key(2), (3, num_particles, channel_size)) * 0.3,
+	)
+
+	array = both_ways(num_particles, fused=False)(batch)
+	fused = both_ways(num_particles, fused=True)(batch)
+
+	assert fused.shape == array.shape
+	assert jnp.max(jnp.abs(fused - array)) / jnp.max(jnp.abs(array)) < 1e-3
+
+
+@gpu_only
+@pytest.mark.parametrize("num_particles", [64, 100, 1000, 1024, 1237, 4096, 5000])
+def test_fused_matches_at_any_cloud_size(num_particles: int) -> None:
+	"""The tiling is static, but the cloud need not be a multiple of it.
+
+	A count the tiles do not divide is padded out and the extra entries are masked away, so
+	sizes that are awkward for the kernel must still give the array version's answer rather
+	than a slightly wrong one.
+	"""
+	channel_size = 8
+	particles = Particles(
+		position=jax.random.uniform(jax.random.key(1), (num_particles, 2)),
+		state=jax.random.normal(jax.random.key(2), (num_particles, channel_size)) * 0.3,
+	)
+
+	array = both_ways(num_particles, fused=False)(particles)
+	fused = both_ways(num_particles, fused=True)(particles)
+
+	assert fused.shape == array.shape
+	assert jnp.max(jnp.abs(fused - array)) / jnp.max(jnp.abs(array)) < 1e-3

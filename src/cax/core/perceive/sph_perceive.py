@@ -14,6 +14,7 @@ import jax
 import jax.numpy as jnp
 from jax import Array
 
+from ._sph_kernel import sph_moments
 from .perceive import Perceive
 
 
@@ -122,6 +123,7 @@ class SPHPerceive(Perceive[Particles, Array]):
 		mass: float = 1.0,
 		log_normalize: bool = True,
 		period: float | None = None,
+		fused: bool = False,
 	):
 		"""Initialize SPH perceive.
 
@@ -140,12 +142,19 @@ class SPHPerceive(Perceive[Particles, Array]):
 				something, and puts the magnitude on a scale the rest of the perception
 				shares.
 			period: Size of the periodic domain, or None for an unbounded one.
+			fused: Whether to compute the sums with Pallas kernels instead of array
+				operations. The two agree; the kernels never build anything with an entry
+				per pair, so they run faster and reach cloud sizes the array version cannot
+				fit. Any particle count works --- the tile shape is chosen from it, and a
+				count the tiles do not divide is padded and masked. GPU-only, and written
+				for two spatial dimensions.
 
 		"""
 		self.support_radius = support_radius
 		self.mass = mass
 		self.log_normalize = log_normalize
 		self.period = period
+		self.fused = fused
 
 	def __call__(self, state: Particles) -> Array:
 		"""Perceive the neighborhood of every particle.
@@ -159,6 +168,9 @@ class SPHPerceive(Perceive[Particles, Array]):
 				gradient, concatenated in that order.
 
 		"""
+		if self.fused:
+			return self._fused(state)
+
 		position, feature = state.position, state.state
 		num_spatial_dims = position.shape[-1]
 
@@ -187,6 +199,36 @@ class SPHPerceive(Perceive[Particles, Array]):
 		difference = feature[..., None, :, :] - feature[..., :, None, :]
 		gradient = jnp.einsum("...ijd,...j,...ijc->...icd", weight_gradient, volume, difference)
 		density_gradient = self.mass * jnp.sum(weight_gradient, axis=-2)
+
+		if self.log_normalize:
+			gradient = _log_normalize(gradient)
+			density_gradient = _log_normalize(density_gradient)
+
+		return jnp.concatenate(
+			[
+				feature,
+				average,
+				gradient.reshape(*feature.shape[:-1], feature.shape[-1] * num_spatial_dims),
+				density_gradient,
+			],
+			axis=-1,
+		)
+
+	def _fused(self, state: Particles) -> Array:
+		"""Perceive through the Pallas kernels, which take one cloud at a time."""
+		position, feature = state.position, state.state
+
+		if position.ndim > 2:
+			return jax.vmap(self._fused)(state)
+
+		num_spatial_dims = position.shape[-1]
+		if num_spatial_dims != 2:
+			raise ValueError(
+				f"fused=True is written for two spatial dimensions, got {num_spatial_dims}."
+			)
+		_, average, gradient, density_gradient = sph_moments(
+			position, feature, self.support_radius, self.mass, self.period
+		)
 
 		if self.log_normalize:
 			gradient = _log_normalize(gradient)
