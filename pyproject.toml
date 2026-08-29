@@ -11,7 +11,7 @@ dependencies = [
 	"jax>=0.10.0",
 	"flax>=0.12.6",
 	"optax>=0.2.8",
-	"pillow>=11.1.0",
+	"pillow>=12.3.0",
 ]
 keywords = [
 	"complex systems",
