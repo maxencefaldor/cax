@@ -6,7 +6,7 @@ each cell's next state depends on its current state and the number of alive neig
 in its Moore neighborhood (8 surrounding cells).
 """
 
-from typing import Literal
+from typing import Literal, override
 
 import jax.numpy as jnp
 from flax import nnx
@@ -50,6 +50,7 @@ class Life(ComplexSystem[Array, Array]):
 		self.perceive = LifePerceive(padding=padding)
 		self.update = LifeUpdate(birth=birth, survival=survival)
 
+	@override
 	def _step(self, state: Array, input: Array | None = None) -> Array:
 		perception = self.perceive(state)
 		next_state = self.update(state, perception, input)
@@ -107,6 +108,7 @@ class Life(ComplexSystem[Array, Array]):
 		return birth, survival
 
 	@nnx.jit
+	@override
 	def render(self, state: Array) -> Array:
 		"""Render state to RGB image.
 

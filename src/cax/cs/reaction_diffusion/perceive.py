@@ -5,7 +5,7 @@ It computes the discrete Laplacian of each chemical species using a fixed convol
 which represents the spatial diffusion component of the PDE.
 """
 
-from typing import Literal
+from typing import Literal, override
 
 import jax
 import jax.numpy as jnp
@@ -55,6 +55,7 @@ class ReactionDiffusionPerceive(Perceive[Array, Array]):
 		)
 		self.kernel = jnp.expand_dims(kernel, axis=-2)
 
+	@override
 	def __call__(self, state: Array) -> Array:
 		"""Apply the fixed identity/Laplacian stencil to the input state.
 

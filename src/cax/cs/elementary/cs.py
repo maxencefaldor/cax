@@ -6,7 +6,7 @@ Cellular Automata are classified by Wolfram rule numbers (0-255), which define t
 function for all possible three-cell neighborhoods.
 """
 
-from typing import Literal
+from typing import Literal, override
 
 import jax.numpy as jnp
 from flax import nnx
@@ -46,6 +46,7 @@ class Elementary(ComplexSystem[Array, Array]):
 		self.perceive = ElementaryPerceive(padding=padding)
 		self.update = ElementaryUpdate(wolfram_code=wolfram_code)
 
+	@override
 	def _step(self, state: Array, input: Array | None = None) -> Array:
 		perception = self.perceive(state)
 		next_state = self.update(state, perception, input)
@@ -72,6 +73,7 @@ class Elementary(ComplexSystem[Array, Array]):
 		return ((rule_number >> 7 - jnp.arange(8)) & 1).astype(jnp.float32)
 
 	@nnx.jit
+	@override
 	def render(self, state: Array) -> Array:
 		"""Render state to RGB image.
 

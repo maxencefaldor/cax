@@ -2,6 +2,7 @@
 
 from collections.abc import Callable, Sequence
 from functools import partial
+from typing import override
 
 from flax import nnx
 from jax import Array
@@ -21,7 +22,7 @@ class NCAUpdate(ResidualUpdate):
 		channel_size: int,
 		perception_size: int,
 		hidden_layer_sizes: tuple[int, ...],
-		activation_fn: Callable = nnx.relu,
+		activation_fn: Callable[[Array], Array] = nnx.relu,
 		step_size: float = 1.0,
 		cell_dropout_rate: float = 0.0,
 		kernel_size: Sequence[int] = (3, 3),
@@ -58,6 +59,7 @@ class NCAUpdate(ResidualUpdate):
 		self.pool = partial(nnx.max_pool, window_shape=kernel_size, padding="SAME")
 		self.alive_threshold = alive_threshold
 
+	@override
 	def __call__(self, state: Array, perception: Array, input: Array | None = None) -> Array:
 		"""Process the current state, perception, and input to produce a new state.
 

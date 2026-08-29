@@ -6,6 +6,7 @@ forward one step.
 """
 
 from dataclasses import replace
+from typing import override
 
 import jax.numpy as jnp
 from jax import Array
@@ -37,6 +38,7 @@ class LangtonAntUpdate(Update[LangtonAntState, Array, Array]):
 		"""
 		self.turns = turns
 
+	@override
 	def __call__(
 		self, state: LangtonAntState, perception: Array, input: Array | None = None
 	) -> LangtonAntState:

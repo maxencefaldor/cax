@@ -6,7 +6,7 @@ growth fields computed between particle pairs, plus a repulsion term.
 """
 
 from collections.abc import Callable
-from typing import Any
+from typing import Any, override
 
 import jax
 import jax.numpy as jnp
@@ -60,6 +60,7 @@ class ParticleLeniaPerceive(Perceive[ParticleLeniaState, Array]):
 
 		self.c_rep = rule_params.c_rep
 
+	@override
 	def __call__(self, state: ParticleLeniaState) -> Array:
 		"""Process the current state to produce a perception.
 

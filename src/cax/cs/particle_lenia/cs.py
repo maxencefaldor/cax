@@ -12,7 +12,7 @@ References:
 """
 
 from collections.abc import Callable
-from typing import Literal
+from typing import Literal, override
 
 import jax.numpy as jnp
 from flax import nnx
@@ -21,8 +21,8 @@ from jax import Array
 from cax.core import ComplexSystem
 from cax.utils import clip_and_uint8, nearest_point, pixel_grid, soft_disk_mask
 
-from .growth import peak_growth_fn
-from .kernel import peak_kernel_fn
+from .growth import ParticleLeniaGrowthParams, peak_growth_fn
+from .kernel import ParticleLeniaKernelParams, peak_kernel_fn
 from .perceive import ParticleLeniaPerceive
 from .rule import ParticleLeniaRuleParams
 from .state import ParticleLeniaState
@@ -37,8 +37,8 @@ class ParticleLenia(ComplexSystem[ParticleLeniaState, Array]):
 		*,
 		num_spatial_dims: int,
 		T: float,
-		kernel_fn: Callable = peak_kernel_fn,
-		growth_fn: Callable = peak_growth_fn,
+		kernel_fn: Callable[[Array, ParticleLeniaKernelParams], Array] = peak_kernel_fn,
+		growth_fn: Callable[[Array, ParticleLeniaGrowthParams], Array] = peak_growth_fn,
 		rule_params: ParticleLeniaRuleParams,
 	):
 		"""Initialize Particle Lenia.
@@ -67,6 +67,7 @@ class ParticleLenia(ComplexSystem[ParticleLeniaState, Array]):
 			T=T,
 		)
 
+	@override
 	def _step(self, state: ParticleLeniaState, input: Array | None = None) -> ParticleLeniaState:
 		perception = self.perceive(state)
 		next_state = self.update(state, perception, input)
@@ -74,6 +75,7 @@ class ParticleLenia(ComplexSystem[ParticleLeniaState, Array]):
 		return next_state
 
 	@nnx.jit(static_argnames=("resolution", "extent", "particle_radius", "mode"))
+	@override
 	def render(
 		self,
 		state: ParticleLeniaState,

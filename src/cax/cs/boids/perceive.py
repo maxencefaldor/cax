@@ -6,6 +6,8 @@ steering behaviors (separation, alignment, cohesion) and their parameters.
 
 """
 
+from typing import override
+
 import jax.numpy as jnp
 from flax import nnx
 
@@ -33,6 +35,7 @@ class BoidsPerceive(Perceive[BoidsState, BoidsPerception]):
 		"""
 		self.boid_policy = boid_policy
 
+	@override
 	def __call__(self, state: BoidsState) -> BoidsPerception:
 		"""Process the current state to produce a perception.
 

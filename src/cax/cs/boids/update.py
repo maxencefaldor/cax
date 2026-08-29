@@ -7,6 +7,7 @@ and periodic boundary conditions.
 """
 
 from dataclasses import replace
+from typing import override
 
 import jax.numpy as jnp
 from jax import Array
@@ -46,6 +47,7 @@ class BoidsUpdate(Update[BoidsState, BoidsPerception, Array]):
 		self.dt = dt
 		self.friction_factor = 0.5 ** (dt / velocity_half_life)
 
+	@override
 	def __call__(
 		self, state: BoidsState, perception: BoidsPerception, input: Array | None = None
 	) -> BoidsState:

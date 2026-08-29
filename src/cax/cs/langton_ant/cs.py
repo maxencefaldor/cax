@@ -7,6 +7,8 @@ exhibits complex emergent behavior — notably the formation of a "highway" afte
 10,000 steps in the classic RL variant.
 """
 
+from typing import override
+
 import jax.numpy as jnp
 from flax import nnx
 from jax import Array
@@ -47,6 +49,7 @@ class LangtonAnt(ComplexSystem[LangtonAntState, Array]):
 		self.perceive = LangtonAntPerceive()
 		self.update = LangtonAntUpdate(turns=turns)
 
+	@override
 	def _step(self, state: LangtonAntState, input: Array | None = None) -> LangtonAntState:
 		perception = self.perceive(state)
 		next_state = self.update(state, perception, input)
@@ -86,6 +89,7 @@ class LangtonAnt(ComplexSystem[LangtonAntState, Array]):
 		return turns
 
 	@nnx.jit
+	@override
 	def render(self, state: LangtonAntState) -> Array:
 		"""Render state to RGB image.
 

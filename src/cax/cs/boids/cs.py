@@ -6,6 +6,8 @@ velocity based on the boid policy. These local interactions produce emergent glo
 patterns without centralized coordination.
 """
 
+from typing import override
+
 import jax.numpy as jnp
 from flax import nnx
 from jax import Array
@@ -48,6 +50,7 @@ class Boids(ComplexSystem[BoidsState, Array]):
 			velocity_half_life=velocity_half_life,
 		)
 
+	@override
 	def _step(self, state: BoidsState, input: Array | None = None) -> BoidsState:
 		perception = self.perceive(state)
 		next_state = self.update(state, perception, input)
@@ -55,6 +58,7 @@ class Boids(ComplexSystem[BoidsState, Array]):
 		return next_state
 
 	@nnx.jit(static_argnames=("resolution", "particle_radius"))
+	@override
 	def render(
 		self,
 		state: BoidsState,

@@ -9,6 +9,7 @@ edge. The smoothness is what keeps the whole thing differentiable as neighbors c
 
 import math
 from dataclasses import dataclass
+from typing import override
 
 import jax
 import jax.numpy as jnp
@@ -156,6 +157,7 @@ class SPHPerceive(Perceive[Particles, Array]):
 		self.period = period
 		self.fused = fused
 
+	@override
 	def __call__(self, state: Particles) -> Array:
 		"""Perceive the neighborhood of every particle.
 

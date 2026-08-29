@@ -6,6 +6,7 @@ friction and periodic boundary conditions.
 """
 
 from dataclasses import replace
+from typing import override
 
 from jax import Array
 
@@ -43,6 +44,7 @@ class ParticleLifeUpdate(Update[ParticleLifeState, ParticleLifePerception, Array
 		self.dt = dt
 		self.friction_factor = 0.5 ** (dt / velocity_half_life)
 
+	@override
 	def __call__(
 		self,
 		state: ParticleLifeState,

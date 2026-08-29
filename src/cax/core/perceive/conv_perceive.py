@@ -1,6 +1,7 @@
 """Convolution perceive module."""
 
 from collections.abc import Callable
+from typing import override
 
 from flax import nnx
 from jax import Array
@@ -20,7 +21,7 @@ class ConvPerceive(Perceive[Array, Array]):
 		padding: str = "SAME",
 		feature_group_count: int = 1,
 		use_bias: bool = False,
-		activation_fn: Callable | None = None,
+		activation_fn: Callable[[Array], Array] | None = None,
 		rngs: nnx.Rngs,
 	):
 		"""Initialize convolution perceive.
@@ -47,6 +48,7 @@ class ConvPerceive(Perceive[Array, Array]):
 		)
 		self.activation_fn = activation_fn
 
+	@override
 	def __call__(self, state: Array) -> Array:
 		"""Apply convolutional perception to the input state.
 

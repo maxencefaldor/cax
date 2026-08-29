@@ -84,8 +84,10 @@ def center_state(state: Array, *, R: int) -> Array:
 	metrics = metrics_fn(state, R=R)
 	center_of_mass_grid = metrics["center_of_mass_grid"]
 	spatial_dims = state.shape[:-1]
-	shifts = tuple(
-		(spatial_dims[i] // 2 - center_of_mass_grid[i]).astype(int)
-		for i in range(len(spatial_dims))
+	shifts = jnp.stack(
+		[
+			(spatial_dims[i] // 2 - center_of_mass_grid[i]).astype(int)
+			for i in range(len(spatial_dims))
+		]
 	)
 	return jnp.roll(state, shifts, axis=tuple(range(len(spatial_dims))))

@@ -14,12 +14,13 @@ References:
 """
 
 from collections.abc import Callable
+from typing import override
 
 import jax
 import jax.numpy as jnp
 from jax import Array
 
-from ..lenia.growth import exponential_growth_fn
+from ..lenia.growth import LeniaGrowthParams, exponential_growth_fn
 from ..lenia.rule import LeniaRuleParams
 from ..lenia.update import LeniaUpdate
 
@@ -56,7 +57,7 @@ class FlowLeniaUpdate(LeniaUpdate):
 		*,
 		channel_size: int,
 		T: float,
-		growth_fn: Callable = exponential_growth_fn,
+		growth_fn: Callable[[Array, LeniaGrowthParams], Array] = exponential_growth_fn,
 		rule_params: LeniaRuleParams,
 		# Flow Lenia parameters
 		theta_A: float | None = None,
@@ -95,6 +96,7 @@ class FlowLeniaUpdate(LeniaUpdate):
 		self.dd = dd
 		self.sigma = sigma
 
+	@override
 	def __call__(self, state: Array, perception: Array, input: Array | None = None) -> Array:
 		"""Process the current state, perception, and input to produce a new state.
 

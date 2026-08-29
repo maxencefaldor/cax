@@ -6,6 +6,7 @@ parameterized growth function, then aggregated back to channels.
 """
 
 from collections.abc import Callable
+from typing import override
 
 import jax
 import jax.numpy as jnp
@@ -14,7 +15,7 @@ from jax import Array
 
 from cax.core.update import Update
 
-from .growth import exponential_growth_fn
+from .growth import LeniaGrowthParams, exponential_growth_fn
 from .rule import LeniaRuleParams
 
 
@@ -32,7 +33,7 @@ class LeniaUpdate(Update[Array, Array, Array]):
 		*,
 		channel_size: int,
 		T: float,
-		growth_fn: Callable = exponential_growth_fn,
+		growth_fn: Callable[[Array, LeniaGrowthParams], Array] = exponential_growth_fn,
 		rule_params: LeniaRuleParams,
 	):
 		"""Initialize Lenia update.
@@ -60,6 +61,7 @@ class LeniaUpdate(Update[Array, Array, Array]):
 		self.growth_fn = growth_fn
 		self.growth_params = nnx.data(rule_params.growth_params)
 
+	@override
 	def __call__(self, state: Array, perception: Array, input: Array | None = None) -> Array:
 		"""Process the current state, perception, and input to produce a new state.
 

@@ -1,6 +1,7 @@
 """MLP update module."""
 
 from collections.abc import Callable
+from typing import override
 
 import jax.numpy as jnp
 from flax import nnx
@@ -26,7 +27,7 @@ class MLPUpdate(Update[Array, Array, Array]):
 		channel_size: int,
 		perception_size: int,
 		hidden_layer_sizes: tuple[int, ...],
-		activation_fn: Callable = nnx.relu,
+		activation_fn: Callable[[Array], Array] = nnx.relu,
 		zeros_init: bool = False,
 		rngs: nnx.Rngs,
 	):
@@ -63,6 +64,7 @@ class MLPUpdate(Update[Array, Array, Array]):
 		)
 		self.activation_fn = activation_fn
 
+	@override
 	def __call__(self, state: Array, perception: Array, input: Array | None = None) -> Array:
 		"""Process the current state, perception, and input to produce a new state.
 

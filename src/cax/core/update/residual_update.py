@@ -1,6 +1,7 @@
 """Residual update module."""
 
 from collections.abc import Callable
+from typing import override
 
 from flax import nnx
 from jax import Array
@@ -21,7 +22,7 @@ class ResidualUpdate(MLPUpdate):
 		channel_size: int,
 		perception_size: int,
 		hidden_layer_sizes: tuple[int, ...],
-		activation_fn: Callable = nnx.relu,
+		activation_fn: Callable[[Array], Array] = nnx.relu,
 		step_size: float = 1.0,
 		cell_dropout_rate: float = 0.0,
 		zeros_init: bool = False,
@@ -53,6 +54,7 @@ class ResidualUpdate(MLPUpdate):
 		self.dropout = nnx.Dropout(rate=cell_dropout_rate, broadcast_dims=(-1,), rngs=rngs)
 		self.step_size = step_size
 
+	@override
 	def __call__(self, state: Array, perception: Array, input: Array | None = None) -> Array:
 		"""Process the current state, perception, and input to produce a new state.
 

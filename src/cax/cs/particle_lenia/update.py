@@ -5,6 +5,7 @@ update particle positions with temporal resolution T.
 """
 
 from dataclasses import replace
+from typing import override
 
 from jax import Array
 
@@ -35,6 +36,7 @@ class ParticleLeniaUpdate(Update[ParticleLeniaState, Array, Array]):
 		"""
 		self.T = T
 
+	@override
 	def __call__(
 		self, state: ParticleLeniaState, perception: Array, input: Array | None = None
 	) -> ParticleLeniaState:

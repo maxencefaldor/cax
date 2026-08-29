@@ -7,7 +7,7 @@ distributing one chip to each face-adjacent neighbor. Parallel toppling proceeds
 until a stable configuration is reached.
 """
 
-from typing import Literal
+from typing import Literal, override
 
 import jax.numpy as jnp
 from flax import nnx
@@ -62,6 +62,7 @@ class Sandpile(ComplexSystem[Array, Array]):
 			threshold=self.threshold,
 		)
 
+	@override
 	def _step(self, state: Array, input: Array | None = None) -> Array:
 		perception = self.perceive(state)
 		next_state = self.update(state, perception, input)
@@ -69,6 +70,7 @@ class Sandpile(ComplexSystem[Array, Array]):
 		return next_state
 
 	@nnx.jit
+	@override
 	def render(self, state: Array) -> Array:
 		"""Render state to RGB image.
 

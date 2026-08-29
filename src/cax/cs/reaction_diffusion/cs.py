@@ -7,7 +7,7 @@ two chemical species U and V that diffuse at different rates and interact throug
 a cubic autocatalytic reaction.
 """
 
-from typing import Literal
+from typing import Literal, override
 
 import jax.numpy as jnp
 from flax import nnx
@@ -67,6 +67,7 @@ class ReactionDiffusion(ComplexSystem[Array, Array]):
 			dt=dt,
 		)
 
+	@override
 	def _step(self, state: Array, input: Array | None = None) -> Array:
 		perception = self.perceive(state)
 		next_state = self.update(state, perception, input)
@@ -74,6 +75,7 @@ class ReactionDiffusion(ComplexSystem[Array, Array]):
 		return next_state
 
 	@nnx.jit
+	@override
 	def render(self, state: Array) -> Array:
 		"""Render state to RGB image.
 

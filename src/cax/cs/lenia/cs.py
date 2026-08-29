@@ -7,6 +7,7 @@ patterns and behaviors. The system supports multiple channels and arbitrary spat
 """
 
 from collections.abc import Callable
+from typing import override
 
 from flax import nnx
 from jax import Array
@@ -14,8 +15,8 @@ from jax import Array
 from cax.core import ComplexSystem
 from cax.utils import clip_and_uint8, render_array_with_channels_to_rgb
 
-from .growth import exponential_growth_fn
-from .kernel import gaussian_kernel_fn
+from .growth import LeniaGrowthParams, exponential_growth_fn
+from .kernel import LeniaKernelParams, gaussian_kernel_fn
 from .perceive import LeniaPerceive
 from .rule import LeniaRuleParams
 from .update import LeniaUpdate
@@ -32,8 +33,8 @@ class Lenia(ComplexSystem[Array, Array]):
 		R: int,
 		T: float,
 		state_scale: float = 1.0,
-		kernel_fn: Callable = gaussian_kernel_fn,
-		growth_fn: Callable = exponential_growth_fn,
+		kernel_fn: Callable[[Array, LeniaKernelParams], Array] = gaussian_kernel_fn,
+		growth_fn: Callable[[Array, LeniaGrowthParams], Array] = exponential_growth_fn,
 		rule_params: LeniaRuleParams,
 	):
 		"""Initialize Lenia.
@@ -69,6 +70,7 @@ class Lenia(ComplexSystem[Array, Array]):
 			rule_params=rule_params,
 		)
 
+	@override
 	def _step(self, state: Array, input: Array | None = None) -> Array:
 		perception = self.perceive(state)
 		next_state = self.update(state, perception, input)
@@ -76,6 +78,7 @@ class Lenia(ComplexSystem[Array, Array]):
 		return next_state
 
 	@nnx.jit
+	@override
 	def render(self, state: Array) -> Array:
 		"""Render state to RGB image.
 

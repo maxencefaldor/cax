@@ -100,6 +100,14 @@ include = ["src", "tests"]
 [tool.ty.rules]
 all = "error"
 
+# JAX and flax return `Any`/`Unknown` from imprecise stubs, and nnx.jit/nnx.scan erase
+# the return type of everything they decorate. These four rules fire on that erasure
+# rather than on anything we wrote, across ~30 files. Everything else stays an error.
+unsound-return-statement = "ignore"
+unsound-assignment = "ignore"
+unsound-yield = "ignore"
+dynamic-function-decorator-return = "ignore"
+
 [tool.ty.analysis]
 # JAX's type stubs are imprecise — e.g., jnp.roll, jnp.mgrid, nnx.Param arithmetic
 replace-imports-with-any = ["flax.**"]

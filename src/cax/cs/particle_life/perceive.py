@@ -5,6 +5,8 @@ interaction forces between particles based on their types and distances. Forces 
 from repulsion at short range to attraction at medium range according to the attraction matrix.
 """
 
+from typing import override
+
 import jax.numpy as jnp
 from jax import Array
 
@@ -95,6 +97,7 @@ class ParticleLifePerceive(Perceive[ParticleLifeState, ParticleLifePerception]):
 		"""
 		return self.force_factor * jnp.sum(forces[..., None] * direction_norm, axis=-2)
 
+	@override
 	def __call__(self, state: ParticleLifeState) -> ParticleLifePerception:
 		"""Process the current state to produce a perception.
 

@@ -4,6 +4,8 @@ This module implements the perception function for Langton's Ant. It extracts th
 of the cell at the ant's current position, which determines the turn direction.
 """
 
+from typing import override
+
 from jax import Array
 
 from cax.core.perceive import Perceive
@@ -18,6 +20,7 @@ class LangtonAntPerceive(Perceive[LangtonAntState, Array]):
 	by the update rule to determine the turn direction.
 	"""
 
+	@override
 	def __call__(self, state: LangtonAntState) -> Array:
 		"""Perceive the cell color at the ant's position.
 

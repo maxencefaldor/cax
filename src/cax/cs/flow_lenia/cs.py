@@ -5,9 +5,11 @@ This module implements Flow Lenia, a mass-conservative extension of Lenia.
 
 from collections.abc import Callable
 
+from jax import Array
+
 from ..lenia.cs import Lenia
-from ..lenia.growth import exponential_growth_fn
-from ..lenia.kernel import gaussian_kernel_fn
+from ..lenia.growth import LeniaGrowthParams, exponential_growth_fn
+from ..lenia.kernel import LeniaKernelParams, gaussian_kernel_fn
 from ..lenia.perceive import LeniaPerceive
 from ..lenia.rule import LeniaRuleParams
 from .update import FlowLeniaUpdate
@@ -29,8 +31,8 @@ class FlowLenia(Lenia):
 		R: int,
 		T: float,
 		state_scale: float = 1.0,
-		kernel_fn: Callable = gaussian_kernel_fn,
-		growth_fn: Callable = exponential_growth_fn,
+		kernel_fn: Callable[[Array, LeniaKernelParams], Array] = gaussian_kernel_fn,
+		growth_fn: Callable[[Array, LeniaGrowthParams], Array] = exponential_growth_fn,
 		rule_params: LeniaRuleParams,
 		# Flow Lenia parameters
 		theta_A: float | None = None,

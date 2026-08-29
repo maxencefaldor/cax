@@ -2,6 +2,7 @@
 
 from collections.abc import Callable
 from itertools import product
+from typing import override
 
 from jax import Array
 
@@ -48,6 +49,7 @@ class MoorePerceive(NeighborhoodPerceive):
 			reduce_fn=reduce_fn,
 		)
 
+	@override
 	def _get_shifts(self) -> list[tuple[int, ...]]:
 		"""Return all shifts in the Moore neighborhood (excluding center).
 

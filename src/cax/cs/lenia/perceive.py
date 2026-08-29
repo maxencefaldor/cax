@@ -6,6 +6,7 @@ a potential field that represents the local neighborhood configuration.
 """
 
 from collections.abc import Callable
+from typing import override
 
 import jax
 import jax.numpy as jnp
@@ -13,7 +14,7 @@ from jax import Array
 
 from cax.core.perceive import Perceive
 
-from .kernel import gaussian_kernel_fn
+from .kernel import LeniaKernelParams, gaussian_kernel_fn
 from .rule import LeniaRuleParams
 
 
@@ -32,7 +33,7 @@ class LeniaPerceive(Perceive[Array, Array]):
 		channel_size: int,
 		R: int,
 		state_scale: float = 1.0,
-		kernel_fn: Callable = gaussian_kernel_fn,
+		kernel_fn: Callable[[Array, LeniaKernelParams], Array] = gaussian_kernel_fn,
 		rule_params: LeniaRuleParams,
 	):
 		"""Initialize Lenia perceive.
@@ -61,6 +62,7 @@ class LeniaPerceive(Perceive[Array, Array]):
 		self.kernel_fn = kernel_fn
 		self.kernel_fft = self._kernel_fft(rule_params)
 
+	@override
 	def __call__(self, state: Array) -> Array:
 		"""Process the current state to produce a perception.
 

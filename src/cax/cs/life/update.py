@@ -5,6 +5,8 @@ automata based on birth/survival conditions. Cells become alive (birth) or stay 
 (survival) based on the number of alive neighbors.
 """
 
+from typing import override
+
 import jax.numpy as jnp
 from jax import Array
 
@@ -32,6 +34,7 @@ class LifeUpdate(Update[Array, Array, Array]):
 		self.birth = birth
 		self.survival = survival
 
+	@override
 	def __call__(self, state: Array, perception: Array, input: Array | None = None) -> Array:
 		"""Process the current state, perception, and input to produce a new state.
 

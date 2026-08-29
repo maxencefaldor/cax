@@ -97,7 +97,7 @@ class ComplexSystem[State, Input](nnx.Module):
 		"""
 
 		def step_fn(
-			cs: ComplexSystem, state: State, input: Input | None
+			cs: ComplexSystem[State, Input], state: State, input: Input | None
 		) -> tuple[State, State | None]:
 			next_state = cs._step(state, input)
 			return next_state, (next_state if return_states else None)

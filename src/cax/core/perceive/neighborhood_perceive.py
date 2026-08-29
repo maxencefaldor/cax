@@ -6,6 +6,7 @@ differing only in which neighbor shifts they enumerate.
 """
 
 from collections.abc import Callable
+from typing import override
 
 import jax.numpy as jnp
 from jax import Array
@@ -72,6 +73,7 @@ class NeighborhoodPerceive(Perceive[Array, Array]):
 		"""
 		raise NotImplementedError
 
+	@override
 	def __call__(self, state: Array) -> Array:
 		"""Apply neighborhood perception to the input state.
 
