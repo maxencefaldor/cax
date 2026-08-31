@@ -38,6 +38,9 @@ classifiers = [
 gpu = [
     "jax[cuda12]>=0.11.0",
 ]
+# Experiment code under `breeder/` — a group, not an extra, so it never reaches the
+# published package as a `cax[breeder]` install. `ty` type checks `breeder/`, so its
+# workflow syncs this group explicitly.
 breeder = [
     "pydantic>=2.13.0",
     "pydantic-settings>=2.15.0",
@@ -46,6 +49,9 @@ breeder = [
     "mediapy>=1.2.0",
     "torchvision>=0.21.0",
 ]
+# Experiment code under `breeder/` — a group, not an extra, so it never reaches the
+# published package as a `cax[breeder]` install. `ty` type checks `breeder/`, so its
+# workflow syncs this group explicitly.
 dev = [
     "pytest>=8.3.0",
     "pytest-cov>=5.0.0",

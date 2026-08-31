@@ -29,7 +29,7 @@ jobs:
           enable-cache: true
 
       - name: Install the project
-        run: uv sync --all-extras --dev
+        run: uv sync --all-extras --dev --group breeder
 
       - name: Type check
         run: uv run ty check
