@@ -84,6 +84,20 @@ EXPERIMENTS = {
 	"state_frozen": {"complex_system": {"mutate": {"state_strategy": "frozen"}}},
 	# Support-preserving seed mutation: no mass creation at the reflected 0 boundary
 	"state_multiplicative": {"complex_system": {"mutate": {"state_strategy": "multiplicative"}}},
+	# Seed replicates: one run per arm is one sample, and the arms sit within seed spread
+	"weight_floor_seed1": {"seed": 1, "complex_system": {"mutate": {"weight_floor": 0.5}}},
+	"state_frozen_seed1": {
+		"seed": 1,
+		"complex_system": {"mutate": {"state_strategy": "frozen"}},
+	},
+	"state_multiplicative_seed1": {
+		"seed": 1,
+		"complex_system": {"mutate": {"state_strategy": "multiplicative"}},
+	},
+	"weight_tuned_seed1": {
+		"seed": 1,
+		"complex_system": {"mutate": {"weight_concentration": 1600.0, "weight_floor": 0.5}},
+	},
 	# --- Pure random search: no mutation, fresh samples every generation
 	"random_search": {
 		"complex_system": {"sample": {"strategy": "noise"}},

@@ -1,0 +1,79 @@
+name: state_multiplicative_seed1
+seed: 1
+complex_system:
+  name: lenia
+  spatial_dims:
+  - 128
+  - 128
+  channel_size: 3
+  R: 12
+  T: 0.3333333333333333
+  state_scale: 1
+  num_steps: 128
+  num_self_kernels: 3
+  num_cross_kernels: 1
+  kernel_rank: 3
+  kernel_r_range:
+  - 0.1
+  - 1.2
+  growth_mean_range:
+  - 0.05
+  - 0.7
+  growth_std_range:
+  - 0.005
+  - 0.2
+  min_mass: 0.5
+  min_concentration: 0.5
+  sample:
+    strategy: soliton_full
+    blob_size: 24
+    pattern_names:
+    - 5N7KKM
+  mutate:
+    mutation_std: 0.01
+    weight_concentration: 100.0
+    weight_floor: 0.0
+    state_strategy: multiplicative
+qd:
+  population_size: 1024
+  num_children: 256
+  k: 3
+  sample_ratio: 0.0
+  num_init: 1
+  minibatch_size: 256
+  num_generations: 1024
+encoder:
+  name: vae
+  latent_size: 8
+  features:
+  - 3
+  - 16
+  - 32
+  - 32
+  learning_rate: 0.001
+  grad_clip: 1.0
+  num_steps: 8192
+  batch_size: 256
+  window: 32
+  augment:
+  - d4
+  - roll
+  invariant: true
+  padding: SAME
+fitness:
+  series: velocity
+  reduce: norm_mean
+  sign: 1
+  channel: null
+  window: 32
+descriptor:
+  series:
+  - - latent
+    - 1.0
+  window: 32
+train_interval: 32
+bootstrap: true
+log_interval: 8
+checkpoint_interval: 32
+num_thumbnails: 1024
+output_dir: breeder/output
