@@ -319,4 +319,10 @@ def load_config(path: Path) -> Config:
 
 if __name__ == "__main__":
 	cli = CliConfig()
-	main(load_config(Path(cli.config)) if cli.config else cli)
+	if cli.config:
+		# Flags given alongside --config refine the file, so a variation that changes one
+		# field (a seed, a name) is a command line rather than another config file
+		overrides = {name: getattr(cli, name) for name in cli.model_fields_set - {"config"}}
+		main(load_config(Path(cli.config)).model_copy(update=overrides))
+	else:
+		main(cli)

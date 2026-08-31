@@ -2,8 +2,17 @@
 
 The defaults across the config models *are* the converged protocol (2026-08-31: 128²
 world, single Aquarium soliton seed, tuned pose-invariant VAE, 1024 generations), so an
-experiment states only its delta. Settled one-off experiments are removed once judged;
-their definitions live in git history and their conclusions in notes/EXPERIMENTS.md.
+experiment states only its delta.
+
+Three rules keep the set small:
+
+- **A config is a question, not a run.** Seeds and renames are command-line flags
+  (`--config base.yaml --seed 1 --name base_seed1`), never files.
+- **Per system, one config per descriptor family** — the learned one, the hand-crafted
+  one, and where it exists the fixed pretrained one — plus the null control.
+- **A wave is temporary.** The arms of a question under investigation live here while it
+  is open and are deleted once judged; their definitions stay in git history and their
+  conclusions in notes/EXPERIMENTS.md.
 
 Usage: python -m breeder.scripts.make_configs
 """
@@ -25,25 +34,22 @@ PARTICLE_DESCRIPTOR = {"series": (("radius", 1.0), ("clustering", 5.0))}
 COMMON = {"complex_system": {"name": "lenia"}}
 
 EXPERIMENTS = {
-	# --- The protocol itself, across seeds
+	# --- Lenia: the protocol, and one config per descriptor family
 	"base": {},
-	"base_seed1": {"seed": 1},
-	"base_seed2": {"seed": 2},
-	"base_seed3": {"seed": 3},
-	# --- Latent size axis (base is 8)
-	"latent4": {"encoder": {"name": "vae", "latent_size": 4}},
-	"latent16": {"encoder": {"name": "vae", "latent_size": 16}},
-	# --- Hand-crafted metric descriptor: the ablation control for the learned one
 	"metrics": {"encoder": None, "descriptor": METRIC_DESCRIPTOR},
-	# --- Fixed texture descriptor. VGG activations are memory-heavy during evaluation:
-	# minibatch_size 32 keeps the first conv layer at ~4 GB on-device instead of 32
+	# VGG activations are memory-heavy during evaluation: minibatch_size 32 keeps the
+	# first conv layer at ~4 GB on-device instead of 32
 	"vgg_descriptor": {
 		"encoder": {"name": "vgg"},
 		"descriptor": {"series": (("vgg", 1.0),)},
 		"qd": {"minibatch_size": 32},
 	},
-	# --- Unsupervised homeostasis fitness (the paper's): minimize latent variance
-	"homeostasis": {"fitness": {"name": "homeostasis"}},
+	# The null control: no mutation, fresh samples every generation. Without it no
+	# result above means anything
+	"random_search": {
+		"complex_system": {"sample": {"strategy": "noise"}},
+		"qd": {"sample_ratio": 1.0},
+	},
 	# --- Flow Lenia (arXiv:2212.07906): mass-conserving Lenia, seeded with the paper's
 	# random patch. Mass is conserved, so localization is the gate that does the work.
 	"flow_lenia": {"complex_system": {"name": "flow_lenia"}, "qd": {"num_init": 1024}},
@@ -70,39 +76,15 @@ EXPERIMENTS = {
 		"descriptor": PARTICLE_DESCRIPTOR,
 		"qd": {"num_init": 1024, "sample_ratio": 0.5},
 	},
-	# --- Mutation-operator arms (2026-08-31): measured pathologies of the draft
-	# operators, each varied alone against base. Dirichlet drift fixates weights
-	# (6/8 rules dead by ~100 applications); the pseudo-count keeps rules resurrectable
+	# --- OPEN WAVE (2026-08-31): are the draft mutation operators pathological?
+	# Measured: Dirichlet drift fixates 6 of 8 rules within ~100 applications, and the
+	# seed's reflected Gaussian creates mass at the 0 boundary. Delete once judged.
 	"weight_floor": {"complex_system": {"mutate": {"weight_floor": 0.5}}},
-	# Fully derived operator: c=1600 gives weights the same ~1%-of-range steps as every
-	# other parameter (at c=100 they take 27% relative steps, the largest in the
-	# genotype); floor 0.5 is the measured knee (0.1 still leaves ~1 dead rule)
 	"weight_tuned": {
 		"complex_system": {"mutate": {"weight_concentration": 1600.0, "weight_floor": 0.5}}
 	},
-	# Does seed evolution earn anything? The seed is 49k of the genotype's ~49k+30 dims
 	"state_frozen": {"complex_system": {"mutate": {"state_strategy": "frozen"}}},
-	# Support-preserving seed mutation: no mass creation at the reflected 0 boundary
 	"state_multiplicative": {"complex_system": {"mutate": {"state_strategy": "multiplicative"}}},
-	# Seed replicates: one run per arm is one sample, and the arms sit within seed spread
-	"weight_floor_seed1": {"seed": 1, "complex_system": {"mutate": {"weight_floor": 0.5}}},
-	"state_frozen_seed1": {
-		"seed": 1,
-		"complex_system": {"mutate": {"state_strategy": "frozen"}},
-	},
-	"state_multiplicative_seed1": {
-		"seed": 1,
-		"complex_system": {"mutate": {"state_strategy": "multiplicative"}},
-	},
-	"weight_tuned_seed1": {
-		"seed": 1,
-		"complex_system": {"mutate": {"weight_concentration": 1600.0, "weight_floor": 0.5}},
-	},
-	# --- Pure random search: no mutation, fresh samples every generation
-	"random_search": {
-		"complex_system": {"sample": {"strategy": "noise"}},
-		"qd": {"sample_ratio": 1.0},
-	},
 }
 
 
