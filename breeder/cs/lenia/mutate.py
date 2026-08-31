@@ -57,20 +57,16 @@ def mutate(key: Array, genotype: Genotype, config: LeniaConfig) -> Genotype:
 		mutation_std=mutation_std,
 	)
 
-	# Initial state: per MutateConfig.state_strategy
-	if config.mutate.state_strategy == "frozen":
-		state_init = genotype.state_init
-	elif config.mutate.state_strategy == "multiplicative":
-		factor = jnp.exp(mutation_std * jax.random.normal(key_state, genotype.state_init.shape))
-		state_init = reflect(genotype.state_init * factor, upper=1.0)
-	else:
-		state_init = mutate_bounded(
-			key_state,
-			genotype.state_init,
-			lower=0.0,
-			upper=1.0,
-			mutation_std=mutation_std,
-		)
+	# Initial state: bounded Gaussian. Two alternatives were tried and rejected by eye
+	# (2026-08-31): freezing the seed entirely, and support-preserving multiplicative
+	# noise. Both looked worse than this operator despite measuring competitively
+	state_init = mutate_bounded(
+		key_state,
+		genotype.state_init,
+		lower=0.0,
+		upper=1.0,
+		mutation_std=mutation_std,
+	)
 
 	return Genotype(
 		rule_params=LeniaRuleParams(

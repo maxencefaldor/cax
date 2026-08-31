@@ -33,7 +33,6 @@ complex_system:
     mutation_std: 0.01
     weight_concentration: 100.0
     weight_floor: 0.5
-    state_strategy: gaussian
   theta_A: null
   n: 2
   dd: 5

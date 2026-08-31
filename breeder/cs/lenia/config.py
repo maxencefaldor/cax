@@ -42,15 +42,6 @@ class MutateConfig(BaseModel):
 			`weight_concentration` was left at 100: raising it to 1600 for step-size
 			parity with the other parameters measured *worse* on both seeds, so the
 			search wants the larger weight steps.
-		state_strategy: How the initial state mutates. `gaussian` is the draft operator
-			and the default (bounded per-pixel Gaussian; its reflection at 0 makes empty
-			pixels *gain* mass in expectation). `multiplicative` scales pixels by
-			`exp(std * noise)` — support-preserving, empty pixels stay exactly empty; it
-			was the only arm above base fitness on both seeds (0.0764/0.0830 vs base mean
-			0.0684) and looked good, so it remains the candidate worth revisiting.
-			`frozen` disables seed mutation: **rejected** 2026-08-31 by visual verdict
-			despite holding the highest phenotype variance of any arm, which settles that
-			seed evolution earns its 49k of the genotype's ~49k+30 dimensions.
 
 	"""
 
@@ -59,7 +50,6 @@ class MutateConfig(BaseModel):
 	mutation_std: float = 0.01
 	weight_concentration: float = 100.0
 	weight_floor: float = 0.5
-	state_strategy: Literal["gaussian", "multiplicative", "frozen"] = "gaussian"
 
 
 class LeniaConfig(BaseModel):

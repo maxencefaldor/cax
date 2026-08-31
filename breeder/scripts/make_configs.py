@@ -80,9 +80,8 @@ EXPERIMENTS = {
 		"qd": {"num_init": 1024, "sample_ratio": 0.5},
 	},
 	# --- The mutation wave closed 2026-08-31: the Dirichlet pseudo-count is now the
-	# default (weight_floor 0.5), state_frozen was rejected by eye and weight_tuned
-	# measured worse on both seeds. `multiplicative` seed mutation stays a candidate —
-	# the only arm above base fitness on both seeds — and is one config line away.
+	# default (weight_floor 0.5); weight_tuned measured worse on both seeds, and both
+	# seed-mutation alternatives were rejected by eye.
 }
 
 
