@@ -1,68 +1,10 @@
+# Flow Lenia with hand-crafted axes. Mass is conserved, so localization rather than
+# survival is what the descriptor has to separate.
 name: flow_lenia_metrics
-seed: 0
 complex_system:
   name: flow_lenia
-  spatial_dims:
-  - 128
-  - 128
-  channel_size: 3
-  R: 12
-  T: 0.3333333333333333
-  state_scale: 1
-  num_steps: 128
-  num_self_kernels: 3
-  num_cross_kernels: 1
-  kernel_rank: 3
-  kernel_r_range:
-  - 0.1
-  - 1.2
-  growth_mean_range:
-  - 0.05
-  - 0.7
-  growth_std_range:
-  - 0.005
-  - 0.2
-  min_mass: 0.5
-  min_concentration: 0.5
-  sample:
-    strategy: noise
-    blob_size: 24
-    pattern_names:
-    - 5N7KKM
-  mutate:
-    mutation_std: 0.01
-    weight_concentration: 100.0
-    weight_floor: 0.5
-  theta_A: null
-  n: 2
-  dd: 5
-  sigma: 0.65
-qd:
-  population_size: 1024
-  num_children: 256
-  k: 3
-  sample_ratio: 0.0
-  num_init: 1024
-  minibatch_size: 256
-  num_generations: 1024
-encoder:
-  name: none
-fitness:
-  series: velocity
-  reduce: norm_mean
-  sign: 1
-  channel: null
-  window: 32
+encoder: null
 descriptor:
-  series:
-  - - concentration
-    - 0.5
-  - - linear_velocity
-    - 0.01
-  window: 32
-train_interval: 32
-bootstrap: true
-log_interval: 8
-checkpoint_interval: 32
-num_thumbnails: 1024
-output_dir: breeder/output
+  series: [[concentration, 0.5], [linear_velocity, 0.01]]
+qd:
+  num_init: 1024

@@ -1,68 +1,8 @@
+# Particle Life: the genotype is the attraction matrix, the force crossover and the
+# initial arrangement. Seeded from one disk — measured, a soliton persists from a blob
+# 55% of the time and essentially never from a uniform scatter.
 name: particle_life
-seed: 0
 complex_system:
   name: particle_life
-  num_particles: 256
-  num_classes: 4
-  num_steps: 1024
-  num_frames: 64
-  resolution: 128
-  dt: 0.01
-  force_factor: 1.0
-  velocity_half_life: 0.01
-  r_max: 0.15
-  beta_range:
-  - 0.1
-  - 0.7
-  particle_radius: 0.016
-  min_concentration: 0.5
-  min_clustering: 2.0
-  sample:
-    strategy: blob
-    blob_radius: 0.1
-  mutate:
-    mutation_std: 0.01
-    position_std: 0.002
 qd:
-  population_size: 1024
-  num_children: 256
-  k: 3
-  sample_ratio: 0.0
   num_init: 1024
-  minibatch_size: 256
-  num_generations: 1024
-encoder:
-  name: vae
-  latent_size: 8
-  features:
-  - 3
-  - 16
-  - 32
-  - 32
-  learning_rate: 0.001
-  grad_clip: 1.0
-  num_steps: 8192
-  batch_size: 256
-  window: 32
-  augment:
-  - d4
-  - roll
-  invariant: true
-  padding: SAME
-fitness:
-  series: velocity
-  reduce: norm_mean
-  sign: 1
-  channel: null
-  window: 32
-descriptor:
-  series:
-  - - latent
-    - 1.0
-  window: 32
-train_interval: 32
-bootstrap: true
-log_interval: 8
-checkpoint_interval: 32
-num_thumbnails: 1024
-output_dir: breeder/output
