@@ -10,16 +10,19 @@ __STYLE__
 </head>
 <body>
 <header>
-	<div class="title-row">
-		<h1>__NAME__</h1>
-		<span class="defs">fitness <b id="def-fitness"></b> &nbsp;·&nbsp; descriptor <b id="def-descriptor"></b></span>
-		<span class="spacer"></span>
-		<span class="chip"><b id="chip-count"></b> individuals</span>
-		<span class="chip">valid <b id="chip-valid"></b></span>
-		<span class="chip">best <b id="chip-best"></b></span>
-		<span class="chip">diversity <b id="chip-diversity"></b></span>
-		<span class="chip">vendi <b id="chip-vendi"></b></span>
-		<span class="chip">vendi cos <b id="chip-vendi-cos"></b></span>
+	<div class="masthead">
+		<div class="identity">
+			<h1>__NAME__</h1>
+			<div class="defs">fitness <b id="def-fitness"></b><span class="sep">·</span>descriptor <b id="def-descriptor"></b></div>
+		</div>
+		<div class="stats">
+			<div class="stat"><span>individuals</span><b id="chip-count"></b></div>
+			<div class="stat"><span>valid</span><b id="chip-valid"></b></div>
+			<div class="stat"><span>best fitness</span><b id="chip-best"></b></div>
+			<div class="stat"><span>diversity</span><b id="chip-diversity"></b></div>
+			<div class="stat"><span>vendi</span><b id="chip-vendi"></b></div>
+			<div class="stat"><span>vendi cos</span><b id="chip-vendi-cos"></b></div>
+		</div>
 	</div>
 	<nav>
 		<button data-tab="individuals" class="active">Individuals</button>
@@ -39,6 +42,8 @@ __STYLE__
 		<button id="direction" title="toggle order">↓</button>
 		<label>show <input id="count" type="number" value="256" min="1" step="64"></label>
 		<label class="toggle"><input id="valid-only" type="checkbox"> valid only</label>
+		<span class="spacer"></span>
+		<span id="shown-count" class="hint"></span>
 	</div>
 	<div id="grid"></div>
 </section>
@@ -48,7 +53,7 @@ __STYLE__
 	<div class="caption">
 		Population in reference space (PCA). Fitness
 		<span class="ramp"></span> brighter&nbsp;=&nbsp;fitter, gray&nbsp;=&nbsp;invalid.
-		Hover to preview, click to open in Individuals.
+		Hover to preview, click to inspect.
 	</div>
 </section>
 
@@ -61,10 +66,18 @@ __STYLE__
 
 <div id="preview"><video muted loop autoplay playsinline></video><div class="meta"></div></div>
 
+<aside id="inspector" hidden aria-label="individual details">
+	<div class="media"><video muted loop autoplay playsinline></video></div>
+	<div class="head">
+		<span class="who"><b class="id"></b><span class="rank"></span></span>
+		<button class="close" title="close (Esc)">✕</button>
+	</div>
+	<table class="metrics"></table>
+</aside>
+
 <script>
 const report = __REPORT__;
 __SCRIPT__
 </script>
 </body>
 </html>
-

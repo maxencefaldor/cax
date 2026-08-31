@@ -83,8 +83,56 @@ function color(individual) {
 	return `rgb(${lerp(35, 110)}, ${lerp(80, 231)}, ${lerp(92, 200)})`;
 }
 
-// ---- Individuals ----
+// ---- Selection & inspector ----
 let shown = [];
+let selected = null;
+
+const inspector = document.getElementById("inspector");
+
+function metricRows(individual) {
+	const fitness = individual.fitness === null ? "invalid" : individual.fitness.toFixed(4);
+	const rows = [["fitness", fitness, true]];
+	for (const [name, value] of Object.entries(individual.metrics)) {
+		rows.push([name, value.toFixed(4), false]);
+	}
+	rows.push(["map x", individual.x.toFixed(3), false], ["map y", individual.y.toFixed(3), false]);
+	return rows;
+}
+
+function inspect(individual) {
+	selected = individual;
+	inspector.querySelector("video").src = `videos/${individual.id}.mp4`;
+	inspector.querySelector(".id").textContent = `#${individual.id}`;
+	inspector.querySelector(".rank").textContent =
+		`fitness rank ${individual.id + 1} of ${population.length}`;
+	inspector.querySelector(".metrics").innerHTML = metricRows(individual)
+		.map(
+			([name, value, primary]) =>
+				`<tr${primary ? ' class="primary"' : ""}><td>${name}</td><td>${value}</td></tr>`,
+		)
+		.join("");
+	inspector.hidden = false;
+	for (const card of document.querySelectorAll(".card.selected")) card.classList.remove("selected");
+	document.getElementById(`individual-${individual.id}`)?.classList.add("selected");
+	drawMap();
+}
+
+function closeInspector() {
+	selected = null;
+	inspector.hidden = true;
+	const video = inspector.querySelector("video");
+	video.removeAttribute("src");
+	video.load();
+	for (const card of document.querySelectorAll(".card.selected")) card.classList.remove("selected");
+	drawMap();
+}
+
+inspector.querySelector(".close").addEventListener("click", closeInspector);
+document.addEventListener("keydown", (event) => {
+	if (event.key === "Escape" && !inspector.hidden) closeInspector();
+});
+
+// ---- Individuals ----
 
 function render() {
 	const sortKey = document.getElementById("sort").value;
@@ -122,14 +170,20 @@ function render() {
 		observer.observe(card);
 		const meta = document.createElement("div");
 		meta.className = "meta";
-		const fitness = individual.fitness === null ? "invalid" : individual.fitness.toFixed(4);
-		meta.innerHTML = `<span class="id">#${individual.id}</span><span>${fitness}</span>`;
+		const metaValue =
+			sortKey === "fitness"
+				? individual.fitness === null
+					? "invalid"
+					: individual.fitness.toFixed(4)
+				: individual.metrics[sortKey].toFixed(4);
+		meta.innerHTML = `<span class="id">#${individual.id}</span><span>${metaValue}</span>`;
 		card.append(media, meta);
-		card.title = Object.entries(individual.metrics)
-			.map(([name, value]) => `${name} ${value.toFixed(4)}`)
-			.join(" · ");
+		card.addEventListener("click", () => inspect(individual));
+		if (selected?.id === individual.id) card.classList.add("selected");
 		grid.append(card);
 	}
+	document.getElementById("shown-count").textContent =
+		`showing ${shown.length} of ${population.length} · click a card to inspect`;
 	drawMap();
 }
 
@@ -163,6 +217,14 @@ function drawMap() {
 		ctx.arc(x, y, 3.5 * pixelRatio, 0, 2 * Math.PI);
 		ctx.fill();
 	}
+	if (selected && shown.includes(selected)) {
+		const [x, y] = mapXY(selected);
+		ctx.strokeStyle = "#e8ecf1";
+		ctx.lineWidth = 1.5 * pixelRatio;
+		ctx.beginPath();
+		ctx.arc(x, y, 6.5 * pixelRatio, 0, 2 * Math.PI);
+		ctx.stroke();
+	}
 }
 
 function nearest(event) {
@@ -194,14 +256,7 @@ map.addEventListener("mouseleave", () => { preview.style.display = "none"; });
 
 map.addEventListener("click", (event) => {
 	const individual = nearest(event);
-	if (!individual) return;
-	document.querySelector('nav button[data-tab="individuals"]').click();
-	const card = document.getElementById(`individual-${individual.id}`);
-	if (card) {
-		card.scrollIntoView({ behavior: "smooth", block: "center" });
-		document.querySelectorAll(".card.selected").forEach((c) => c.classList.remove("selected"));
-		card.classList.add("selected");
-	}
+	if (individual) inspect(individual);
 });
 
 // ---- Progress ----
