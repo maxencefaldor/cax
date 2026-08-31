@@ -20,10 +20,20 @@ BASE = "https://hp3d7589-5500.euw.devtunnels.ms/cax/breeder/output"
 LIMIT = int(sys.argv[1]) if len(sys.argv) > 1 else 20
 
 running = subprocess.run(["ps", "-eo", "cmd"], capture_output=True, text=True).stdout
+
+
+def _run_name(command: str) -> str:
+	"""Return the name a live process runs under: its --name flag, else its config's stem."""
+	fields = command.split()
+	if "--name" in fields:
+		return fields[fields.index("--name") + 1]
+	return command.split("configs/")[1].split(".yaml")[0]
+
+
 active = {
-	line.split("configs/")[1].split(".yaml")[0]
+	_run_name(line)
 	for line in running.splitlines()
-	if "breeder.main" in line and "configs/" in line
+	if "breeder.main" in line and "configs/" in line and "shell-snapshots" not in line
 }
 
 rows = []
