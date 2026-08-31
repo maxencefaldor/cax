@@ -1,0 +1,54 @@
+name: particle_life_sampled
+seed: 0
+complex_system:
+  name: particle_life
+  num_particles: 256
+  num_classes: 4
+  num_steps: 1024
+  num_frames: 64
+  resolution: 128
+  dt: 0.01
+  force_factor: 1.0
+  velocity_half_life: 0.01
+  r_max: 0.15
+  beta_range:
+  - 0.1
+  - 0.7
+  particle_radius: 0.016
+  min_concentration: 0.5
+  min_clustering: 2.0
+  sample:
+    strategy: blob
+    blob_radius: 0.1
+  mutate:
+    mutation_std: 0.01
+    position_std: 0.002
+qd:
+  population_size: 1024
+  num_children: 256
+  k: 3
+  sample_ratio: 0.5
+  num_init: 1024
+  minibatch_size: 256
+  num_generations: 1024
+encoder:
+  name: none
+fitness:
+  series: velocity
+  reduce: norm_mean
+  sign: 1
+  channel: null
+  window: 32
+descriptor:
+  series:
+  - - radius
+    - 1.0
+  - - clustering
+    - 5.0
+  window: 32
+train_interval: 32
+bootstrap: true
+log_interval: 8
+checkpoint_interval: 32
+num_thumbnails: 1024
+output_dir: breeder/output

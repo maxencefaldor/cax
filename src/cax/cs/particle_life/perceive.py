@@ -31,7 +31,7 @@ class ParticleLifePerceive(Perceive[ParticleLifeState, ParticleLifePerception]):
         *,
         force_factor: float = 1.0,
         r_max: float = 0.15,
-        beta: float = 0.3,
+        beta: float | Array = 0.3,
         attraction_matrix: Array,
     ):
         """Initialize Particle Life perceive.
@@ -44,7 +44,8 @@ class ParticleLifePerceive(Perceive[ParticleLifeState, ParticleLifePerception]):
                 cost.
             beta: Distance threshold parameter controlling the transition from repulsion
                 to attraction. Typically in range [0, 1], where smaller values create
-                stronger short-range repulsion.
+                stronger short-range repulsion. May be an array when the value is
+                traced, e.g. when it is an evolved parameter.
             attraction_matrix: Attraction matrix of shape (num_classes, num_classes)
                 where entry (i, j) defines the attraction strength from type i to type
                 j. Positive values attract, negative values repel. Values typically

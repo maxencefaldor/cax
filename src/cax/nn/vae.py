@@ -21,6 +21,7 @@ class Encoder(nnx.Module):
         spatial_dims: Sequence[int],
         features: Sequence[int],
         latent_size: int,
+        padding: str = "SAME",
         rngs: nnx.Rngs,
     ):
         """Initialize the Encoder module.
@@ -29,6 +30,7 @@ class Encoder(nnx.Module):
             spatial_dims: Spatial dimensions of the input.
             features: Sequence of feature sizes for convolutional layers.
             latent_size: Size of the latent space.
+            padding: Convolution padding, e.g. "SAME" or "CIRCULAR" (toroidal input).
             rngs: rng key.
 
         """
@@ -42,7 +44,7 @@ class Encoder(nnx.Module):
                     out_features=out_features,
                     kernel_size=(3, 3),
                     strides=(2, 2),
-                    padding="SAME",
+                    padding=padding,
                     rngs=rngs,
                 )
                 for in_features, out_features in zip(
@@ -113,6 +115,7 @@ class Decoder(nnx.Module):
         spatial_dims: Sequence[int],
         features: Sequence[int],
         latent_size: int,
+        padding: str = "SAME",
         rngs: nnx.Rngs,
     ):
         """Initialize the Decoder module.
@@ -121,6 +124,7 @@ class Decoder(nnx.Module):
             spatial_dims: Spatial dimensions of the output.
             features: Sequence of feature sizes for transposed convolutional layers.
             latent_size: Size of the latent space.
+            padding: Convolution padding, e.g. "SAME" or "CIRCULAR" (toroidal output).
             rngs: rng key.
 
         """
@@ -146,7 +150,7 @@ class Decoder(nnx.Module):
                     out_features=out_features,
                     kernel_size=(3, 3),
                     strides=(2, 2),
-                    padding="SAME",
+                    padding=padding,
                     rngs=rngs,
                 )
                 for in_features, out_features in zip(
@@ -187,6 +191,7 @@ class VAE(nnx.Module):
         spatial_dims: tuple[int, int],
         features: Sequence[int],
         latent_size: int,
+        padding: str = "SAME",
         rngs: nnx.Rngs,
     ):
         """Initialize the VAE module.
@@ -195,6 +200,7 @@ class VAE(nnx.Module):
             spatial_dims: Spatial dimensions of the input/output.
             features: Sequence of feature sizes for encoder and decoder.
             latent_size: Size of the latent space.
+            padding: Convolution padding, e.g. "SAME" or "CIRCULAR" (toroidal worlds).
             rngs: rng key.
 
         """
@@ -203,12 +209,14 @@ class VAE(nnx.Module):
             spatial_dims=spatial_dims,
             features=features,
             latent_size=latent_size,
+            padding=padding,
             rngs=rngs,
         )
         self.decoder = Decoder(
             spatial_dims=spatial_dims,
             features=features[::-1],
             latent_size=latent_size,
+            padding=padding,
             rngs=rngs,
         )
 

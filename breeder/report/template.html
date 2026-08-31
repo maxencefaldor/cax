@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>__NAME__ — population</title>
+<style>
+__STYLE__
+</style>
+</head>
+<body>
+<header>
+	<div class="title-row">
+		<h1>__NAME__</h1>
+		<span class="defs">fitness <b id="def-fitness"></b> &nbsp;·&nbsp; descriptor <b id="def-descriptor"></b></span>
+		<span class="spacer"></span>
+		<span class="chip"><b id="chip-count"></b> individuals</span>
+		<span class="chip">valid <b id="chip-valid"></b></span>
+		<span class="chip">best <b id="chip-best"></b></span>
+		<span class="chip">diversity <b id="chip-diversity"></b></span>
+		<span class="chip">vendi <b id="chip-vendi"></b></span>
+		<span class="chip">vendi cos <b id="chip-vendi-cos"></b></span>
+	</div>
+	<nav>
+		<button data-tab="individuals" class="active">Individuals</button>
+		<button data-tab="map">Map</button>
+		<button data-tab="progress">Progress</button>
+		<button data-tab="config">Config</button>
+	</nav>
+</header>
+
+<section id="tab-individuals">
+	<div class="toolbar">
+		<label>sort
+			<select id="sort">
+				<option value="fitness">fitness</option>
+			</select>
+		</label>
+		<button id="direction" title="toggle order">↓</button>
+		<label>show <input id="count" type="number" value="256" min="1" step="64"></label>
+		<label class="toggle"><input id="valid-only" type="checkbox"> valid only</label>
+	</div>
+	<div id="grid"></div>
+</section>
+
+<section id="tab-map" hidden>
+	<canvas id="map"></canvas>
+	<div class="caption">
+		Population in reference space (PCA). Fitness
+		<span class="ramp"></span> brighter&nbsp;=&nbsp;fitter, gray&nbsp;=&nbsp;invalid.
+		Hover to preview, click to open in Individuals.
+	</div>
+</section>
+
+<section id="tab-progress" hidden>
+	<div id="charts"></div>
+	<div class="caption" id="progress-caption"></div>
+</section>
+
+<section id="tab-config" hidden><pre id="config-yaml"></pre></section>
+
+<div id="preview"><video muted loop autoplay playsinline></video><div class="meta"></div></div>
+
+<script>
+const report = __REPORT__;
+__SCRIPT__
+</script>
+</body>
+</html>
+

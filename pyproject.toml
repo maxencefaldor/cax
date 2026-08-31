@@ -31,6 +31,21 @@ classifiers = [
 ]
 
 [dependency-groups]
+# GPU stack for the training host — deliberately a group, not an extra, so CI's
+# `uv sync --all-extras` never pulls CUDA wheels; sync locally with `--group gpu`.
+# An undeclared ad-hoc jax[cuda12] was pruned by uv sync on 2026-08-30, killing
+# every running experiment mid-flight. Declare what you run on.
+gpu = [
+    "jax[cuda12]>=0.11.0",
+]
+breeder = [
+    "pydantic>=2.13.0",
+    "pydantic-settings>=2.15.0",
+    "pyyaml>=6.0.0",
+    "orbax-checkpoint>=0.11.0",
+    "mediapy>=1.2.0",
+    "torchvision>=0.21.0",
+]
 dev = [
     "pytest>=8.3.0",
     "pytest-cov>=5.0.0",
@@ -65,7 +80,7 @@ build-backend = "hatchling.build"
 # ruff: the formatter at its defaults (4 spaces, 88 columns), so no width and
 # no indent appear here; the opinion is the lint selection, one reason each.
 [tool.ruff]
-src = ["src", "tests"]
+src = ["src", "tests", "."]
 
 [tool.ruff.lint]
 select = [
@@ -119,7 +134,7 @@ docstring-code-format = true
 python-version = "3.14"
 
 [tool.ty.src]
-include = ["src", "tests"]
+include = ["src", "tests", "breeder"]
 
 [tool.ty.rules]
 all = "error"
