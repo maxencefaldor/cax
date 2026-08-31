@@ -79,17 +79,10 @@ EXPERIMENTS = {
 		"descriptor": PARTICLE_DESCRIPTOR,
 		"qd": {"num_init": 1024, "sample_ratio": 0.5},
 	},
-	# --- OPEN WAVE (2026-08-31): are the draft mutation operators pathological?
-	# Measured: Dirichlet drift fixates 6 of 8 rules within ~100 applications, and the
-	# seed's reflected Gaussian creates mass at the 0 boundary. Delete once judged.
-	"lenia_weight_floor": {"complex_system": {"mutate": {"weight_floor": 0.5}}},
-	"lenia_weight_tuned": {
-		"complex_system": {"mutate": {"weight_concentration": 1600.0, "weight_floor": 0.5}}
-	},
-	"lenia_state_frozen": {"complex_system": {"mutate": {"state_strategy": "frozen"}}},
-	"lenia_state_multiplicative": {
-		"complex_system": {"mutate": {"state_strategy": "multiplicative"}}
-	},
+	# --- The mutation wave closed 2026-08-31: the Dirichlet pseudo-count is now the
+	# default (weight_floor 0.5), state_frozen was rejected by eye and weight_tuned
+	# measured worse on both seeds. `multiplicative` seed mutation stays a candidate —
+	# the only arm above base fitness on both seeds — and is one config line away.
 }
 
 

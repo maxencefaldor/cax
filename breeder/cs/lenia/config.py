@@ -34,14 +34,23 @@ class MutateConfig(BaseModel):
 		weight_floor: Pseudo-count added to the Dirichlet alphas. At 0 the perturbation
 			is pure drift and fixates — measured: 6 of 8 rules dead (< 1e-6) after ~100
 			applications, all but one by ~300, well within one run — because a weight
-			near 0 gets alpha near 0, which is absorbing. A floor of 0.5 (Jeffreys-style)
-			keeps every rule resurrectable: zero dead rules after 1000 applications.
+			near 0 gets alpha near 0, which is absorbing. The default 0.5
+			(Jeffreys-style) keeps every rule resurrectable: zero dead rules after 1000
+			applications. Adopted as the default 2026-08-31 on the user's visual verdict
+			over two seeds. It costs a weak pull toward uniform (at w = 1, E[w'] ≈ 0.97),
+			so an extreme weight vector must be held there by selection.
+			`weight_concentration` was left at 100: raising it to 1600 for step-size
+			parity with the other parameters measured *worse* on both seeds, so the
+			search wants the larger weight steps.
 		state_strategy: How the initial state mutates. `gaussian` is the draft operator
-			(bounded per-pixel Gaussian; its reflection at 0 makes empty pixels *gain*
-			mass in expectation). `multiplicative` scales pixels by `exp(std * noise)` —
-			support-preserving: empty pixels stay exactly empty. `frozen` disables seed
-			mutation entirely (the rule parameters are ~30 of the genotype's ~49k
-			dimensions; this arm measures whether seed evolution earns anything).
+			and the default (bounded per-pixel Gaussian; its reflection at 0 makes empty
+			pixels *gain* mass in expectation). `multiplicative` scales pixels by
+			`exp(std * noise)` — support-preserving, empty pixels stay exactly empty; it
+			was the only arm above base fitness on both seeds (0.0764/0.0830 vs base mean
+			0.0684) and looked good, so it remains the candidate worth revisiting.
+			`frozen` disables seed mutation: **rejected** 2026-08-31 by visual verdict
+			despite holding the highest phenotype variance of any arm, which settles that
+			seed evolution earns its 49k of the genotype's ~49k+30 dimensions.
 
 	"""
 
@@ -49,7 +58,7 @@ class MutateConfig(BaseModel):
 
 	mutation_std: float = 0.01
 	weight_concentration: float = 100.0
-	weight_floor: float = 0.0
+	weight_floor: float = 0.5
 	state_strategy: Literal["gaussian", "multiplicative", "frozen"] = "gaussian"
 
 
