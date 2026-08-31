@@ -6,8 +6,10 @@ document.getElementById("chip-count").textContent = population.length;
 document.getElementById("chip-valid").textContent = report.summary.num_valid;
 document.getElementById("chip-best").textContent = report.summary.best_fitness.toFixed(4);
 document.getElementById("chip-diversity").textContent = report.summary.diversity.toFixed(4);
-document.getElementById("chip-vendi").textContent = report.summary.vendi.toFixed(2);
-document.getElementById("chip-vendi-cos").textContent = report.summary.vendi_cos.toFixed(2);
+const chip = (id, value, digits) =>
+	(document.getElementById(id).textContent = value == null ? "—" : value.toFixed(digits));
+chip("chip-vendi", report.summary.vendi, 2);
+chip("chip-vendi-cos", report.summary.vendi_cos, 2);
 document.getElementById("config-yaml").textContent = report.config_yaml;
 
 // Tabs
@@ -23,35 +25,51 @@ for (const button of document.querySelectorAll("nav button")) {
 	});
 }
 
-// Load videos as they come into view and keep them loaded: browsers cap concurrent
-// video decoders (~75 in Chrome) and every element past the cap renders black, so
-// once more than BUDGET are held the least recently seen are released. Videos still
-// in view are never released -- evicting those is what makes tiles go blank -- and
-// releasing on scroll-out would refetch a video the moment it scrolled back.
-const BUDGET = 64;
+// Every card always shows its poster image (plain lazy-loaded <img>: no decoder
+// budget, never blank). Videos are progressive enhancement: attached as a card nears
+// the viewport, revealed only once decoded ("loadeddata"), and detached
+// least-recently-visible first when more than BUDGET are held — browsers cap
+// concurrent video decoders (~75 in Chrome), and past the cap elements render black.
+// An evicted or budget-starved video simply leaves the poster showing.
+const BUDGET = 96;
 const loaded = new Set(); // iteration order: least recently in view first
 const visible = new Set();
+
+function attach(card) {
+	let video = card.querySelector("video");
+	if (video) return video;
+	video = document.createElement("video");
+	video.muted = video.loop = video.autoplay = true;
+	video.playsInline = true;
+	video.addEventListener("loadeddata", () => video.classList.add("ready"), { once: true });
+	video.src = card.dataset.video;
+	card.querySelector(".media").append(video);
+	return video;
+}
+
+function detach(card) {
+	const video = card.querySelector("video");
+	if (video) video.remove();
+	loaded.delete(card);
+}
 
 const observer = new IntersectionObserver(
 	(entries) => {
 		for (const entry of entries) {
-			const video = entry.target;
+			const card = entry.target;
 			if (entry.isIntersecting) {
-				if (!video.src) video.src = video.dataset.src;
-				visible.add(video);
-				loaded.delete(video);
-				loaded.add(video);
+				attach(card);
+				visible.add(card);
+				loaded.delete(card);
+				loaded.add(card);
 			} else {
-				visible.delete(video);
+				visible.delete(card);
 			}
 		}
-		for (const video of loaded) {
+		for (const card of loaded) {
 			if (loaded.size <= BUDGET) break;
-			if (visible.has(video)) continue;
-			video.pause();
-			video.removeAttribute("src");
-			video.load();
-			loaded.delete(video);
+			if (visible.has(card)) continue;
+			detach(card);
 		}
 	},
 	{ rootMargin: "300px" },
@@ -92,16 +110,21 @@ function render() {
 		const card = document.createElement("div");
 		card.className = "card";
 		card.id = `individual-${individual.id}`;
-		const video = document.createElement("video");
-		video.dataset.src = `videos/${individual.id}.mp4`;
-		video.muted = video.loop = video.autoplay = true;
-		video.playsInline = true;
-		observer.observe(video);
+		card.dataset.video = `videos/${individual.id}.mp4`;
+		const media = document.createElement("div");
+		media.className = "media";
+		const poster = document.createElement("img");
+		poster.loading = "lazy";
+		poster.decoding = "async";
+		poster.alt = `#${individual.id}`;
+		poster.src = `thumbs/${individual.id}.jpg`;
+		media.append(poster);
+		observer.observe(card);
 		const meta = document.createElement("div");
 		meta.className = "meta";
 		const fitness = individual.fitness === null ? "invalid" : individual.fitness.toFixed(4);
 		meta.innerHTML = `<span class="id">#${individual.id}</span><span>${fitness}</span>`;
-		card.append(video, meta);
+		card.append(media, meta);
 		card.title = Object.entries(individual.metrics)
 			.map(([name, value]) => `${name} ${value.toFixed(4)}`)
 			.join(" · ");
@@ -320,9 +343,10 @@ function drawCharts() {
 	if (!chartsBuilt) {
 		chartsBuilt = true;
 		for (const [key, label] of CHARTS) {
+			const series = report.progress[key];
+			if (!series) continue;
 			const card = document.createElement("div");
 			card.className = "chart";
-			const series = report.progress[key];
 			const last = series[series.length - 1];
 			const value = Number.isFinite(last) ? (Number.isInteger(last) ? last : last.toFixed(4)) : "—";
 			card.innerHTML = `<div class="head"><span class="name">${label}</span><span class="value">${value}</span></div>`;

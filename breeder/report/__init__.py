@@ -99,6 +99,8 @@ def write_report(state: DNSState, run_dir: Path, config, *, minibatch_size: int)
 	report_dir = run_dir / "report"
 	video_dir = report_dir / "videos"
 	video_dir.mkdir(parents=True, exist_ok=True)
+	thumb_dir = report_dir / "thumbs"
+	thumb_dir.mkdir(parents=True, exist_ok=True)
 
 	# Develop the population, fittest first, with the raw (uncentered) view
 	order = jnp.argsort(state.fitness, descending=True)
@@ -165,15 +167,22 @@ def write_report(state: DNSState, run_dir: Path, config, *, minibatch_size: int)
 		],
 	}
 
-	# Encode only missing videos so regenerating a report is fast
+	# Encode only missing videos and posters so regenerating a report is fast. The
+	# poster is the final frame — the creature as selection judged it. Cards show
+	# posters as plain lazy-loaded images and overlay the video only once it has
+	# decoded, so the grid never depends on the browser's video-decoder budget.
 	frames = None
 	for rank in range(num):
-		path = video_dir / f"{rank}.mp4"
-		if path.exists():
+		video_path = video_dir / f"{rank}.mp4"
+		thumb_path = thumb_dir / f"{rank}.jpg"
+		if video_path.exists() and thumb_path.exists():
 			continue
 		if frames is None:
 			frames = np.asarray(phenotypes.frames)
-		mediapy.write_video(path, frames[rank], fps=16)
+		if not video_path.exists():
+			mediapy.write_video(video_path, frames[rank], fps=16)
+		if not thumb_path.exists():
+			mediapy.write_image(thumb_path, frames[rank, -1])
 
 	html = _page(config.name, report)
 	(report_dir / "index.html").write_text(html)
