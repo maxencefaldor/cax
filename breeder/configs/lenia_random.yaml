@@ -1,4 +1,4 @@
-name: state_multiplicative
+name: lenia_random
 seed: 0
 complex_system:
   name: lenia
@@ -25,7 +25,7 @@ complex_system:
   min_mass: 0.5
   min_concentration: 0.5
   sample:
-    strategy: soliton_full
+    strategy: noise
     blob_size: 24
     pattern_names:
     - 5N7KKM
@@ -33,12 +33,12 @@ complex_system:
     mutation_std: 0.01
     weight_concentration: 100.0
     weight_floor: 0.0
-    state_strategy: multiplicative
+    state_strategy: gaussian
 qd:
   population_size: 1024
   num_children: 256
   k: 3
-  sample_ratio: 0.0
+  sample_ratio: 1.0
   num_init: 1
   minibatch_size: 256
   num_generations: 1024

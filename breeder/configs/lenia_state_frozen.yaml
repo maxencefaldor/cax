@@ -1,4 +1,4 @@
-name: vgg_descriptor
+name: lenia_state_frozen
 seed: 0
 complex_system:
   name: lenia
@@ -33,20 +33,33 @@ complex_system:
     mutation_std: 0.01
     weight_concentration: 100.0
     weight_floor: 0.0
-    state_strategy: gaussian
+    state_strategy: frozen
 qd:
   population_size: 1024
   num_children: 256
   k: 3
   sample_ratio: 0.0
   num_init: 1
-  minibatch_size: 32
+  minibatch_size: 256
   num_generations: 1024
 encoder:
-  name: vgg
-  layer: 11
+  name: vae
+  latent_size: 8
+  features:
+  - 3
+  - 16
+  - 32
+  - 32
+  learning_rate: 0.001
+  grad_clip: 1.0
+  num_steps: 8192
+  batch_size: 256
   window: 32
+  augment:
+  - d4
+  - roll
   invariant: true
+  padding: SAME
 fitness:
   series: velocity
   reduce: norm_mean
@@ -55,7 +68,7 @@ fitness:
   window: 32
 descriptor:
   series:
-  - - vgg
+  - - latent
     - 1.0
   window: 32
 train_interval: 32

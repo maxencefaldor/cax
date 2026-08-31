@@ -1,4 +1,4 @@
-name: metrics
+name: lenia
 seed: 0
 complex_system:
   name: lenia
@@ -43,7 +43,23 @@ qd:
   minibatch_size: 256
   num_generations: 1024
 encoder:
-  name: none
+  name: vae
+  latent_size: 8
+  features:
+  - 3
+  - 16
+  - 32
+  - 32
+  learning_rate: 0.001
+  grad_clip: 1.0
+  num_steps: 8192
+  batch_size: 256
+  window: 32
+  augment:
+  - d4
+  - roll
+  invariant: true
+  padding: SAME
 fitness:
   series: velocity
   reduce: norm_mean
@@ -52,10 +68,8 @@ fitness:
   window: 32
 descriptor:
   series:
-  - - mass
-    - 10.0
-  - - linear_velocity
-    - 0.01
+  - - latent
+    - 1.0
   window: 32
 train_interval: 32
 bootstrap: true

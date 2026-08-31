@@ -7,7 +7,10 @@ experiment states only its delta.
 Three rules keep the set small:
 
 - **A config is a question, not a run.** Seeds and renames are command-line flags
-  (`--config base.yaml --seed 1 --name base_seed1`), never files.
+  (`--config lenia.yaml --seed 1 --name lenia_seed1`), never files.
+- **The name begins with its complex system**, so the set sorts into systems and a run
+  is identifiable from its name alone. The bare system name is that system's protocol
+  (learned descriptor); variants add a suffix naming what they change.
 - **Per system, one config per descriptor family** — the learned one, the hand-crafted
   one, and where it exists the fixed pretrained one — plus the null control.
 - **A wave is temporary.** The arms of a question under investigation live here while it
@@ -35,18 +38,18 @@ COMMON = {"complex_system": {"name": "lenia"}}
 
 EXPERIMENTS = {
 	# --- Lenia: the protocol, and one config per descriptor family
-	"base": {},
-	"metrics": {"encoder": None, "descriptor": METRIC_DESCRIPTOR},
+	"lenia": {},
+	"lenia_metrics": {"encoder": None, "descriptor": METRIC_DESCRIPTOR},
 	# VGG activations are memory-heavy during evaluation: minibatch_size 32 keeps the
 	# first conv layer at ~4 GB on-device instead of 32
-	"vgg_descriptor": {
+	"lenia_vgg": {
 		"encoder": {"name": "vgg"},
 		"descriptor": {"series": (("vgg", 1.0),)},
 		"qd": {"minibatch_size": 32},
 	},
 	# The null control: no mutation, fresh samples every generation. Without it no
 	# result above means anything
-	"random_search": {
+	"lenia_random": {
 		"complex_system": {"sample": {"strategy": "noise"}},
 		"qd": {"sample_ratio": 1.0},
 	},
@@ -79,12 +82,14 @@ EXPERIMENTS = {
 	# --- OPEN WAVE (2026-08-31): are the draft mutation operators pathological?
 	# Measured: Dirichlet drift fixates 6 of 8 rules within ~100 applications, and the
 	# seed's reflected Gaussian creates mass at the 0 boundary. Delete once judged.
-	"weight_floor": {"complex_system": {"mutate": {"weight_floor": 0.5}}},
-	"weight_tuned": {
+	"lenia_weight_floor": {"complex_system": {"mutate": {"weight_floor": 0.5}}},
+	"lenia_weight_tuned": {
 		"complex_system": {"mutate": {"weight_concentration": 1600.0, "weight_floor": 0.5}}
 	},
-	"state_frozen": {"complex_system": {"mutate": {"state_strategy": "frozen"}}},
-	"state_multiplicative": {"complex_system": {"mutate": {"state_strategy": "multiplicative"}}},
+	"lenia_state_frozen": {"complex_system": {"mutate": {"state_strategy": "frozen"}}},
+	"lenia_state_multiplicative": {
+		"complex_system": {"mutate": {"state_strategy": "multiplicative"}}
+	},
 }
 
 

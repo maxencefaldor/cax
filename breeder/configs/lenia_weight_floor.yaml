@@ -1,4 +1,4 @@
-name: base
+name: lenia_weight_floor
 seed: 0
 complex_system:
   name: lenia
@@ -32,7 +32,7 @@ complex_system:
   mutate:
     mutation_std: 0.01
     weight_concentration: 100.0
-    weight_floor: 0.0
+    weight_floor: 0.5
     state_strategy: gaussian
 qd:
   population_size: 1024
