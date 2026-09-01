@@ -37,6 +37,18 @@ jobs:
       - name: Install the project
         run: uv sync --extra docs
 
+      # The examples are committed stripped; their outputs are built on demand
+      # (docs/scripts/execute.py) and published as a release asset, so the repository
+      # never carries them. Missing or broken, the docs still build from the sources.
+      - name: Fetch executed notebooks
+        continue-on-error: true
+        run: |
+          gh release download docs-notebooks --pattern notebooks.tar.gz --clobber
+          tar xzf notebooks.tar.gz
+          rm notebooks.tar.gz
+        env:
+          GH_TOKEN: ${{ github.token }}
+
       - name: Build (strict)
         run: uv run mkdocs build --clean
 
