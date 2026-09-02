@@ -64,8 +64,12 @@ class Sandpile(ComplexSystem[Array, Array]):
 
 	@override
 	def _step(self, state: Array, input: Array | None = None) -> Array:
+		# Add dropped grains before perceiving, so every cell topples against the
+		# same post-drop snapshot and chips are conserved away from the boundary
+		if input is not None:
+			state = state + input
 		perception = self.perceive(state)
-		next_state = self.update(state, perception, input)
+		next_state = self.update(state, perception)
 
 		return next_state
 

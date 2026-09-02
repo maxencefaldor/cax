@@ -39,24 +39,21 @@ class SandpileUpdate(Update[Array, Array, Array]):
 
 		Performs one parallel toppling step. Cells at or above the threshold topple,
 		losing ``threshold`` chips. Each face-adjacent neighbor of a critical cell
-		gains 1 chip. If input is provided, it is added to the chip counts before
-		evaluating the toppling rule (used for dropping sand grains).
+		gains 1 chip. Dropped grains are added to the state by `Sandpile._step` before
+		perception, so that every cell topples against the same snapshot.
 
 		Args:
 			state: Current state (unused, values come from perception).
 			perception: Array with shape (..., *spatial_dims, (2*ndim + 1)) containing
 				the Von Neumann neighborhood. Channel 0 is the center cell, remaining
 				channels are face-adjacent neighbors.
-			input: Optional array with shape (..., *spatial_dims, 1) representing
-				sand grains to add before toppling.
+			input: Unused; grains are added to the state before perception.
 
 		Returns:
 			Next state with shape (..., *spatial_dims, 1) containing updated chip counts.
 
 		"""
 		chips = perception[..., 0:1]
-		if input is not None:
-			chips = chips + input
 		neighbor_chips = perception[..., 1:]
 
 		self_critical = (chips >= self.threshold).astype(jnp.float32)

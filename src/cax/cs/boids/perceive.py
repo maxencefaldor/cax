@@ -54,7 +54,7 @@ class BoidsPerceive(Perceive[BoidsState, BoidsPerception]):
 		"""
 		num_boids = state.position.shape[-2]
 
-		state_axes = nnx.StateAxes({nnx.RngState: 0, nnx.Intermediate: 0, ...: None})
+		state_axes = nnx.StateAxes({nnx.RngState: 0, ...: None})
 
 		@nnx.split_rngs(splits=num_boids)
 		@nnx.vmap(in_axes=(state_axes, None, 0))

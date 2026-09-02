@@ -327,30 +327,31 @@ class _Renderable(Protocol):
 	def render(self, state: Any, **kwargs: Any) -> Array: ...
 
 
-def render_states(cs: _Renderable, states: Any, *, batch_size: int = 16, **kwargs: Any) -> Array:
-	"""Render every state of a trajectory, a batch of frames at a time.
+def render_states(cs: _Renderable, states: Any, **kwargs: Any) -> Array:
+	"""Render every state of a trajectory, one frame at a time.
 
 	Rendering a particle system costs one `(resolution^2, num_particles)` array per frame,
 	which is far larger than the frame it produces. Vectorizing over a whole trajectory
 	asks for all of them at once — terabytes for a long run — and survives only where the
 	compiler happens to fuse the intermediate away, so the same notebook runs on an
-	accelerator and dies on a CPU. Rendering in batches bounds the peak at `batch_size`
-	frames whatever the backend, and costs nothing: the frames are independent.
+	accelerator and dies on a CPU. Scanning over the trajectory bounds the peak at a
+	single frame whatever the backend, and costs nothing: the frames are independent.
 
 	Args:
 		cs: The complex system, whose `render` draws one state.
 		states: A trajectory: a pytree whose leaves have the time steps on axis 0.
-		batch_size: Frames rendered at once. Larger is faster and needs more memory.
 		**kwargs: Forwarded to `cs.render` (`resolution`, `particle_radius`, ...).
 
 	Returns:
 		The rendered frames, with shape `(num_steps, resolution, resolution, 3)`.
 
 	"""
-	num_steps = jax.tree.leaves(states)[0].shape[0]
-	render = nnx.vmap(lambda cs, state: cs.render(state, **kwargs), in_axes=(None, 0))
 
-	def batch(start: int) -> Array:
-		return render(cs, jax.tree.map(lambda leaf: leaf[start : start + batch_size], states))
+	def render_fn(cs: _Renderable, state: Any) -> Array:
+		return cs.render(state, **kwargs)
 
-	return jnp.concatenate([batch(start) for start in range(0, num_steps, batch_size)])
+	return nnx.scan(
+		render_fn,
+		in_axes=(nnx.StateAxes({...: nnx.Carry}), 0),
+		out_axes=0,
+	)(cs, states)

@@ -37,7 +37,7 @@ EXAMPLES = ROOT / "examples"
 BUILD = ROOT / "docs" / "build" / "notebooks"
 CACHE = ROOT / "docs" / "build" / "cache.json"
 TARBALL = ROOT / "docs" / "build" / "notebooks.tar.gz"
-TIMEOUT = 60 * 60  # a training notebook may legitimately run for an hour
+TIMEOUT = 2 * 60 * 60  # a training notebook may legitimately run for hours
 
 
 def library_digest() -> str:
