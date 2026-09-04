@@ -2,10 +2,10 @@
 
 Use as a namespace, mirroring the classical genotype-to-phenotype pipeline:
 
-	from breeder.cs import particle_life
+    from breeder.cs import particle_life
 
-	genotype = particle_life.sample(key, config)
-	phenotype = particle_life.develop(genotype, config)
+    genotype = particle_life.sample(key, config)
+    phenotype = particle_life.develop(genotype, config)
 
 """
 
@@ -16,17 +16,17 @@ from .mutate import mutate
 from .sample import SAMPLE_FNS, blob, class_id, sample, uniform
 
 __all__ = [
-	"SAMPLE_FNS",
-	"SERIES",
-	"Genotype",
-	"MutateConfig",
-	"ParticleLifeConfig",
-	"SampleConfig",
-	"blob",
-	"class_id",
-	"develop",
-	"mutate",
-	"sample",
-	"uniform",
-	"valid",
+    "SAMPLE_FNS",
+    "SERIES",
+    "Genotype",
+    "MutateConfig",
+    "ParticleLifeConfig",
+    "SampleConfig",
+    "blob",
+    "class_id",
+    "develop",
+    "mutate",
+    "sample",
+    "uniform",
+    "valid",
 ]

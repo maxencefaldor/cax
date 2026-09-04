@@ -23,48 +23,55 @@ from .genotype import Genotype
 
 
 def sample(key: Array, config: ParticleLifeConfig) -> Genotype:
-	"""Sample a fresh genotype using the configured strategy."""
-	return SAMPLE_FNS[config.sample.strategy](key, config)
+    """Sample a fresh genotype using the configured strategy."""
+    return SAMPLE_FNS[config.sample.strategy](key, config)
 
 
 def uniform(key: Array, config: ParticleLifeConfig) -> Genotype:
-	"""Random rule and particles scattered over the whole torus."""
-	key_rule, key_position = jax.random.split(key)
-	position_init = jax.random.uniform(key_position, (config.num_particles, 2))
-	return _with_rule(key_rule, config, position_init)
+    """Random rule and particles scattered over the whole torus."""
+    key_rule, key_position = jax.random.split(key)
+    position_init = jax.random.uniform(key_position, (config.num_particles, 2))
+    return _with_rule(key_rule, config, position_init)
 
 
 def blob(key: Array, config: ParticleLifeConfig) -> Genotype:
-	"""Random rule and particles inside one disk at the center of the torus.
+    """Random rule and particles inside one disk at the center of the torus.
 
-	Sampled uniformly *by area* (radius as the square root of a uniform draw), so the
-	disk has even density instead of a center-heavy one.
-	"""
-	key_rule, key_radius, key_angle = jax.random.split(key, 3)
-	radius = config.sample.blob_radius * jnp.sqrt(
-		jax.random.uniform(key_radius, (config.num_particles,))
-	)
-	angle = jax.random.uniform(key_angle, (config.num_particles,), maxval=2 * jnp.pi)
-	offset = jnp.stack([radius * jnp.cos(angle), radius * jnp.sin(angle)], axis=-1)
-	return _with_rule(key_rule, config, (0.5 + offset) % 1.0)
+    Sampled uniformly *by area* (radius as the square root of a uniform draw), so the
+    disk has even density instead of a center-heavy one.
+    """
+    key_rule, key_radius, key_angle = jax.random.split(key, 3)
+    radius = config.sample.blob_radius * jnp.sqrt(
+        jax.random.uniform(key_radius, (config.num_particles,))
+    )
+    angle = jax.random.uniform(key_angle, (config.num_particles,), maxval=2 * jnp.pi)
+    offset = jnp.stack([radius * jnp.cos(angle), radius * jnp.sin(angle)], axis=-1)
+    return _with_rule(key_rule, config, (0.5 + offset) % 1.0)
 
 
-def _with_rule(key: Array, config: ParticleLifeConfig, position_init: Array) -> Genotype:
-	"""Complete a genotype with a rule sampled from the prior."""
-	key_attraction, key_beta = jax.random.split(key)
-	attraction = jax.random.uniform(
-		key_attraction, (config.num_classes, config.num_classes), minval=-1.0, maxval=1.0
-	)
-	beta = jax.random.uniform(key_beta, minval=config.beta_range[0], maxval=config.beta_range[1])
-	return Genotype(attraction=attraction, beta=beta, position_init=position_init)
+def _with_rule(
+    key: Array, config: ParticleLifeConfig, position_init: Array
+) -> Genotype:
+    """Complete a genotype with a rule sampled from the prior."""
+    key_attraction, key_beta = jax.random.split(key)
+    attraction = jax.random.uniform(
+        key_attraction,
+        (config.num_classes, config.num_classes),
+        minval=-1.0,
+        maxval=1.0,
+    )
+    beta = jax.random.uniform(
+        key_beta, minval=config.beta_range[0], maxval=config.beta_range[1]
+    )
+    return Genotype(attraction=attraction, beta=beta, position_init=position_init)
 
 
 def class_id(config: ParticleLifeConfig) -> Array:
-	"""Return the round-robin class label of every particle: balanced by construction."""
-	return jnp.arange(config.num_particles) % config.num_classes
+    """The round-robin class label of every particle: balanced by construction."""
+    return jnp.arange(config.num_particles) % config.num_classes
 
 
 SAMPLE_FNS = {
-	"uniform": uniform,
-	"blob": blob,
+    "uniform": uniform,
+    "blob": blob,
 }

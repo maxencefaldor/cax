@@ -17,26 +17,28 @@ from .encoder import Encoder
 
 
 def checkpoint_manager(directory: Path) -> ocp.CheckpointManager:
-	"""Create an async checkpoint manager for a run's checkpoint directory."""
-	return ocp.CheckpointManager(
-		directory.resolve(),
-		options=ocp.CheckpointManagerOptions(max_to_keep=2, enable_async_checkpointing=True),
-	)
+    """Create an async checkpoint manager for a run's checkpoint directory."""
+    return ocp.CheckpointManager(
+        directory.resolve(),
+        options=ocp.CheckpointManagerOptions(
+            max_to_keep=2, enable_async_checkpointing=True
+        ),
+    )
 
 
 def save(
-	manager: ocp.CheckpointManager,
-	generation: int,
-	state: DNSState,
-	encoder_fn: Encoder,
-	key: Array,
+    manager: ocp.CheckpointManager,
+    generation: int,
+    state: DNSState,
+    encoder_fn: Encoder,
+    key: Array,
 ) -> None:
-	"""Save the evolution state at a generation (asynchronously)."""
-	items = {
-		"state": ocp.args.StandardSave(state),
-		"key": ocp.args.StandardSave({"data": jax.random.key_data(key)}),
-	}
-	params = nnx.state(encoder_fn, nnx.Param).to_pure_dict()
-	if params:
-		items["encoder"] = ocp.args.StandardSave(params)
-	manager.save(generation, args=ocp.args.Composite(**items))
+    """Save the evolution state at a generation (asynchronously)."""
+    items = {
+        "state": ocp.args.StandardSave(state),
+        "key": ocp.args.StandardSave({"data": jax.random.key_data(key)}),
+    }
+    params = nnx.state(encoder_fn, nnx.Param).to_pure_dict()
+    if params:
+        items["encoder"] = ocp.args.StandardSave(params)
+    manager.save(generation, args=ocp.args.Composite(**items))
