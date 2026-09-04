@@ -1,0 +1,49 @@
+name: lint
+
+on:
+  push:
+    paths:
+      - "**.py"
+      - "**.ipynb"
+      - "**.md"
+      - "pyproject.toml"
+      - ".rumdl.toml"
+      - ".editorconfig"
+      - ".github/workflows/lint.yml"
+  pull_request:
+    paths:
+      - "**.py"
+      - "**.ipynb"
+      - "**.md"
+      - "pyproject.toml"
+      - ".rumdl.toml"
+      - ".editorconfig"
+      - ".github/workflows/lint.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: lint-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v10.0.1
+        with:
+          enable-cache: true
+
+      - name: Install the project
+        run: uv sync --group dev
+
+      - name: Lint
+        run: uv run ruff check .
+
+      - name: Check formatting
+        run: uv run ruff format --check .
+
+      - name: Lint Markdown
+        run: uv run rumdl check .

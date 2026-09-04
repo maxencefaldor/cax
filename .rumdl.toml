@@ -1,0 +1,40 @@
+# Markdown lints and formats with rumdl, beside ruff for the code. This file
+# exists because rumdl reads [code-block-tools] only from here, not from
+# pyproject.toml (rvben/rumdl#851); everything moves there once that is fixed.
+
+# Prose is one sentence per line and the renderer wraps: no width limit, and
+# the formatter joins a wrapped sentence and splits a line holding two.
+[MD013]
+line-length = 0
+reflow = true
+reflow-mode = "sentence-per-line"
+# A sentence may open with a lowercase name: ruff, uv, jax. Inert until
+# rvben/rumdl#852 lands; split such a line by hand until then.
+require-sentence-capital = false
+
+[MD004]
+style = "dash"
+
+[MD025]
+front-matter-title = ""
+
+# Fenced blocks, never indented: only a fence can name its language, and the
+# code-block tools below key on that name.
+[MD046]
+style = "fenced"
+
+[MD029]
+style = "one"
+
+# Python examples in the markdown are held to the same ruff rules as the code,
+# except the rules a whole module answers to: an example is an excerpt, so its
+# names are defined and its docstrings written in the module it is lifted from.
+[code-block-tools]
+enabled = true
+
+[code-block-tools.tools.ruff-excerpt]
+command = ["ruff", "check", "--output-format=concise", "--ignore", "D,F821", "-"]
+
+[code-block-tools.languages.python]
+lint = ["ruff-excerpt"]
+format = ["ruff:format"]

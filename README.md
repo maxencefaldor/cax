@@ -1,5 +1,6 @@
 # CAX: Cellular Automata Accelerated in JAX
 
+<!-- rumdl-disable MD033 MD041 -->
 <div align="center">
 	<img src="https://raw.githubusercontent.com/maxencefaldor/cax/main/docs/assets/cax.png" alt="logo" width="448"></img>
 </div>
@@ -10,12 +11,15 @@
 	<a href="https://arxiv.org/abs/2410.02651"><img alt="Paper" src="http://img.shields.io/badge/paper-arxiv.2410.02651-B31B1B.svg"></img></a>
 	<a href="https://x.com/maxencefaldor/status/1842211478796918945"><img alt="X URL" src="https://img.shields.io/twitter/url?url=https%3A%2F%2Fx.com%2Fmaxencefaldor%2Fstatus%2F1842211478796918945"></img></a>
 </div>
+<!-- rumdl-enable MD033 MD041 -->
 
 CAX is a high-performance and flexible open-source library designed to **accelerate artificial life research** — cellular automata, particle systems, and other self-organizing complex systems, all in JAX. 🧬
 
 ## Overview 🔎
 
-Are you interested in emergence, self-organization, or open-endedness? Whether you're a researcher or just curious about the fascinating world of artificial life, CAX is your digital lab! 🔬
+Are you interested in emergence, self-organization, or open-endedness?
+Whether you're a researcher or just curious about the fascinating world of artificial life, CAX is your digital lab!
+🔬
 
 Designed for speed and flexibility, CAX allows you to easily experiment with self-organizing behaviors and emergent phenomena. 🧑‍🔬
 
@@ -23,23 +27,29 @@ Designed for speed and flexibility, CAX allows you to easily experiment with sel
 
 ## Why CAX? 💡
 
-CAX supports discrete and continuous systems, including neural cellular automata, across any number of dimensions. Beyond traditional cellular automata, it also handles particle systems and more, all unified under a single, intuitive API.
+CAX supports discrete and continuous systems, including neural cellular automata, across any number of dimensions.
+Beyond traditional cellular automata, it also handles particle systems and more, all unified under a single, intuitive API.
 
 ### Rich 🎨
 
-CAX provides a comprehensive collection of 25+ ready-to-use systems. From simulating one-dimensional [elementary cellular automata](examples/10_elementary.ipynb) to training three-dimensional [self-autoencoding neural cellular automata](examples/45_self_autoencoding_mnist.ipynb), or even creating beautiful [Lenia](examples/20_lenia.ipynb) simulations, CAX provides a versatile platform for exploring the rich world of self-organizing systems.
+CAX provides a comprehensive collection of 25+ ready-to-use systems.
+From simulating one-dimensional [elementary cellular automata](examples/10_elementary.ipynb) to training three-dimensional [self-autoencoding neural cellular automata](examples/45_self_autoencoding_mnist.ipynb), or even creating beautiful [Lenia](examples/20_lenia.ipynb) simulations, CAX provides a versatile platform for exploring the rich world of self-organizing systems.
 
 ### Flexible 🧩
 
-CAX makes it easy to extend existing systems or build custom ones from scratch for endless experimentation and discovery. Design your own experiments to probe the boundaries of artificial open-ended evolution and emergent complexity.
+CAX makes it easy to extend existing systems or build custom ones from scratch for endless experimentation and discovery.
+Design your own experiments to probe the boundaries of artificial open-ended evolution and emergent complexity.
 
 ### Fast 🚀
 
-CAX is built on top of the JAX/Flax ecosystem for speed and scalability. The library benefits from vectorization and parallelization on various hardware accelerators such as CPU, GPU, and TPU. This allows you to scale your experiments from small prototypes to massive simulations with minimal code changes.
+CAX is built on top of the JAX/Flax ecosystem for speed and scalability.
+The library benefits from vectorization and parallelization on various hardware accelerators such as CPU, GPU, and TPU.
+This allows you to scale your experiments from small prototypes to massive simulations with minimal code changes.
 
 ### Tested & Documented 📚
 
-The library is thoroughly tested and [documented](https://maxencefaldor.github.io/cax/) with numerous examples to get you started! Our comprehensive guides walk you through everything from basic cellular automata to advanced neural implementations.
+The library is thoroughly tested and [documented](https://maxencefaldor.github.io/cax/) with numerous examples to get you started!
+Our comprehensive guides walk you through everything from basic cellular automata to advanced neural implementations.
 
 ## Examples 📓
 
@@ -97,9 +107,9 @@ key = jax.random.key(seed)
 birth, survival = Life.birth_survival_from_string(rule_golly)
 cs = Life(birth=birth, survival=survival)
 
-state_init = jax.random.bernoulli(key, p=0.5, shape=(*spatial_dims, channel_size)).astype(
-	jnp.float32
-)
+state_init = jax.random.bernoulli(
+    key, p=0.5, shape=(*spatial_dims, channel_size)
+).astype(jnp.float32)
 state_final, states = cs(state_init, num_steps=num_steps, return_states=True)
 ```
 
@@ -110,12 +120,14 @@ For a more detailed overview, get started with this notebook [![Colab](https://c
 You will need Python 3.12 or later, and a working JAX installation installed in a virtual environment.
 
 Then, install CAX from PyPi with `uv`:
-```
+
+```sh
 uv pip install cax
 ```
 
 or with `pip`:
-```
+
+```sh
 pip install cax
 ```
 
@@ -139,4 +151,5 @@ If you use CAX in your research, please cite the following paper:
 
 ## Contributing 👷
 
-Contributions are welcome! If you find a bug or are missing your favorite self-organizing system, please open an issue or submit a pull request following our [contribution guidelines](https://maxencefaldor.github.io/cax/contributing/) 🤗.
+Contributions are welcome!
+If you find a bug or are missing your favorite self-organizing system, please open an issue or submit a pull request following our [contribution guidelines](https://maxencefaldor.github.io/cax/contributing/) 🤗.

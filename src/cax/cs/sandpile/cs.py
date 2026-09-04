@@ -21,92 +21,104 @@ from .update import SandpileUpdate
 
 
 class Sandpile(ComplexSystem[Array, Array]):
-	"""Abelian Sandpile model.
+    """Abelian Sandpile model.
 
-	A discrete cellular automaton demonstrating self-organized criticality. The state
-	is a grid of non-negative integers representing chip counts. When a cell reaches
-	the critical threshold, it topples, distributing chips to neighbors. Cascading
-	avalanches of topplings produce power-law distributed events.
+    A discrete cellular automaton demonstrating self-organized criticality. The state
+    is a grid of non-negative integers representing chip counts. When a cell reaches
+    the critical threshold, it topples, distributing chips to neighbors. Cascading
+    avalanches of topplings produce power-law distributed events.
 
-	Two boundary modes are supported:
-		- "CIRCULAR": periodic (toroidal) boundaries conserving total mass.
-		- "ZERO": dissipative boundaries where sand falling off the edge is lost,
-			which is required for proper self-organized criticality.
-	"""
+    Two boundary modes are supported:
+        - "CIRCULAR": periodic (toroidal) boundaries conserving total mass.
+        - "ZERO": dissipative boundaries where sand falling off the edge is lost,
+            which is required for proper self-organized criticality.
+    """
 
-	def __init__(
-		self,
-		*,
-		num_spatial_dims: int = 2,
-		threshold: int | None = None,
-		padding: Literal["CIRCULAR", "ZERO"] = "CIRCULAR",
-	):
-		"""Initialize Sandpile.
+    def __init__(
+        self,
+        *,
+        num_spatial_dims: int = 2,
+        threshold: int | None = None,
+        padding: Literal["CIRCULAR", "ZERO"] = "CIRCULAR",
+    ):
+        """Initialize Sandpile.
 
-		Args:
-			num_spatial_dims: Number of spatial dimensions (default 2).
-			threshold: Critical chip count for toppling. Defaults to
-				2 * num_spatial_dims (4 in 2D, 6 in 3D).
-			padding: Boundary condition mode. "CIRCULAR" for periodic boundaries,
-				"ZERO" for dissipative boundaries (required for SOC).
+        Args:
+            num_spatial_dims: Number of spatial dimensions (default 2).
+            threshold: Critical chip count for toppling. Defaults to
+                2 * num_spatial_dims (4 in 2D, 6 in 3D).
+            padding: Boundary condition mode. "CIRCULAR" for periodic boundaries,
+                "ZERO" for dissipative boundaries (required for SOC).
 
-		"""
-		self.num_spatial_dims = num_spatial_dims
-		self.threshold = threshold if threshold is not None else 2 * num_spatial_dims
-		self.perceive = SandpilePerceive(
-			num_spatial_dims=num_spatial_dims,
-			padding=padding,
-		)
-		self.update = SandpileUpdate(
-			num_spatial_dims=num_spatial_dims,
-			threshold=self.threshold,
-		)
+        """
+        self.num_spatial_dims = num_spatial_dims
+        self.threshold = threshold if threshold is not None else 2 * num_spatial_dims
+        self.perceive = SandpilePerceive(
+            num_spatial_dims=num_spatial_dims,
+            padding=padding,
+        )
+        self.update = SandpileUpdate(
+            num_spatial_dims=num_spatial_dims,
+            threshold=self.threshold,
+        )
 
-	@override
-	def _step(self, state: Array, input: Array | None = None) -> Array:
-		# Add dropped grains before perceiving, so every cell topples against the
-		# same post-drop snapshot and chips are conserved away from the boundary
-		if input is not None:
-			state = state + input
-		perception = self.perceive(state)
-		next_state = self.update(state, perception)
+    @override
+    def _step(self, state: Array, input: Array | None = None) -> Array:
+        # Add dropped grains before perceiving, so every cell topples against the
+        # same post-drop snapshot and chips are conserved away from the boundary
+        if input is not None:
+            state = state + input
+        perception = self.perceive(state)
+        next_state = self.update(state, perception)
 
-		return next_state
+        return next_state
 
-	@nnx.jit
-	@override
-	def render(self, state: Array) -> Array:
-		"""Render state to RGB image.
+    @nnx.jit
+    @override
+    def render(self, state: Array) -> Array:
+        """Render state to RGB image.
 
-		Maps chip counts to distinct colors using the classic sandpile palette:
-		0 chips → dark blue, 1 chip → cyan, 2 chips → yellow, 3 chips → orange.
-		Cells at or above the critical threshold are rendered in red.
+        Maps chip counts to distinct colors using the classic sandpile palette:
+        0 chips → dark blue, 1 chip → cyan, 2 chips → yellow, 3 chips → orange.
+        Cells at or above the critical threshold are rendered in red.
 
-		Args:
-			state: Array with shape (..., *spatial_dims, 1) containing integer chip
-				counts stored as float32.
+        Args:
+            state: Array with shape (..., *spatial_dims, 1) containing integer chip
+                counts stored as float32.
 
-		Returns:
-			RGB image with dtype uint8 and shape (..., *spatial_dims, 3).
+        Returns:
+            RGB image with dtype uint8 and shape (..., *spatial_dims, 3).
 
-		"""
-		chips = state[..., 0]
+        """
+        chips = state[..., 0]
 
-		r = jnp.where(
-			chips == 0,
-			0.1,
-			jnp.where(chips == 1, 0.0, jnp.where(chips == 2, 0.9, jnp.where(chips == 3, 1.0, 0.8))),
-		)
-		g = jnp.where(
-			chips == 0,
-			0.1,
-			jnp.where(chips == 1, 0.7, jnp.where(chips == 2, 0.9, jnp.where(chips == 3, 0.5, 0.0))),
-		)
-		b = jnp.where(
-			chips == 0,
-			0.4,
-			jnp.where(chips == 1, 0.8, jnp.where(chips == 2, 0.1, jnp.where(chips == 3, 0.0, 0.0))),
-		)
+        r = jnp.where(
+            chips == 0,
+            0.1,
+            jnp.where(
+                chips == 1,
+                0.0,
+                jnp.where(chips == 2, 0.9, jnp.where(chips == 3, 1.0, 0.8)),
+            ),
+        )
+        g = jnp.where(
+            chips == 0,
+            0.1,
+            jnp.where(
+                chips == 1,
+                0.7,
+                jnp.where(chips == 2, 0.9, jnp.where(chips == 3, 0.5, 0.0)),
+            ),
+        )
+        b = jnp.where(
+            chips == 0,
+            0.4,
+            jnp.where(
+                chips == 1,
+                0.8,
+                jnp.where(chips == 2, 0.1, jnp.where(chips == 3, 0.0, 0.0)),
+            ),
+        )
 
-		rgb = jnp.stack([r, g, b], axis=-1)
-		return clip_and_uint8(rgb)
+        rgb = jnp.stack([r, g, b], axis=-1)
+        return clip_and_uint8(rgb)

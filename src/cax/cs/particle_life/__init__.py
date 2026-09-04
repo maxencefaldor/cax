@@ -1,7 +1,7 @@
 """Particle Life module.
 
 References:
-	[1] Particle Life, Tom Mohr. 2018. https://particle-life.com/
+    [1] Particle Life, Tom Mohr. 2018. https://particle-life.com/
 
 """
 
@@ -12,9 +12,9 @@ from .state import ParticleLifeState
 from .update import ParticleLifeUpdate
 
 __all__ = [
-	"ParticleLife",
-	"ParticleLifePerceive",
-	"ParticleLifePerception",
-	"ParticleLifeState",
-	"ParticleLifeUpdate",
+    "ParticleLife",
+    "ParticleLifePerceive",
+    "ParticleLifePerception",
+    "ParticleLifeState",
+    "ParticleLifeUpdate",
 ]

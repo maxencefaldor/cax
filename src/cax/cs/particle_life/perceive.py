@@ -1,8 +1,9 @@
 """Particle Life perceive module.
 
-This module implements the perception function for Particle Life, which computes pairwise
-interaction forces between particles based on their types and distances. Forces transition
-from repulsion at short range to attraction at medium range according to the attraction matrix.
+This module implements the perception function for Particle Life, which computes
+pairwise interaction forces between particles based on their types and distances. Forces
+transition from repulsion at short range to attraction at medium range according to the
+attraction matrix.
 """
 
 from typing import override
@@ -18,123 +19,136 @@ from .state import ParticleLifeState
 
 
 class ParticleLifePerceive(Perceive[ParticleLifeState, ParticleLifePerception]):
-	"""Particle Life perception.
+    """Particle Life perception.
 
-	Computes interaction forces between all particle pairs based on their distances and
-	types. The force profile transitions from repulsion at short distances to attraction
-	at medium distances, with interaction strength determined by the attraction matrix.
-	"""
+    Computes interaction forces between all particle pairs based on their distances and
+    types. The force profile transitions from repulsion at short distances to attraction
+    at medium distances, with interaction strength determined by the attraction matrix.
+    """
 
-	def __init__(
-		self,
-		*,
-		force_factor: float = 1.0,
-		r_max: float = 0.15,
-		beta: float = 0.3,
-		attraction_matrix: Array,
-	):
-		"""Initialize Particle Life perceive.
+    def __init__(
+        self,
+        *,
+        force_factor: float = 1.0,
+        r_max: float = 0.15,
+        beta: float = 0.3,
+        attraction_matrix: Array,
+    ):
+        """Initialize Particle Life perceive.
 
-		Args:
-			force_factor: Global scaling factor for all interaction forces. Higher values
-				create stronger, more dynamic interactions.
-			r_max: Maximum interaction distance in coordinate space [0, 1]. Particles beyond
-				this distance do not interact. Larger values increase computation cost.
-			beta: Distance threshold parameter controlling the transition from repulsion to
-				attraction. Typically in range [0, 1], where smaller values create stronger
-				short-range repulsion.
-			attraction_matrix: Attraction matrix of shape (num_classes, num_classes) where
-				entry (i, j) defines the attraction strength from type i to type j. Positive
-				values attract, negative values repel. Values typically range from -1 to 1.
+        Args:
+            force_factor: Global scaling factor for all interaction forces. Higher
+                values create stronger, more dynamic interactions.
+            r_max: Maximum interaction distance in coordinate space [0, 1]. Particles
+                beyond this distance do not interact. Larger values increase computation
+                cost.
+            beta: Distance threshold parameter controlling the transition from repulsion
+                to attraction. Typically in range [0, 1], where smaller values create
+                stronger short-range repulsion.
+            attraction_matrix: Attraction matrix of shape (num_classes, num_classes)
+                where entry (i, j) defines the attraction strength from type i to type
+                j. Positive values attract, negative values repel. Values typically
+                range from -1 to 1.
 
-		"""
-		self.force_factor = force_factor
-		self.r_max = r_max
-		self.beta = beta
-		self.attraction_matrix = attraction_matrix
+        """
+        self.force_factor = force_factor
+        self.r_max = r_max
+        self.beta = beta
+        self.attraction_matrix = attraction_matrix
 
-	def _get_forces(self, distances: Array, attraction_factors: Array) -> Array:
-		"""Calculate interaction forces between particles based on distance.
+    def _get_forces(self, distances: Array, attraction_factors: Array) -> Array:
+        """Calculate interaction forces between particles based on distance.
 
-		Computes forces using a piecewise function: linear repulsion at short distances
-		(r <= beta), parameterized attraction at medium distances (beta < r <= r_max),
-		and zero force beyond r_max.
+        Computes forces using a piecewise function: linear repulsion at short distances
+        (r <= beta), parameterized attraction at medium distances (beta < r <= r_max),
+        and zero force beyond r_max.
 
-		Args:
-			distances: Array of normalized pairwise distances (scaled by r_max).
-			attraction_factors: Array of attraction coefficients for each particle pair
-				from the attraction matrix.
+        Args:
+            distances: Array of normalized pairwise distances (scaled by r_max).
+            attraction_factors: Array of attraction coefficients for each particle pair
+                from the attraction matrix.
 
-		Returns:
-			Array of scalar force magnitudes with the same shape as distances, where
-				positive values indicate repulsion and negative values indicate attraction.
+        Returns:
+            Array of scalar force magnitudes with the same shape as distances, where
+                positive values indicate repulsion and negative values indicate
+                attraction.
 
-		"""
-		distances /= self.r_max
-		return jnp.select(
-			condlist=[distances <= self.beta, (distances > self.beta) & (distances <= 1)],
-			choicelist=[
-				distances / self.beta - 1,
-				attraction_factors * (1 - jnp.abs(2 * distances - 1 - self.beta) / (1 - self.beta)),
-			],
-			default=0.0,
-		)
+        """
+        distances /= self.r_max
+        return jnp.select(
+            condlist=[
+                distances <= self.beta,
+                (distances > self.beta) & (distances <= 1),
+            ],
+            choicelist=[
+                distances / self.beta - 1,
+                attraction_factors
+                * (1 - jnp.abs(2 * distances - 1 - self.beta) / (1 - self.beta)),
+            ],
+            default=0.0,
+        )
 
-	def _get_acceleration(self, forces: Array, direction_norm: Array) -> Array:
-		"""Calculate accelerations by summing vectorial forces.
+    def _get_acceleration(self, forces: Array, direction_norm: Array) -> Array:
+        """Calculate accelerations by summing vectorial forces.
 
-		Converts scalar forces to vector forces by multiplying with direction vectors,
-		then sums over all particle pairs to get the total acceleration for each particle.
+        Converts scalar forces to vector forces by multiplying with direction vectors,
+        then sums over all particle pairs to get the total acceleration for each
+        particle.
 
-		Args:
-			forces: Array of scalar force magnitudes between particle pairs.
-			direction_norm: Array of normalized direction vectors pointing from each particle
-				to every other particle.
+        Args:
+            forces: Array of scalar force magnitudes between particle pairs.
+            direction_norm: Array of normalized direction vectors pointing from each
+                particle to every other particle.
 
-		Returns:
-			Array of acceleration vectors for each particle, with the same shape as positions.
+        Returns:
+            Array of acceleration vectors for each particle, with the same shape as
+            positions.
 
-		"""
-		return self.force_factor * jnp.sum(forces[..., None] * direction_norm, axis=-2)
+        """
+        return self.force_factor * jnp.sum(forces[..., None] * direction_norm, axis=-2)
 
-	@override
-	def __call__(self, state: ParticleLifeState) -> ParticleLifePerception:
-		"""Process the current state to produce a perception.
+    @override
+    def __call__(self, state: ParticleLifeState) -> ParticleLifePerception:
+        """Process the current state to produce a perception.
 
-		Computes pairwise distances between all particles with periodic boundary conditions,
-		determines interaction forces based on particle types and the attraction matrix,
-		and aggregates forces into acceleration vectors for each particle.
+        Computes pairwise distances between all particles with periodic boundary
+        conditions, determines interaction forces based on particle types and the
+        attraction matrix, and aggregates forces into acceleration vectors for each
+        particle.
 
-		Args:
-			state: ParticleLifeState containing class_id, position, and velocity arrays.
-				Position should have shape (num_particles, num_spatial_dims).
+        Args:
+            state: ParticleLifeState containing class_id, position, and velocity arrays.
+                Position should have shape (num_particles, num_spatial_dims).
 
-		Returns:
-			ParticleLifePerception containing acceleration array with shape
-				(num_particles, num_spatial_dims) representing the total force on each particle.
+        Returns:
+            ParticleLifePerception containing acceleration array with shape
+                (num_particles, num_spatial_dims) representing the total force on each
+                particle.
 
-		"""
-		num_particles = state.class_id.shape[-1]
-		attraction_factors = self.attraction_matrix[
-			state.class_id[..., :, None], state.class_id[..., None, :]
-		]
+        """
+        num_particles = state.class_id.shape[-1]
+        attraction_factors = self.attraction_matrix[
+            state.class_id[..., :, None], state.class_id[..., None, :]
+        ]
 
-		pos_diff = toroidal_difference(
-			state.position[..., :, None, :], state.position[..., None, :, :]
-		)
+        pos_diff = toroidal_difference(
+            state.position[..., :, None, :], state.position[..., None, :, :]
+        )
 
-		# Calculate distances and normalized directions with periodic conditions.
-		# Both go through the safe primitives: the diagonal is a zero vector, and a plain
-		# norm or division there leaves nan in the gradient even though the forward pass
-		# is masked (the where-NaN trap, see cax.utils.numerics).
-		distance = safe_norm(pos_diff, axis=-1)
-		is_other = ~jnp.eye(num_particles, dtype=bool)
-		direction_norm = safe_divide(pos_diff, distance[..., None], where=is_other[..., None])
+        # Calculate distances and normalized directions with periodic conditions. Both
+        # go through the safe primitives: the diagonal is a zero vector, and a plain
+        # norm or division there leaves nan in the gradient even though the forward pass
+        # is masked (the where-NaN trap, see cax.utils.numerics).
+        distance = safe_norm(pos_diff, axis=-1)
+        is_other = ~jnp.eye(num_particles, dtype=bool)
+        direction_norm = safe_divide(
+            pos_diff, distance[..., None], where=is_other[..., None]
+        )
 
-		# Calculate forces
-		forces = self._get_forces(distance, attraction_factors)
+        # Calculate forces
+        forces = self._get_forces(distance, attraction_factors)
 
-		# Calculate accelerations
-		acceleration = self._get_acceleration(forces, direction_norm)
+        # Calculate accelerations
+        acceleration = self._get_acceleration(forces, direction_norm)
 
-		return ParticleLifePerception(acceleration=acceleration)
+        return ParticleLifePerception(acceleration=acceleration)

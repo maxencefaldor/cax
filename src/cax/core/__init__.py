@@ -8,7 +8,7 @@ from .perceive import Perceive
 from .update import Update
 
 __all__ = [
-	"ComplexSystem",
-	"Perceive",
-	"Update",
+    "ComplexSystem",
+    "Perceive",
+    "Update",
 ]

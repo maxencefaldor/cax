@@ -1,4 +1,4 @@
-### Perceive
+# Perceive
 
 ::: cax.core.perceive.perceive
 ::: cax.core.perceive.neighborhood_perceive

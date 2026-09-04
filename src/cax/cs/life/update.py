@@ -14,52 +14,55 @@ from cax.core.update import Update
 
 
 class LifeUpdate(Update[Array, Array, Array]):
-	"""Life update rule.
+    """Life update rule.
 
-	Applies birth and survival rules to determine each cell's next state. Dead cells with
-	the right number of alive neighbors are born, and alive cells with the right number
-	of alive neighbors survive. All other cells become or remain dead.
-	"""
+    Applies birth and survival rules to determine each cell's next state. Dead cells
+    with the right number of alive neighbors are born, and alive cells with the right
+    number of alive neighbors survive. All other cells become or remain dead.
+    """
 
-	def __init__(self, *, birth: Array, survival: Array):
-		"""Initialize Life update.
+    def __init__(self, *, birth: Array, survival: Array):
+        """Initialize Life update.
 
-		Args:
-			birth: Array of shape (9,) defining birth conditions. Element i is 1.0 if a dead
-				cell with i alive neighbors should become alive, 0.0 otherwise.
-			survival: Array of shape (9,) defining survival conditions. Element i is 1.0 if a
-				live cell with i alive neighbors should stay alive, 0.0 otherwise.
+        Args:
+            birth: Array of shape (9,) defining birth conditions. Element i is 1.0 if a
+                dead cell with i alive neighbors should become alive, 0.0 otherwise.
+            survival: Array of shape (9,) defining survival conditions. Element i is 1.0
+                if a live cell with i alive neighbors should stay alive, 0.0 otherwise.
 
-		"""
-		self.birth = birth
-		self.survival = survival
+        """
+        self.birth = birth
+        self.survival = survival
 
-	@override
-	def __call__(self, state: Array, perception: Array, input: Array | None = None) -> Array:
-		"""Process the current state, perception, and input to produce a new state.
+    @override
+    def __call__(
+        self, state: Array, perception: Array, input: Array | None = None
+    ) -> Array:
+        """Process the current state, perception, and input to produce a new state.
 
-		Determines each cell's next state by checking birth conditions for dead cells and
-		survival conditions for alive cells based on the number of alive neighbors.
+        Determines each cell's next state by checking birth conditions for dead cells
+        and survival conditions for alive cells based on the number of alive neighbors.
 
-		Args:
-			state: Current state (unused, next state computed solely from perception).
-			perception: Array with shape (..., height, width, 2) where channel 0 is the cell's
-				state (0.0 or 1.0) and channel 1 is the count of alive neighbors (0-8).
-			input: Optional input (unused in this implementation).
+        Args:
+            state: Current state (unused, next state computed solely from perception).
+            perception: Array with shape (..., height, width, 2) where channel 0 is the
+                cell's state (0.0 or 1.0) and channel 1 is the count of alive neighbors
+                (0-8).
+            input: Optional input (unused in this implementation).
 
-		Returns:
-			Next state with shape (..., height, width, 1) containing binary cell values.
+        Returns:
+            Next state with shape (..., height, width, 1) containing binary cell values.
 
-		"""
-		self_alive = perception[..., 0:1]
-		num_alive_neighbors = perception[..., 1:2].astype(jnp.int32)
+        """
+        self_alive = perception[..., 0:1]
+        num_alive_neighbors = perception[..., 1:2].astype(jnp.int32)
 
-		# Birth
-		birth = jnp.logical_and(1.0 - self_alive, self.birth[num_alive_neighbors])
+        # Birth
+        birth = jnp.logical_and(1.0 - self_alive, self.birth[num_alive_neighbors])
 
-		# Survival
-		survival = jnp.logical_and(self_alive, self.survival[num_alive_neighbors])
+        # Survival
+        survival = jnp.logical_and(self_alive, self.survival[num_alive_neighbors])
 
-		# Combine the conditions for the next state
-		state = jnp.where(birth | survival, 1.0, 0.0)
-		return state
+        # Combine the conditions for the next state
+        state = jnp.where(birth | survival, 1.0, 0.0)
+        return state
