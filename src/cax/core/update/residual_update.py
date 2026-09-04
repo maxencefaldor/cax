@@ -10,64 +10,70 @@ from .mlp_update import MLPUpdate
 
 
 class ResidualUpdate(MLPUpdate):
-	"""Residual update class.
+    """Residual update class.
 
-	Extends the MLP update with a residual connection and cell dropout applied to the update.
-	"""
+    Extends the MLP update with a residual connection and cell dropout applied to the
+    update.
+    """
 
-	def __init__(
-		self,
-		*,
-		num_spatial_dims: int,
-		channel_size: int,
-		perception_size: int,
-		hidden_layer_sizes: tuple[int, ...],
-		activation_fn: Callable[[Array], Array] = nnx.relu,
-		step_size: float = 1.0,
-		cell_dropout_rate: float = 0.0,
-		zeros_init: bool = False,
-		rngs: nnx.Rngs,
-	):
-		"""Initialize the ResidualUpdate module.
+    def __init__(
+        self,
+        *,
+        num_spatial_dims: int,
+        channel_size: int,
+        perception_size: int,
+        hidden_layer_sizes: tuple[int, ...],
+        activation_fn: Callable[[Array], Array] = nnx.relu,
+        step_size: float = 1.0,
+        cell_dropout_rate: float = 0.0,
+        zeros_init: bool = False,
+        rngs: nnx.Rngs,
+    ):
+        """Initialize the ResidualUpdate module.
 
-		Args:
-			num_spatial_dims: Number of spatial dimensions.
-			channel_size: Number of channels in the state.
-			perception_size: Size of the perception input.
-			hidden_layer_sizes: Sizes of hidden layers in the MLP.
-			activation_fn: Activation function to use.
-			step_size: Step size for the residual update.
-			cell_dropout_rate: Dropout rate for cell updates.
-			zeros_init: Whether to use zeros initialization for the weights of the last layer.
-			rngs: rng key.
+        Args:
+            num_spatial_dims: Number of spatial dimensions.
+            channel_size: Number of channels in the state.
+            perception_size: Size of the perception input.
+            hidden_layer_sizes: Sizes of hidden layers in the MLP.
+            activation_fn: Activation function to use.
+            step_size: Step size for the residual update.
+            cell_dropout_rate: Dropout rate for cell updates.
+            zeros_init: Whether to use zeros initialization for the weights of the last
+                layer.
+            rngs: rng key.
 
-		"""
-		super().__init__(
-			num_spatial_dims=num_spatial_dims,
-			channel_size=channel_size,
-			perception_size=perception_size,
-			hidden_layer_sizes=hidden_layer_sizes,
-			activation_fn=activation_fn,
-			zeros_init=zeros_init,
-			rngs=rngs,
-		)
-		self.dropout = nnx.Dropout(rate=cell_dropout_rate, broadcast_dims=(-1,), rngs=rngs)
-		self.step_size = step_size
+        """
+        super().__init__(
+            num_spatial_dims=num_spatial_dims,
+            channel_size=channel_size,
+            perception_size=perception_size,
+            hidden_layer_sizes=hidden_layer_sizes,
+            activation_fn=activation_fn,
+            zeros_init=zeros_init,
+            rngs=rngs,
+        )
+        self.dropout = nnx.Dropout(
+            rate=cell_dropout_rate, broadcast_dims=(-1,), rngs=rngs
+        )
+        self.step_size = step_size
 
-	@override
-	def __call__(self, state: Array, perception: Array, input: Array | None = None) -> Array:
-		"""Process the current state, perception, and input to produce a new state.
+    @override
+    def __call__(
+        self, state: Array, perception: Array, input: Array | None = None
+    ) -> Array:
+        """Process the current state, perception, and input to produce a new state.
 
-		Args:
-			state: Current state.
-			perception: Current perception.
-			input: Optional input.
+        Args:
+            state: Current state.
+            perception: Current perception.
+            input: Optional input.
 
-		Returns:
-			Next state.
+        Returns:
+            Next state.
 
-		"""
-		update = super().__call__(state, perception, input)
-		update = self.dropout(update)
-		state += self.step_size * update
-		return state
+        """
+        update = super().__call__(state, perception, input)
+        update = self.dropout(update)
+        state += self.step_size * update
+        return state

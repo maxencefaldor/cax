@@ -17,19 +17,23 @@ NOTEBOOK_PATHS = sorted(EXAMPLES_DIR.glob("*.ipynb"))
 
 @pytest.mark.parametrize("path", NOTEBOOK_PATHS, ids=lambda path: path.stem)
 def test_notebook_code_cells_compile(path: Path) -> None:
-	"""Test that every code cell of the notebook is valid Python."""
-	notebook = json.loads(path.read_text())
-	sources = []
-	for cell in notebook["cells"]:
-		if cell["cell_type"] != "code":
-			continue
-		# IPython magics and shell escapes are not Python; strip those lines.
-		sources.append(
-			"".join(line for line in cell["source"] if not line.lstrip().startswith(("%", "!")))
-		)
-	compile("\n\n".join(sources), str(path), "exec")
+    """Test that every code cell of the notebook is valid Python."""
+    notebook = json.loads(path.read_text())
+    sources = []
+    for cell in notebook["cells"]:
+        if cell["cell_type"] != "code":
+            continue
+        # IPython magics and shell escapes are not Python; strip those lines.
+        sources.append(
+            "".join(
+                line
+                for line in cell["source"]
+                if not line.lstrip().startswith(("%", "!"))
+            )
+        )
+    compile("\n\n".join(sources), str(path), "exec")
 
 
 def test_notebooks_exist() -> None:
-	"""Test that the examples directory is where this test thinks it is."""
-	assert len(NOTEBOOK_PATHS) >= 20
+    """Test that the examples directory is where this test thinks it is."""
+    assert len(NOTEBOOK_PATHS) >= 20

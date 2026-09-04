@@ -9,7 +9,7 @@ from jax import Array
 @jax.tree_util.register_dataclass
 @dataclass(frozen=True)
 class BoidsState:
-	"""Boids state class."""
+    """Boids state class."""
 
-	position: Array
-	velocity: Array
+    position: Array
+    velocity: Array

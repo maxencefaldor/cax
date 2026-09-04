@@ -1,8 +1,8 @@
 """Boids module.
 
 References:
-	[1] Flocks, Herds, and Schools: A Distributed Behavioral Model, Craig W. Reynolds.
-		1987.
+    [1] Flocks, Herds, and Schools: A Distributed Behavioral Model, Craig W. Reynolds.
+        1987.
 
 """
 
@@ -14,10 +14,10 @@ from .state import BoidsState
 from .update import BoidsUpdate
 
 __all__ = [
-	"Boids",
-	"BoidsPerceive",
-	"BoidsPerception",
-	"BoidsPolicy",
-	"BoidsState",
-	"BoidsUpdate",
+    "Boids",
+    "BoidsPerceive",
+    "BoidsPerception",
+    "BoidsPolicy",
+    "BoidsState",
+    "BoidsUpdate",
 ]

@@ -9,292 +9,307 @@ from jax import Array
 
 
 class Encoder(nnx.Module):
-	"""Encoder module for the VAE.
+    """Encoder module for the VAE.
 
-	Applies a stack of strided convolutions followed by linear layers to produce mean and
-	log-variance parameters of a diagonal Gaussian in latent space.
-	"""
+    Applies a stack of strided convolutions followed by linear layers to produce mean
+    and log-variance parameters of a diagonal Gaussian in latent space.
+    """
 
-	def __init__(
-		self,
-		*,
-		spatial_dims: Sequence[int],
-		features: Sequence[int],
-		latent_size: int,
-		rngs: nnx.Rngs,
-	):
-		"""Initialize the Encoder module.
+    def __init__(
+        self,
+        *,
+        spatial_dims: Sequence[int],
+        features: Sequence[int],
+        latent_size: int,
+        rngs: nnx.Rngs,
+    ):
+        """Initialize the Encoder module.
 
-		Args:
-			spatial_dims: Spatial dimensions of the input.
-			features: Sequence of feature sizes for convolutional layers.
-			latent_size: Size of the latent space.
-			rngs: rng key.
+        Args:
+            spatial_dims: Spatial dimensions of the input.
+            features: Sequence of feature sizes for convolutional layers.
+            latent_size: Size of the latent space.
+            rngs: rng key.
 
-		"""
-		self.features = features
-		self.latent_size = latent_size
+        """
+        self.features = features
+        self.latent_size = latent_size
 
-		self.convs = nnx.List(
-			[
-				nnx.Conv(
-					in_features=in_features,
-					out_features=out_features,
-					kernel_size=(3, 3),
-					strides=(2, 2),
-					padding="SAME",
-					rngs=rngs,
-				)
-				for in_features, out_features in zip(
-					self.features[:-1], self.features[1:], strict=True
-				)
-			]
-		)
+        self.convs = nnx.List(
+            [
+                nnx.Conv(
+                    in_features=in_features,
+                    out_features=out_features,
+                    kernel_size=(3, 3),
+                    strides=(2, 2),
+                    padding="SAME",
+                    rngs=rngs,
+                )
+                for in_features, out_features in zip(
+                    self.features[:-1], self.features[1:], strict=True
+                )
+            ]
+        )
 
-		flattened_size = spatial_dims[0] * spatial_dims[1] * self.features[-1]
-		for _ in range(len(self.features) - 1):
-			flattened_size //= 4
+        flattened_size = spatial_dims[0] * spatial_dims[1] * self.features[-1]
+        for _ in range(len(self.features) - 1):
+            flattened_size //= 4
 
-		self.linear = nnx.Linear(in_features=flattened_size, out_features=flattened_size, rngs=rngs)
-		self.mean = nnx.Linear(in_features=flattened_size, out_features=self.latent_size, rngs=rngs)
-		self.logvar = nnx.Linear(
-			in_features=flattened_size, out_features=self.latent_size, rngs=rngs
-		)
-		self.rngs = rngs
+        self.linear = nnx.Linear(
+            in_features=flattened_size, out_features=flattened_size, rngs=rngs
+        )
+        self.mean = nnx.Linear(
+            in_features=flattened_size, out_features=self.latent_size, rngs=rngs
+        )
+        self.logvar = nnx.Linear(
+            in_features=flattened_size, out_features=self.latent_size, rngs=rngs
+        )
+        self.rngs = rngs
 
-	def __call__(self, x: Array) -> tuple[Array, Array]:
-		"""Forward pass of the encoder.
+    def __call__(self, x: Array) -> tuple[Array, Array]:
+        """Forward pass of the encoder.
 
-		Args:
-			x: Input tensor with shape `(..., H, W, channel_size)`.
+        Args:
+            x: Input tensor with shape `(..., H, W, channel_size)`.
 
-		Returns:
-			Tuple `(mean, logvar)` each with shape `(..., latent_size)`.
+        Returns:
+            Tuple `(mean, logvar)` each with shape `(..., latent_size)`.
 
-		"""
-		for conv in self.convs:
-			x = jax.nn.relu(conv(x))
-		x = jnp.reshape(x, (*x.shape[:-3], -1))
-		x = jax.nn.relu(self.linear(x))
-		mean = self.mean(x)
-		logvar = self.logvar(x)
-		return mean, logvar
+        """
+        for conv in self.convs:
+            x = jax.nn.relu(conv(x))
+        x = jnp.reshape(x, (*x.shape[:-3], -1))
+        x = jax.nn.relu(self.linear(x))
+        mean = self.mean(x)
+        logvar = self.logvar(x)
+        return mean, logvar
 
-	def reparameterize(self, mean: Array, logvar: Array) -> Array:
-		"""Perform the reparameterization trick.
+    def reparameterize(self, mean: Array, logvar: Array) -> Array:
+        """Perform the reparameterization trick.
 
-		Args:
-			mean: Mean of the latent distribution.
-			logvar: Log variance of the latent distribution.
+        Args:
+            mean: Mean of the latent distribution.
+            logvar: Log variance of the latent distribution.
 
-		Returns:
-			Sampled latent vector with shape matching `mean`.
+        Returns:
+            Sampled latent vector with shape matching `mean`.
 
-		"""
-		return mean + jnp.exp(logvar * 0.5) * jax.random.normal(self.rngs(), shape=mean.shape)
+        """
+        return mean + jnp.exp(logvar * 0.5) * jax.random.normal(
+            self.rngs(), shape=mean.shape
+        )
 
 
 class Decoder(nnx.Module):
-	"""Decoder module for the VAE.
+    """Decoder module for the VAE.
 
-	Maps latent vectors back to image space using a linear layer followed by transposed
-	convolutions.
-	"""
+    Maps latent vectors back to image space using a linear layer followed by transposed
+    convolutions.
+    """
 
-	def __init__(
-		self,
-		*,
-		spatial_dims: Sequence[int],
-		features: Sequence[int],
-		latent_size: int,
-		rngs: nnx.Rngs,
-	):
-		"""Initialize the Decoder module.
+    def __init__(
+        self,
+        *,
+        spatial_dims: Sequence[int],
+        features: Sequence[int],
+        latent_size: int,
+        rngs: nnx.Rngs,
+    ):
+        """Initialize the Decoder module.
 
-		Args:
-			spatial_dims: Spatial dimensions of the output.
-			features: Sequence of feature sizes for transposed convolutional layers.
-			latent_size: Size of the latent space.
-			rngs: rng key.
+        Args:
+            spatial_dims: Spatial dimensions of the output.
+            features: Sequence of feature sizes for transposed convolutional layers.
+            latent_size: Size of the latent space.
+            rngs: rng key.
 
-		"""
-		self.features = features
-		self.latent_size = latent_size
+        """
+        self.features = features
+        self.latent_size = latent_size
 
-		self._spatial_dims = tuple(
-			dim // (2 ** (len(self.features) - 1)) for dim in spatial_dims[:2]
-		)
+        self._spatial_dims = tuple(
+            dim // (2 ** (len(self.features) - 1)) for dim in spatial_dims[:2]
+        )
 
-		flattened_size = self._spatial_dims[0] * self._spatial_dims[1] * self.features[0]
+        flattened_size = (
+            self._spatial_dims[0] * self._spatial_dims[1] * self.features[0]
+        )
 
-		self.linear = nnx.Linear(
-			in_features=self.latent_size, out_features=flattened_size, rngs=rngs
-		)
+        self.linear = nnx.Linear(
+            in_features=self.latent_size, out_features=flattened_size, rngs=rngs
+        )
 
-		self.convs = nnx.List(
-			[
-				nnx.ConvTranspose(
-					in_features=in_features,
-					out_features=out_features,
-					kernel_size=(3, 3),
-					strides=(2, 2),
-					padding="SAME",
-					rngs=rngs,
-				)
-				for in_features, out_features in zip(
-					self.features[:-1], self.features[1:], strict=True
-				)
-			]
-		)
+        self.convs = nnx.List(
+            [
+                nnx.ConvTranspose(
+                    in_features=in_features,
+                    out_features=out_features,
+                    kernel_size=(3, 3),
+                    strides=(2, 2),
+                    padding="SAME",
+                    rngs=rngs,
+                )
+                for in_features, out_features in zip(
+                    self.features[:-1], self.features[1:], strict=True
+                )
+            ]
+        )
 
-	def __call__(self, z: Array) -> Array:
-		"""Forward pass of the decoder.
+    def __call__(self, z: Array) -> Array:
+        """Forward pass of the decoder.
 
-		Args:
-			z: Latent vector with shape `(..., latent_size)`.
+        Args:
+            z: Latent vector with shape `(..., latent_size)`.
 
-		Returns:
-			Reconstructed output tensor with shape `(..., H, W, channel_size)`.
+        Returns:
+            Reconstructed output tensor with shape `(..., H, W, channel_size)`.
 
-		"""
-		x = jax.nn.relu(self.linear(z))
-		x = jnp.reshape(x, x.shape[:-1] + self._spatial_dims + (self.features[0],))
-		for conv in self.convs[:-1]:
-			x = jax.nn.relu(conv(x))
-		x = self.convs[-1](x)
-		return x
+        """
+        x = jax.nn.relu(self.linear(z))
+        x = jnp.reshape(x, x.shape[:-1] + self._spatial_dims + (self.features[0],))
+        for conv in self.convs[:-1]:
+            x = jax.nn.relu(conv(x))
+        x = self.convs[-1](x)
+        return x
 
 
 class VAE(nnx.Module):
-	"""Variational Autoencoder module.
+    """Variational Autoencoder module.
 
-	Combines an encoder and decoder with a reparameterization sampler for training with the
-	evidence lower bound (ELBO).
+    Combines an encoder and decoder with a reparameterization sampler for training with
+    the evidence lower bound (ELBO).
 
-	"""
+    """
 
-	def __init__(
-		self,
-		*,
-		spatial_dims: tuple[int, int],
-		features: Sequence[int],
-		latent_size: int,
-		rngs: nnx.Rngs,
-	):
-		"""Initialize the VAE module.
+    def __init__(
+        self,
+        *,
+        spatial_dims: tuple[int, int],
+        features: Sequence[int],
+        latent_size: int,
+        rngs: nnx.Rngs,
+    ):
+        """Initialize the VAE module.
 
-		Args:
-			spatial_dims: Spatial dimensions of the input/output.
-			features: Sequence of feature sizes for encoder and decoder.
-			latent_size: Size of the latent space.
-			rngs: rng key.
+        Args:
+            spatial_dims: Spatial dimensions of the input/output.
+            features: Sequence of feature sizes for encoder and decoder.
+            latent_size: Size of the latent space.
+            rngs: rng key.
 
-		"""
-		super().__init__()
-		self.encoder = Encoder(
-			spatial_dims=spatial_dims, features=features, latent_size=latent_size, rngs=rngs
-		)
-		self.decoder = Decoder(
-			spatial_dims=spatial_dims, features=features[::-1], latent_size=latent_size, rngs=rngs
-		)
+        """
+        super().__init__()
+        self.encoder = Encoder(
+            spatial_dims=spatial_dims,
+            features=features,
+            latent_size=latent_size,
+            rngs=rngs,
+        )
+        self.decoder = Decoder(
+            spatial_dims=spatial_dims,
+            features=features[::-1],
+            latent_size=latent_size,
+            rngs=rngs,
+        )
 
-	def encode(self, x: Array) -> tuple[Array, Array, Array]:
-		"""Encode input to latent space.
+    def encode(self, x: Array) -> tuple[Array, Array, Array]:
+        """Encode input to latent space.
 
-		Args:
-			x: Input tensor with shape `(..., H, W, channel_size)`.
+        Args:
+            x: Input tensor with shape `(..., H, W, channel_size)`.
 
-		Returns:
-			Tuple `(z, mean, logvar)` where all have shape `(..., latent_size)`.
+        Returns:
+            Tuple `(z, mean, logvar)` where all have shape `(..., latent_size)`.
 
-		"""
-		mean, logvar = self.encoder(x)
-		return self.encoder.reparameterize(mean, logvar), mean, logvar
+        """
+        mean, logvar = self.encoder(x)
+        return self.encoder.reparameterize(mean, logvar), mean, logvar
 
-	def decode(self, z: Array) -> Array:
-		"""Decode latent vector to output space.
+    def decode(self, z: Array) -> Array:
+        """Decode latent vector to output space.
 
-		Args:
-			z: Latent vector with shape `(..., latent_size)`.
+        Args:
+            z: Latent vector with shape `(..., latent_size)`.
 
-		Returns:
-			Reconstructed output tensor with shape `(..., H, W, channel_size)`.
+        Returns:
+            Reconstructed output tensor with shape `(..., H, W, channel_size)`.
 
-		"""
-		return self.decoder(z)
+        """
+        return self.decoder(z)
 
-	def generate(self, z: Array) -> Array:
-		"""Generate output from latent vector.
+    def generate(self, z: Array) -> Array:
+        """Generate output from latent vector.
 
-		Args:
-			z: Latent vector with shape `(..., latent_size)`.
+        Args:
+            z: Latent vector with shape `(..., latent_size)`.
 
-		Returns:
-			Generated output tensor with shape `(..., H, W, channel_size)` in the range `[0, 1]`.
+        Returns:
+            Generated output tensor with shape `(..., H, W, channel_size)` in the range
+            `[0, 1]`.
 
-		"""
-		return jax.nn.sigmoid(self.decoder(z))
+        """
+        return jax.nn.sigmoid(self.decoder(z))
 
-	def __call__(self, x: Array) -> tuple[Array, Array, Array]:
-		"""Forward pass of the VAE.
+    def __call__(self, x: Array) -> tuple[Array, Array, Array]:
+        """Forward pass of the VAE.
 
-		Args:
-			x: Input tensor with shape `(..., H, W, channel_size)`.
+        Args:
+            x: Input tensor with shape `(..., H, W, channel_size)`.
 
-		Returns:
-			Tuple `(logits, mean, logvar)`
+        Returns:
+            Tuple `(logits, mean, logvar)`
 
-		"""
-		z, mean, logvar = self.encode(x)
-		logits = self.decode(z)
-		return logits, mean, logvar
+        """
+        z, mean, logvar = self.encode(x)
+        logits = self.decode(z)
+        return logits, mean, logvar
 
 
 @nnx.jit
 def kl_divergence(mean: Array, logvar: Array) -> Array:
-	"""Compute KL divergence between latent distribution and standard normal.
+    """Compute KL divergence between latent distribution and standard normal.
 
-	Args:
-		mean: Mean of the latent distribution.
-		logvar: Log variance of the latent distribution.
+    Args:
+        mean: Mean of the latent distribution.
+        logvar: Log variance of the latent distribution.
 
-	Returns:
-		Scalar KL divergence value (sum over last dimension).
+    Returns:
+        Scalar KL divergence value (sum over last dimension).
 
-	"""
-	return -0.5 * jnp.sum(1 + logvar - jnp.square(mean) - jnp.exp(logvar))
+    """
+    return -0.5 * jnp.sum(1 + logvar - jnp.square(mean) - jnp.exp(logvar))
 
 
 @nnx.jit
 def binary_cross_entropy_with_logits(logits: Array, labels: Array) -> Array:
-	"""Compute binary cross-entropy loss with logits.
+    """Compute binary cross-entropy loss with logits.
 
-	Args:
-		logits: Predicted logits.
-		labels: True labels.
+    Args:
+        logits: Predicted logits.
+        labels: True labels.
 
-	Returns:
-		Summed Binary Cross-Entropy loss over the last dimension.
+    Returns:
+        Summed Binary Cross-Entropy loss over the last dimension.
 
-	"""
-	logits = jax.nn.log_sigmoid(logits)
-	return -jnp.sum(labels * logits + (1.0 - labels) * jnp.log(-jnp.expm1(logits)))
+    """
+    logits = jax.nn.log_sigmoid(logits)
+    return -jnp.sum(labels * logits + (1.0 - labels) * jnp.log(-jnp.expm1(logits)))
 
 
 @nnx.jit
 def vae_loss(logits: Array, labels: Array, mean: Array, logvar: Array) -> Array:
-	"""Compute VAE loss.
+    """Compute VAE loss.
 
-	Args:
-		logits: Predicted logits from the decoder.
-		labels: Target labels (e.g., normalized images or one-hot vectors).
-		mean: Mean of the latent distribution.
-		logvar: Log variance of the latent distribution.
+    Args:
+        logits: Predicted logits from the decoder.
+        labels: Target labels (e.g., normalized images or one-hot vectors).
+        mean: Mean of the latent distribution.
+        logvar: Log variance of the latent distribution.
 
-	Returns:
-		Total VAE loss equal to `mean(BCE) + mean(KL)`.
+    Returns:
+        Total VAE loss equal to `mean(BCE) + mean(KL)`.
 
-	"""
-	bce_loss = jnp.mean(binary_cross_entropy_with_logits(logits, labels))
-	kld_loss = jnp.mean(kl_divergence(mean, logvar))
-	return bce_loss + kld_loss
+    """
+    bce_loss = jnp.mean(binary_cross_entropy_with_logits(logits, labels))
+    kld_loss = jnp.mean(kl_divergence(mean, logvar))
+    return bce_loss + kld_loss

@@ -12,14 +12,14 @@ from .reaction_diffusion import ReactionDiffusion
 from .sandpile import Sandpile
 
 __all__ = [
-	"Boids",
-	"Elementary",
-	"FlowLenia",
-	"LangtonAnt",
-	"Lenia",
-	"Life",
-	"ParticleLenia",
-	"ParticleLife",
-	"ReactionDiffusion",
-	"Sandpile",
+    "Boids",
+    "Elementary",
+    "FlowLenia",
+    "LangtonAnt",
+    "Lenia",
+    "Life",
+    "ParticleLenia",
+    "ParticleLife",
+    "ReactionDiffusion",
+    "Sandpile",
 ]

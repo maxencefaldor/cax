@@ -1,4 +1,4 @@
-## Neural Network Utils
+# Neural Network Utils
 
 ::: cax.nn.pool
 ::: cax.nn.buffer

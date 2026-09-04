@@ -1,8 +1,8 @@
 """Particle Lenia module.
 
 References:
-	[1] Particle Lenia and the energy-based formulation, Mordvintsev et al. 2022.
-		https://google-research.github.io/self-organising-systems/particle-lenia/
+    [1] Particle Lenia and the energy-based formulation, Mordvintsev et al. 2022.
+        https://google-research.github.io/self-organising-systems/particle-lenia/
 
 """
 
@@ -15,14 +15,14 @@ from .state import ParticleLeniaState
 from .update import ParticleLeniaUpdate
 
 __all__ = [
-	"ParticleLenia",
-	"ParticleLeniaGrowthParams",
-	"ParticleLeniaKernelParams",
-	"ParticleLeniaPerceive",
-	"ParticleLeniaRuleParams",
-	"ParticleLeniaState",
-	"ParticleLeniaUpdate",
-	"bell",
-	"peak_growth_fn",
-	"peak_kernel_fn",
+    "ParticleLenia",
+    "ParticleLeniaGrowthParams",
+    "ParticleLeniaKernelParams",
+    "ParticleLeniaPerceive",
+    "ParticleLeniaRuleParams",
+    "ParticleLeniaState",
+    "ParticleLeniaUpdate",
+    "bell",
+    "peak_growth_fn",
+    "peak_kernel_fn",
 ]

@@ -1,6 +1,7 @@
 # API Reference
 
-This section documents the public Python API of CAX. Use the pages below to browse modules.
+This section documents the public Python API of CAX.
+Use the pages below to browse modules.
 
 - [Core](core.md)
 - [Perceive](perceive.md)

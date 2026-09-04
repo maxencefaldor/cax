@@ -8,49 +8,50 @@ license = "MIT"
 license-files = ["LICENSE"]
 requires-python = ">=3.12"
 dependencies = [
-	"jax>=0.10.0",
-	"flax>=0.12.6",
-	"optax>=0.2.8",
-	"pillow>=12.3.0",
+    "jax>=0.10.0",
+    "flax>=0.12.6",
+    "optax>=0.2.8",
+    "pillow>=12.3.0",
 ]
 keywords = [
-	"complex systems",
-	"artificial life",
-	"open-endedness",
-	"emergence",
-	"self-organization",
-	"cellular automata",
-	"neural cellular automata",
+    "complex systems",
+    "artificial life",
+    "open-endedness",
+    "emergence",
+    "self-organization",
+    "cellular automata",
+    "neural cellular automata",
 ]
 classifiers = [
-	"Programming Language :: Python :: 3.12",
-	"Programming Language :: Python :: 3.13",
-	"Programming Language :: Python :: 3.14",
-	"License :: OSI Approved :: MIT License",
-	"Operating System :: OS Independent",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
 ]
 
 [dependency-groups]
 dev = [
-	"pytest>=8.3.0",
-	"pytest-cov>=5.0.0",
-	"pytest-xdist>=3.5.0",
-	"ruff>=0.15.0",
-	"ty>=0.0.38",
+    "pytest>=8.3.0",
+    "pytest-cov>=5.0.0",
+    "pytest-xdist>=3.5.0",
+    "ruff>=0.15.0",
+    "rumdl",
+    "ty>=0.0.38",
 ]
 
 [project.optional-dependencies]
 docs = [
-	"mkdocs>=1.6.0",
-	"mkdocs-material>=9.7.0",
-	"mkdocstrings[python]>=1.0.0",
-	"mkdocs-jupyter>=0.26.0",
+    "mkdocs>=1.6.0",
+    "mkdocs-material>=9.7.0",
+    "mkdocstrings[python]>=1.0.0",
+    "mkdocs-jupyter>=0.26.0",
 ]
 examples = [
-	"torchvision>=0.21.0",
-	"evosax>=0.2.0",
-	"ipykernel>=6.29.0",
-	"mediapy>=1.2.0",
+    "torchvision>=0.21.0",
+    "evosax>=0.2.0",
+    "ipykernel>=6.29.0",
+    "mediapy>=1.2.0",
 ]
 
 [project.urls]
@@ -61,33 +62,58 @@ Documentation = "https://maxencefaldor.github.io/cax/"
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
+# ruff: the formatter at its defaults (4 spaces, 88 columns), so no width and
+# no indent appear here; the opinion is the lint selection, one reason each.
 [tool.ruff]
 src = ["src", "tests"]
-target-version = "py314"
-line-length = 100
 
 [tool.ruff.lint]
-select = ["B", "C4", "D", "E", "F", "I", "N", "PERF", "PT", "RUF", "SIM", "UP", "W"]
-ignore = [
-	"D203",  # incorrect-blank-line-before-class
-	"D206",  # docstring-tab-indentation
-	"D213",  # multi-line-summary-second-line
-	"N803",  # non-lowercase-variable-in-function
-	"N806",  # invalid-argument-name
-	"W191",  # tab-indentation
+select = [
+    "E", "W",  # pycodestyle
+    "F",       # pyflakes
+    "I",       # import order
+    "N",       # naming
+    "D",       # docstrings, Google convention below
+    "UP",      # modern syntax for the target version
+    "B",       # likely bugs: mutable defaults, late-binding closures
+    "SIM",     # simpler expressions
+    "C4",      # simpler comprehensions
+    "PTH",     # pathlib over os.path
+    "PERF",    # perflint
+    "FURB",    # refurb: modernize
+    "RUF",     # ruff's own rules
+    "NPY",     # numpy deprecations and the legacy random API
+    "ERA",     # no commented-out code
 ]
+# Left out on purpose: PL is noisy on research code, ANN duplicates ty, T20
+# forbids the print a CLI uses. Not TC either: jax reads a jitted function's
+# annotations at trace time, so an import used only in a signature is still a
+# runtime import here.
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
 
 [tool.ruff.lint.per-file-ignores]
+"tests/**" = ["D103"]  # a test's name is its docstring
+# A notebook is a sequence of cells, not a module: names are rebound as the
+# story moves on, loops are unrolled for their side effects.
+# Lenia's own symbols, as the papers write them: R the kernel radius, T the
+# time step, U the potential, G the growth, A the world. Renaming them would
+# break the correspondence to the equations the code transcribes.
+"src/cax/cs/lenia/**" = ["N803", "N806"]
+"src/cax/cs/flow_lenia/**" = ["N803", "N806"]
+"src/cax/cs/particle_lenia/**" = ["N803", "N806"]
+"tests/test_cs/**" = ["N803", "N806"]
 "**/*.ipynb" = [
-	"B007",  # unused-loop-control-variable
-	"B905",  # zip-without-explicit-strict
-	"F811",  # redefined-while-unused
-	"RUF005",  # collection-literal-concatenation
-	"RUF059",  # unused-unpacked-variable
+    "B007",  # unused-loop-control-variable
+    "B905",  # zip-without-explicit-strict
+    "F811",  # redefined-while-unused
+    "RUF005",  # collection-literal-concatenation
+    "RUF059",  # unused-unpacked-variable
 ]
 
 [tool.ruff.format]
-indent-style = "tab"
+docstring-code-format = true
 
 [tool.ty.environment]
 python-version = "3.14"
@@ -113,6 +139,11 @@ replace-imports-with-any = ["flax.**"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 filterwarnings = [
-	"error::DeprecationWarning",
-	"error::FutureWarning",
+    "error::DeprecationWarning",
+    "error::FutureWarning",
 ]
+
+# rumdl: its tables live in .rumdl.toml, because rumdl reads code-block-tools
+# only from its own file (rvben/rumdl#851) and uses the first config file it
+# finds, so a tool.rumdl table here would be dead while that file exists. When
+# the fix lands, move every table from .rumdl.toml under tool.rumdl, delete it.

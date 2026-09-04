@@ -14,23 +14,23 @@ from .state import LangtonAntState
 
 
 class LangtonAntPerceive(Perceive[LangtonAntState, Array]):
-	"""Langton's Ant perception.
+    """Langton's Ant perception.
 
-	Reads the cell color at the ant's current grid position. The perceived color is used
-	by the update rule to determine the turn direction.
-	"""
+    Reads the cell color at the ant's current grid position. The perceived color is used
+    by the update rule to determine the turn direction.
+    """
 
-	@override
-	def __call__(self, state: LangtonAntState) -> Array:
-		"""Perceive the cell color at the ant's position.
+    @override
+    def __call__(self, state: LangtonAntState) -> Array:
+        """Perceive the cell color at the ant's position.
 
-		Args:
-			state: Current Langton's Ant state containing grid, position, and direction.
+        Args:
+            state: Current Langton's Ant state containing grid, position, and direction.
 
-		Returns:
-			Scalar array containing the cell color at the ant's position.
+        Returns:
+            Scalar array containing the cell color at the ant's position.
 
-		"""
-		row, col = state.position[0], state.position[1]
-		cell_color: Array = state.grid[row, col, 0]
-		return cell_color
+        """
+        row, col = state.position[0], state.position[1]
+        cell_color: Array = state.grid[row, col, 0]
+        return cell_color
