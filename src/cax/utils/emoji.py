@@ -119,11 +119,16 @@ def get_emoji(emoji: str) -> Image:
 
 
 def get_emoji_array(emoji: str, size: int, pad_width: int = 0) -> Array:
-    """Fetch an emoji as a padded RGBA array.
+    """Fetch an emoji as a padded, premultiplied RGBA array.
 
     The glyph is resized to ``size`` and framed in transparent pixels, which is what a
     growing cellular automaton needs: the target sits in the middle of a larger grid, so
     the automaton has somewhere to overshoot into and can be penalised for doing so.
+
+    Colour is premultiplied by alpha, CAX's convention for RGBA arrays: each pixel
+    holds the light it emits, so a transparent pixel is zero in every channel and a
+    loss on the array measures what is seen rather than the colour a PNG stores behind
+    invisible pixels. ``rgba_to_rgb`` composites arrays in this convention.
 
     Args:
         emoji: The emoji character or sequence to fetch.
@@ -132,7 +137,7 @@ def get_emoji_array(emoji: str, size: int, pad_width: int = 0) -> Array:
 
     Returns:
         An array of shape ``(size + 2 * pad_width, size + 2 * pad_width, 4)`` holding
-        RGBA values in the unit interval.
+        premultiplied RGBA values in the unit interval.
 
     Raises:
         ValueError: If the emoji has no Noto glyph under this naming scheme.
@@ -143,4 +148,5 @@ def get_emoji_array(emoji: str, size: int, pad_width: int = 0) -> Array:
         (size, size), resample=PIL.Image.Resampling.LANCZOS
     )
     array = jnp.asarray(image_pil, dtype=jnp.float32) / 255.0
+    array = array.at[..., :3].multiply(array[..., 3:])
     return jnp.pad(array, ((pad_width, pad_width), (pad_width, pad_width), (0, 0)))

@@ -3,6 +3,15 @@
 All notable changes to CAX are documented here.
 Versions follow [semantic versioning](https://semver.org): while CAX is pre-1.0, breaking changes raise the minor version.
 
+## Unreleased
+
+### Changed
+
+- RGBA arrays are premultiplied: colour is scaled by alpha, so a pixel holds the light it emits and a transparent pixel is zero in every channel.
+  `get_emoji_array` returns targets in this form and `rgba_to_rgb` composites them over white as `rgb + (1 - alpha)`; `render_array_with_channels_to_rgba` premultiplies the colour it builds.
+  The Growing NCA notebooks trained against straight-alpha targets, whose anti-aliased edge pixels store full-strength colour behind almost no alpha --- colour an alive-masked automaton cannot reproduce, and which a mean squared error on the RGBA channels weighs the same as colour that is seen.
+  Three notebooks premultiplied by hand and five did not; now the loader does it, as the reference implementations do.
+
 ## 0.4.3
 
 ### Added

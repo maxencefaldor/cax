@@ -22,24 +22,24 @@ from cax.utils.render import (
     [
         # Simple case: Fully opaque red
         (jnp.array([1.0, 0.0, 0.0, 1.0]), jnp.array([1.0, 0.0, 0.0])),
-        # Simple case: Fully transparent blue (should be white background)
-        (jnp.array([0.0, 0.0, 1.0, 0.0]), jnp.array([1.0, 1.0, 1.0])),
-        # Simple case: 50% transparent green
-        (jnp.array([0.0, 1.0, 0.0, 0.5]), jnp.array([0.5, 1.0, 0.5])),
+        # Fully transparent pixel: premultiplied, so all zero -> white background
+        (jnp.array([0.0, 0.0, 0.0, 0.0]), jnp.array([1.0, 1.0, 1.0])),
+        # 50% transparent green, premultiplied (green * 0.5)
+        (jnp.array([0.0, 0.5, 0.0, 0.5]), jnp.array([0.5, 1.0, 0.5])),
         # Multi-pixel case
         (
-            jnp.array([[1.0, 0.0, 0.0, 1.0], [0.0, 0.0, 1.0, 0.0]]),
+            jnp.array([[1.0, 0.0, 0.0, 1.0], [0.0, 0.0, 0.0, 0.0]]),
             jnp.array([[1.0, 0.0, 0.0], [1.0, 1.0, 1.0]]),
         ),
         # Multi-dimensional case (e.g., image)
         (
-            jnp.array([[[1.0, 0.0, 0.0, 1.0]], [[0.0, 1.0, 0.0, 0.5]]]),
+            jnp.array([[[1.0, 0.0, 0.0, 1.0]], [[0.0, 0.5, 0.0, 0.5]]]),
             jnp.array([[[1.0, 0.0, 0.0]], [[0.5, 1.0, 0.5]]]),
         ),
         # Alpha clipping
         (jnp.array([0.5, 0.5, 0.5, 1.5]), jnp.array([0.5, 0.5, 0.5])),  # Alpha > 1
         (
-            jnp.array([0.5, 0.5, 0.5, -0.5]),
+            jnp.array([0.0, 0.0, 0.0, -0.5]),
             jnp.array([1.0, 1.0, 1.0]),
         ),  # Alpha < 0 -> white
     ],
@@ -156,27 +156,27 @@ def test_render_array_with_channels_to_rgb(
 @pytest.mark.parametrize(
     ("input_array", "expected_rgba"),
     [
-        # 1 channel -> repeated RGBA
-        (jnp.array([0.5]), jnp.array([0.5, 0.5, 0.5, 0.5])),
+        # 1 channel -> gray = alpha, premultiplied
+        (jnp.array([0.5]), jnp.array([0.25, 0.25, 0.25, 0.5])),
         (
-            jnp.array([[0.1], [0.9]]),
-            jnp.array([[0.1, 0.1, 0.1, 0.1], [0.9, 0.9, 0.9, 0.9]]),
+            jnp.array([[0.1], [1.0]]),
+            jnp.array([[0.01, 0.01, 0.01, 0.1], [1.0, 1.0, 1.0, 1.0]]),
         ),
-        # 2 channels -> [Gray, Alpha]
-        (jnp.array([0.8, 0.5]), jnp.array([0.8, 0.8, 0.8, 0.5])),
+        # 2 channels -> [Gray, Alpha], premultiplied
+        (jnp.array([0.8, 0.5]), jnp.array([0.4, 0.4, 0.4, 0.5])),
         (
             jnp.array([[0.2, 1.0], [0.7, 0.0]]),
-            jnp.array([[0.2, 0.2, 0.2, 1.0], [0.7, 0.7, 0.7, 0.0]]),
+            jnp.array([[0.2, 0.2, 0.2, 1.0], [0.0, 0.0, 0.0, 0.0]]),
         ),
-        # 3 channels -> [Hue, Sat, Alpha] (Value=1.0)
-        (jnp.array([0.0, 1.0, 0.5]), jnp.array([1.0, 0.0, 0.0, 0.5])),  # Red, 50% alpha
+        # 3 channels -> [Hue, Sat, Alpha] (Value=1.0), premultiplied
+        (jnp.array([0.0, 1.0, 0.5]), jnp.array([0.5, 0.0, 0.0, 0.5])),  # Red, 50% alpha
         (
             jnp.array([1 / 3, 1.0, 1.0]),
             jnp.array([0.0, 1.0, 0.0, 1.0]),
         ),  # Green, 100% alpha
         (
             jnp.array([[0.5, 1.0, 0.2], [0.0, 0.0, 0.8]]),
-            jnp.array([[0.0, 1.0, 1.0, 0.2], [1.0, 1.0, 1.0, 0.8]]),
+            jnp.array([[0.0, 0.2, 0.2, 0.2], [0.8, 0.8, 0.8, 0.8]]),
         ),  # Cyan (20% alpha), White (80% alpha)
         # 4 channels -> RGBA direct
         (jnp.array([0.1, 0.2, 0.3, 0.4]), jnp.array([0.1, 0.2, 0.3, 0.4])),

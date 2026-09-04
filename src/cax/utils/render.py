@@ -11,14 +11,20 @@ from cax.core.perceive.kernels import HEX_BASIS
 
 
 def rgba_to_rgb(array: Array) -> Array:
-    """Convert an RGBA image to RGB by alpha compositing over white.
+    """Convert a premultiplied RGBA image to RGB by alpha compositing over white.
+
+    RGBA arrays in CAX are premultiplied: colour is already scaled by alpha, so a pixel
+    holds the light it emits and compositing over white is ``rgb + (1 - alpha)``.
+    Targets from ``get_emoji_array`` and the RGBA channels of a neural cellular
+    automaton state follow this convention.
 
     The function assumes the last dimension encodes channels and that the input is
     normalized to the range ``[0, 1]`` with shape ``(..., 4)``. The output preserves the
     input shape except for the channel dimension, which becomes ``3``.
 
     Args:
-        array: RGBA image with shape ``(..., 4)`` and values in ``[0, 1]``.
+        array: Premultiplied RGBA image with shape ``(..., 4)`` and values in
+            ``[0, 1]``.
 
     Returns:
         RGB image with shape ``(..., 3)`` and values in ``[0, 1]``.
@@ -30,7 +36,7 @@ def rgba_to_rgb(array: Array) -> Array:
         )
     rgb, alpha = array[..., :-1], array[..., -1:]
     alpha = jnp.clip(alpha, min=0.0, max=1.0)
-    return (1.0 - alpha) * 1.0 + alpha * rgb
+    return (1.0 - alpha) + rgb
 
 
 def rgb_to_hsv(rgb: Array) -> Array:
@@ -177,23 +183,27 @@ def render_array_with_channels_to_rgba(array: Array) -> Array:
     - If the array has 4 or more channels, the last four channels are used directly as
         RGBA.
 
+    The result is premultiplied, as every RGBA array in CAX is (see ``rgba_to_rgb``):
+    the colour built from one to three channels is scaled by the alpha before it is
+    returned, and four or more channels are taken to be premultiplied already.
+
     Args:
         array: Input array with shape ``(..., C)`` and values in ``[0, 1]``.
 
     Returns:
-        RGBA array with shape ``(..., 4)`` and values in ``[0, 1]``.
+        Premultiplied RGBA array with shape ``(..., 4)`` and values in ``[0, 1]``.
 
     """
     num_channels = array.shape[-1]
 
     if num_channels == 1:
         # 1 channel
-        rgba = jnp.repeat(array, 4, axis=-1)
+        rgb = jnp.repeat(array, 3, axis=-1)
+        alpha = array
     elif num_channels == 2:
         # 2 channels
         rgb = jnp.repeat(array[..., 0:1], 3, axis=-1)
         alpha = array[..., 1:2]
-        rgba = jnp.concatenate([rgb, alpha], axis=-1)
     elif num_channels == 3:
         # 3 channels
         hue = array[..., 0:1]  # Use the first channel as hue
@@ -202,12 +212,11 @@ def render_array_with_channels_to_rgba(array: Array) -> Array:
         hsv = jnp.concatenate([hue, saturation, value], axis=-1)
         rgb = hsv_to_rgb(hsv)
         alpha = array[..., 2:3]  # Use the last channel as alpha
-        rgba = jnp.concatenate([rgb, alpha], axis=-1)
     else:
         # 4 or more channels
-        rgba = array[..., -4:]
+        return array[..., -4:]
 
-    return rgba
+    return jnp.concatenate([rgb * alpha, alpha], axis=-1)
 
 
 def pixel_grid(resolution: int, *, low: float = 0.0, high: float = 1.0) -> Array:

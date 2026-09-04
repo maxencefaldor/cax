@@ -146,6 +146,16 @@ def test_get_emoji_array() -> None:
     assert jnp.all(array[:, -2:] == 0.0)
 
 
+def test_get_emoji_array_premultiplies_alpha() -> None:
+    """Colour is scaled by alpha, so a half-transparent pixel holds half its colour."""
+    glyph = PIL.Image.new("RGBA", (128, 128), (255, 0, 0, 128))
+
+    with patch("cax.utils.emoji.get_emoji", return_value=glyph):
+        array = get_emoji_array("🦎", size=8)
+
+    assert jnp.allclose(array, jnp.array([128 / 255, 0.0, 0.0, 128 / 255]))
+
+
 def test_get_emoji_array_without_padding() -> None:
     """Padding is optional, so the array is exactly the requested size."""
     glyph = PIL.Image.new("RGBA", (128, 128), (0, 0, 0, 255))

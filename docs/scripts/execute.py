@@ -150,6 +150,8 @@ def main() -> None:
         print(f"[{index}/{len(stale)}] {path.stem} ... ", end="", flush=True)
         ok, elapsed, message = execute(path, args.device)
         if ok:
+            # Re-read before writing so shards on other devices are not clobbered.
+            cache = json.loads(CACHE.read_text()) if CACHE.exists() else {}
             cache[path.name] = notebook_digest(path, library)
             CACHE.write_text(json.dumps(cache, indent=1, sort_keys=True) + "\n")
             print(f"ok ({elapsed:.0f}s)")
