@@ -3,7 +3,7 @@
 All notable changes to CAX are documented here.
 Versions follow [semantic versioning](https://semver.org): while CAX is pre-1.0, breaking changes raise the minor version.
 
-## Unreleased
+## 0.4.4
 
 ### Changed
 
