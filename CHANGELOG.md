@@ -14,7 +14,7 @@ Versions follow [semantic versioning](https://semver.org): while CAX is pre-1.0,
 - `examples/62_growing_nca_es.ipynb` trains on the Growing NCA setup: a 72x72 grid, 128 steps, the official seed, and a loss on the second half of the rollout rather than three checkpoints.
   A loss on the final frame alone leaves the growth unconstrained and evolution settles for a blob; scoring every frame of the second half grows the gecko.
   The strategy is Open-ES with a population of 512 and a constant standard deviation, and the update takes half steps: at full steps the seed dies for every member and the fitnesses tie.
-- `examples/63_growing_nca_rl.ipynb` plays the evolved automaton for twice the training horizon, as the other Growing NCA notebooks do.
+- `examples/43_diffusing_nca.ipynb`, `examples/49_isotropic_nca.ipynb` and `examples/63_growing_nca_rl.ipynb` play the trained automaton for twice the training horizon, as the other Growing NCA notebooks do.
 - `examples/32_neural_particle_automata.ipynb` shows its premultiplied target composited over white.
 
 ## 0.4.3
