@@ -11,6 +11,11 @@ Versions follow [semantic versioning](https://semver.org): while CAX is pre-1.0,
   `get_emoji_array` returns targets in this form and `rgba_to_rgb` composites them over white as `rgb + (1 - alpha)`; `render_array_with_channels_to_rgba` premultiplies the colour it builds.
   The Growing NCA notebooks trained against straight-alpha targets, whose anti-aliased edge pixels store full-strength colour behind almost no alpha --- colour an alive-masked automaton cannot reproduce, and which a mean squared error on the RGBA channels weighs the same as colour that is seen.
   Three notebooks premultiplied by hand and five did not; now the loader does it, as the reference implementations do.
+- `examples/62_growing_nca_es.ipynb` trains on the Growing NCA setup: a 72x72 grid, 128 steps, the official seed, and a loss on the second half of the rollout rather than three checkpoints.
+  A loss on the final frame alone leaves the growth unconstrained and evolution settles for a blob; scoring every frame of the second half grows the gecko.
+  The strategy is Open-ES with a population of 512 and a constant standard deviation, and the update takes half steps: at full steps the seed dies for every member and the fitnesses tie.
+- `examples/63_growing_nca_rl.ipynb` plays the evolved automaton for twice the training horizon, as the other Growing NCA notebooks do.
+- `examples/32_neural_particle_automata.ipynb` shows its premultiplied target composited over white.
 
 ## 0.4.3
 
