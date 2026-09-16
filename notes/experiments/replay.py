@@ -1,6 +1,8 @@
 """Replay cubff's RNG (SplitMix64 init, Fisher-Yates shuffle, per-byte mutation) host-side and
 check that CAX's pair_and_run reproduces cubff's per-epoch checkpoints byte for byte."""
 
+import os
+
 import jax.numpy as jnp
 import numpy as np
 from flax import nnx
@@ -58,7 +60,7 @@ def replay(lang_dir, heads, params_seed=7, N=1024, epochs=4, mutation_prob=1 << 
     return ok
 
 
-R = "/private/tmp/claude-502/-Users-mf1022-dev/1e780cb0-2bac-442b-9ceb-13866872294e/scratchpad/replay/"
+R = os.environ.get("CUBFF_REPLAY", "replay") + "/"
 a = replay(R + "nh1024", heads=False)
 b = replay(R + "h1024", heads=True)
 print("REPLAY EXACT" if a and b else "REPLAY MISMATCH")

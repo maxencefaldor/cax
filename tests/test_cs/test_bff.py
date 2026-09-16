@@ -14,6 +14,7 @@ from cax.cs.bff import (
     initial_thread_state,
     opcode_table_from_string,
     opcode_table_permuted,
+    opcode_table_swap_heads,
     parse,
     run,
     step,
@@ -353,3 +354,70 @@ def test_swap_heads_copy_idiom() -> None:
     out, _, ops = run(tapes, table, num_steps=10)
     assert int(out[0, 1]) == int(out[0, 0]) == ord(">")
     assert int(ops[0]) == 3
+
+
+def _enriched_tapes(rng: np.random.Generator, table, num: int) -> jnp.ndarray:
+    ops = np.array(
+        [b for b in range(256) if int(table[b]) != Op.NOOP][1:], dtype=np.uint8
+    )
+    tapes = rng.integers(0, 256, (num, 128), dtype=np.uint8)
+    mask = rng.random(tapes.shape)
+    tapes = np.where(mask < 0.4, rng.choice(ops, tapes.shape), tapes)
+    return jnp.asarray(
+        np.where((mask >= 0.4) & (mask < 0.5), 0, tapes).astype(np.uint8)
+    )
+
+
+@pytest.mark.parametrize("control", ["matched", "cyclic", "flip"])
+@pytest.mark.parametrize("heads", [False, True])
+def test_kernel_matches_xla(control: str, heads: bool) -> None:
+    """The Pallas kernel computes the same function as the XLA scan."""
+    from cax.cs.bff.kernel import run_kernel
+
+    interpret = jax.default_backend() != "gpu"
+    rng = np.random.default_rng(2)
+    for table in (TABLE, opcode_table_swap_heads()):
+        tapes = _enriched_tapes(rng, table, 70)  # not a multiple of the block
+        ref = run(
+            tapes,
+            table,
+            num_steps=300,
+            heads_from_tape=heads,
+            control=control,
+            implementation="xla",
+        )
+        out = run_kernel(
+            tapes,
+            table,
+            num_steps=300,
+            heads_from_tape=heads,
+            control=control,
+            interpret=interpret,
+        )
+        for a, b in zip(out, ref, strict=True):
+            assert bool(jnp.all(a == b)), control
+
+
+@pytest.mark.skipif(jax.device_count() < 2, reason="needs several devices")
+def test_bff_sharded_epoch_matches_unsharded() -> None:
+    """An epoch of a soup sharded over a mesh axis is bit-identical to the plain one."""
+    from jax.sharding import AxisType
+
+    mesh = jax.make_mesh(
+        (jax.device_count(),), ("program",), axis_types=(AxisType.Auto,)
+    )
+
+    def epoch(cs: BFF, soup: jnp.ndarray) -> tuple[jnp.ndarray, jnp.ndarray]:
+        permutation = jax.random.permutation(jax.random.key(5), soup.shape[0])
+        return cs.pair_and_run(soup, permutation)
+
+    with jax.set_mesh(mesh):
+        plain = BFF(num_steps=300, rngs=nnx.Rngs(0))
+        sharded = BFF(num_steps=300, shard_axis="program", rngs=nnx.Rngs(0))
+        soup = plain.init_state(num_programs=64 * jax.device_count())
+        soup_sharded = sharded.init_state(num_programs=64 * jax.device_count())
+        assert bool(jnp.all(soup == soup_sharded))
+        out, steps = nnx.jit(epoch)(plain, soup)
+        out_sharded, steps_sharded = nnx.jit(epoch)(sharded, soup_sharded)
+    assert bool(jnp.all(out == out_sharded))
+    assert bool(jnp.all(steps == steps_sharded))

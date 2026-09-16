@@ -1,7 +1,7 @@
 """Compare cax.cs.bff.replication_score with cubff's CheckSelfRep on identical noise."""
-import subprocess, numpy as np, jax.numpy as jnp
+import os, subprocess, numpy as np, jax.numpy as jnp
 from cax.cs.bff import replication_score, opcode_table_from_string, parse
-H = "/private/tmp/claude-502/-Users-mf1022-dev/1e780cb0-2bac-442b-9ceb-13866872294e/scratchpad/cubff/bin/harness_selfrep_"
+H = os.environ.get("CUBFF_BIN", "cubff/bin") + "/harness_selfrep_"
 table = opcode_table_from_string()
 rng = np.random.default_rng(5)
 ops = np.frombuffer(b"[]+-.,<>{}", dtype=np.uint8)

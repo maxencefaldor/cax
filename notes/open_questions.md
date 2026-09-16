@@ -26,3 +26,6 @@
 - **Phase 3 conflicts.**
   Encode (per-step random priority, value) and scatter-max.
   Decide whether priority is per thread per step or per cell per step; the former is cheaper.
+- **Post-transition epoch cost with the kernel.**
+  A block lives as long as its longest tape; after a takeover most tapes run the whole budget, so epochs will approach the no-halting cost (all 8192 steps for every warp).
+  Measure on a transitioned checkpoint; the `flip` and `cyclic` variants already pay it.

@@ -22,16 +22,18 @@ References:
 
 """
 
+from functools import partial
 from typing import override
 
 import jax
 import jax.numpy as jnp
 from flax import nnx
 from jax import Array
+from jax.sharding import PartitionSpec as P
 
 from cax.core import ComplexSystem
 
-from .interpreter import Control, run
+from .interpreter import Control, Implementation, run
 from .language import Op, opcode_table_from_string
 
 
@@ -47,14 +49,21 @@ class BFF(ComplexSystem[Array, Array]):
     `bff_noheads` (the paper's Section 2, and its headline result) is the default;
     `bff` is `heads_from_tape=True`; `bff_perm` is `opcode_table_permuted()`.
 
-    Speed: the interpreter searches for matching brackets only for the tapes that jump
-    and compacts the tapes still running after an early phase (see `run`), but a
-    fixed-shape scan still pays for the full step budget, where the reference stops each
-    tape as it halts. On a laptop CPU an epoch of the paper's 2^17-program soup takes
-    about 4 s here against 0.13 s for the reference's single-threaded CPU build; a GPU
-    build of the reference is faster still. What this class offers is the rest of the
-    ecosystem: the same state and step API as every other system, vmap over soups, and
-    states that are ordinary arrays.
+    Speed: on a GPU each pair runs inside one Pallas kernel that stops when the tape
+    halts, as the reference does (see `run`); an epoch of the paper's 2^17-program soup
+    takes about 20 ms on an H100 against 12 ms for the reference's CUDA build. On CPU
+    the XLA scan pays for the full step budget of every tape and a laptop takes about
+    4 s per epoch against 0.13 s for the reference's single-threaded build. What this
+    class offers is the rest of the ecosystem: the same state and step API as every
+    other system, and states that are ordinary arrays.
+
+    Sharding: with `shard_axis` set to the name of an axis of the active mesh (see
+    `jax.set_mesh`), `init_state` places the soup along that axis and each epoch runs
+    the pairs device-locally under `jax.shard_map`, leaving the random pairing's
+    gather and scatter to the compiler. One epoch is bit-identical to the unsharded
+    one. A soup of 2^17 programs is not enough work to keep one GPU busy, so this
+    pays only for soups of millions of programs; for many independent soups run
+    independent processes.
     """
 
     def __init__(
@@ -65,6 +74,8 @@ class BFF(ComplexSystem[Array, Array]):
         heads_from_tape: bool = False,
         control: Control = "matched",
         mutation_rate: float = 1 / 4096,
+        implementation: Implementation = "auto",
+        shard_axis: str | None = None,
         rngs: nnx.Rngs,
     ):
         """Initialize BFF.
@@ -82,6 +93,9 @@ class BFF(ComplexSystem[Array, Array]):
             mutation_rate: Probability that each byte of a concatenated pair is replaced
                 by a uniformly random byte before execution. The reference default
                 1/4096 is the paper's 0.024%. Zero disables mutation.
+            implementation: Interpreter implementation passed to `run`.
+            shard_axis: Name of the mesh axis to shard the soup over, or None to run
+                on one device.
             rngs: Random streams. Pairing draws from `pairing`, mutation from
                 `mutation`; `nnx.Rngs(0)` seeds both from the default stream.
 
@@ -97,6 +111,8 @@ class BFF(ComplexSystem[Array, Array]):
         self.heads_from_tape = heads_from_tape
         self.control = control
         self.mutation_rate = mutation_rate
+        self.implementation = implementation
+        self.shard_axis = shard_axis
         self.rngs = rngs
 
     def init_state(self, *, num_programs: int, tape_length: int = 64) -> Array:
@@ -112,9 +128,12 @@ class BFF(ComplexSystem[Array, Array]):
         """
         if num_programs % 2 != 0:
             raise ValueError(f"num_programs must be even, got {num_programs!r}")
-        return jax.random.randint(
+        soup = jax.random.randint(
             self.rngs.params(), (num_programs, tape_length), 0, 256, dtype=jnp.uint8
         )
+        if self.shard_axis is not None:
+            soup = jax.device_put(soup, P(self.shard_axis))
+        return soup
 
     def pair_and_run(self, soup: Array, permutation: Array) -> tuple[Array, Array]:
         """Execute one epoch given the pairing.
@@ -131,7 +150,12 @@ class BFF(ComplexSystem[Array, Array]):
 
         """
         num_programs, tape_length = soup.shape
-        pairs = soup[permutation].reshape(num_programs // 2, 2 * tape_length)
+        spec = P(self.shard_axis) if self.shard_axis is not None else None
+
+        def constrain(x: Array) -> Array:
+            return x if spec is None else jax.lax.with_sharding_constraint(x, spec)
+
+        pairs = constrain(soup[permutation]).reshape(num_programs // 2, 2 * tape_length)
         if self.mutation_rate > 0.0:
             key = self.rngs.mutation()
             key_mask, key_byte = jax.random.split(key)
@@ -140,14 +164,32 @@ class BFF(ComplexSystem[Array, Array]):
                 jnp.uint8
             )
             pairs = jnp.where(mutate, replacement, pairs)
-        pairs, steps, _ = run(
-            pairs,
-            self.opcode_table,
+        execute = partial(
+            run,
             num_steps=self.num_steps,
             heads_from_tape=self.heads_from_tape,
             control=self.control,
+            implementation=self.implementation,
         )
-        soup = jnp.zeros_like(soup).at[permutation].set(pairs.reshape(soup.shape))
+        if spec is not None:
+            pairs = constrain(pairs)
+            # check_vma is off because a Pallas call's outputs carry no varying-axis
+            # metadata; the specs above say everything the partitioner needs.
+            execute = jax.shard_map(
+                execute,
+                in_specs=(spec, P()),
+                out_specs=(spec, spec, spec),
+                check_vma=False,
+            )
+        pairs, steps, _ = execute(pairs, self.opcode_table)
+        # Write back through the inverse permutation: a gather, which partitions as an
+        # all-gather plus a local gather, where the equivalent scatter does not.
+        inverse = (
+            jnp.zeros_like(permutation)
+            .at[permutation]
+            .set(jnp.arange(num_programs, dtype=permutation.dtype))
+        )
+        soup = constrain(constrain(pairs.reshape(soup.shape))[inverse])
         return soup, steps
 
     @override

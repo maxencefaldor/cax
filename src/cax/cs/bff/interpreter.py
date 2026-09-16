@@ -48,6 +48,7 @@ from jax import Array
 from .language import Op, is_instruction
 
 Control = Literal["matched", "cyclic", "flip"]
+Implementation = Literal["auto", "xla", "kernel"]
 
 
 @jax.tree_util.register_dataclass
@@ -386,6 +387,7 @@ def _run_batch(
         "scan_fraction",
         "compact_after",
         "compact_fraction",
+        "implementation",
     ),
 )
 def run(
@@ -398,12 +400,16 @@ def run(
     scan_fraction: float = 1 / 16,
     compact_after: int = 256,
     compact_fraction: float = 1 / 8,
+    implementation: Implementation = "auto",
 ) -> tuple[Array, Array, Array]:
     """Run a batch of tapes, each for at most `num_steps` steps.
 
     Every tape is executed independently for the same result as `step` applied
-    `num_steps` times. Two devices keep the fixed-shape scan from paying for work that
-    most tapes do not need, without changing the result:
+    `num_steps` times. On a GPU the work is done by `kernel.run_kernel`, one Pallas
+    kernel that loops over the steps on-chip and exits a block as soon as its tapes
+    have all halted; everywhere else by the XLA scan below, where two devices keep
+    the fixed-shape scan from paying for work that most tapes do not need, without
+    changing the result:
 
     - Bracket searches run only for the tapes taking a jump on a step, gathered into a
       buffer of `scan_fraction` times the batch; a step where more tapes jump than fit
@@ -429,6 +435,8 @@ def run(
         compact_after: Steps run on the whole batch before compacting the survivors;
             at least `num_steps` disables compaction.
         compact_fraction: Survivor buffer size as a fraction of the batch.
+        implementation: `"kernel"` for the Pallas kernel, `"xla"` for the scan, or
+            `"auto"` to pick the kernel on GPU and the scan elsewhere.
 
     Returns:
         A tuple `(tapes, steps, ops)`: the tapes after execution, with the same shape
@@ -437,6 +445,18 @@ def run(
             instruction rather than a data byte.
 
     """
+    if implementation == "auto":
+        implementation = "kernel" if jax.default_backend() == "gpu" else "xla"
+    if implementation == "kernel":
+        from .kernel import run_kernel
+
+        return run_kernel(
+            tapes,
+            opcode_table,
+            num_steps=num_steps,
+            heads_from_tape=heads_from_tape,
+            control=control,
+        )
     num = tapes.shape[0]
     init = jax.vmap(partial(initial_thread_state, heads_from_tape=heads_from_tape))
     state = init(tapes)
@@ -478,6 +498,7 @@ def run(
 
 __all__ = [
     "Control",
+    "Implementation",
     "ThreadState",
     "initial_thread_state",
     "match_bracket",

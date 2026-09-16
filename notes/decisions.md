@@ -3,6 +3,32 @@
 Newest first.
 Each entry: what was decided, the evidence, what it would take to reverse.
 
+## 2026-09-16 · The GPU interpreter is one Pallas kernel; the XLA scan stays as the portable reference
+
+Measured (`05_gpu_throughput.md`): the XLA scan's step costs 40 µs on an H100 at any batch size because it is 20 to 40 kernels and nothing (unrolling, CUDA graphs, a different prefix sum) fuses them.
+`kernel.run_kernel` runs a warp of 32 tapes for the whole budget inside one kernel with real halting: 19 ms for 65k pairs against 449 ms, exact against the scan on 24 configurations.
+`run(implementation="auto")` picks it on GPU.
+The scan remains the CPU/TPU path and the readable reference; both are tested against `step`.
+Reverse if a JAX release makes the scan competitive, or if Pallas Triton drops a primitive the kernel uses.
+
+## 2026-09-16 · Sharding is a `BFF` option, not the default
+
+`BFF(shard_axis=name)` shards the soup over a mesh axis: gather and mutation under the partitioner, the run under `jax.shard_map`, write-back as a gather through the inverse permutation.
+Bit-identical to the unsharded epoch.
+Kept off by default because one H100 handles the paper's soup in 21 ms and the statistics the programme needs are many independent soups; it exists for soups of millions of programs.
+
+## 2026-09-16 · One process per GPU; no vmap over soups; shard only soups ≥ 2^22
+
+Measured on H100 (`05_gpu_throughput.md`): the epoch cost is a ~40 µs per-step floor times 8192 steps, independent of batch size up to ~2^18 pairs.
+Four processes sharing a GPU gain nothing; two soups under `nnx.vmap` cost 4× per run-epoch because `lax.cond` becomes `select` and the compaction fallback runs every epoch.
+Sharding one soup over devices (`jax.make_mesh` + `device_put(P("program"))`, no other code) pays only when one device is compute-bound, i.e. soups of 2^22 programs and up.
+Reverse if the step floor is cut by an order of magnitude, which would make the batch the limiting factor again.
+
+## 2026-09-16 · Exactness re-verified on the GPU build
+
+Same three checks as the CPU acceptance test, JAX on H100, cubff rebuilt here for `sm_90`: 0 mismatches.
+The fidelity scripts take `CUBFF_BIN` and `CUBFF_REPLAY` from the environment.
+
 ## 2026-09-16 · Phase 1 is `bff_noheads`; head initialisation is a flag
 
 The paper's Section 2 language starts IP and heads at 0 and the paper says so explicitly (`--lang bff_noheads`).

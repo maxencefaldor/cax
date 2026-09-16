@@ -4,6 +4,8 @@
 
 ::: cax.cs.bff.interpreter.run
 
+::: cax.cs.bff.kernel.run_kernel
+
 ::: cax.cs.bff.interpreter.step
 
 ::: cax.cs.bff.interpreter.match_bracket_cyclic

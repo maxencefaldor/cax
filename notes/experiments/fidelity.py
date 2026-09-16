@@ -1,5 +1,6 @@
 """Bit-exact comparison of cax.cs.bff.run against cubff's Evaluate on random tapes."""
 
+import os
 import subprocess
 import time
 
@@ -9,7 +10,7 @@ import numpy as np
 
 from cax.cs.bff import opcode_table_from_string, run
 
-HARNESS = "/private/tmp/claude-502/-Users-mf1022-dev/1e780cb0-2bac-442b-9ceb-13866872294e/scratchpad/cubff/bin/harness_"
+HARNESS = os.environ.get("CUBFF_BIN", "cubff/bin") + "/harness_"
 
 
 def oracle(tapes: np.ndarray, steps: int, heads: bool):
