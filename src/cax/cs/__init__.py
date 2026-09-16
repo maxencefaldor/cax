@@ -1,5 +1,6 @@
 """Complex systems implemented in CAX."""
 
+from .bff import BFF
 from .boids import Boids
 from .elementary import Elementary
 from .flow_lenia import FlowLenia
@@ -12,6 +13,7 @@ from .reaction_diffusion import ReactionDiffusion
 from .sandpile import Sandpile
 
 __all__ = [
+    "BFF",
     "Boids",
     "Elementary",
     "FlowLenia",

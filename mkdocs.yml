@@ -24,6 +24,7 @@ nav:
       - Reaction-Diffusion: api/cs/reaction_diffusion.md
       - Particle Life: api/cs/particle_life.md
       - Boids: api/cs/boids.md
+      - BFF: api/cs/bff.md
     - Neural Network Utils: api/nn.md
     - Utils: api/utils.md
   - Getting Started: examples/00_getting_started.ipynb
@@ -41,6 +42,8 @@ nav:
     - 30 - Particle Life: examples/30_particle_life.ipynb
     - 31 - Boids: examples/31_boids.ipynb
     - 32 - Neural Particle Automata: examples/32_neural_particle_automata.ipynb
+  - Program Soups:
+    - 70 - BFF: examples/70_bff.ipynb
   - Neural Cellular Automata:
     - 40 - Growing Neural Cellular Automata: examples/40_growing_nca.ipynb
     - 41 - Growing Conditional NCA: examples/41_growing_conditional_nca.ipynb

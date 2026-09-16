@@ -52,6 +52,7 @@ examples = [
     "evosax>=0.2.0",
     "ipykernel>=6.29.0",
     "mediapy>=1.2.0",
+    "brotli>=1.2.0",
 ]
 
 [project.urls]
@@ -66,6 +67,8 @@ build-backend = "hatchling.build"
 # no indent appear here; the opinion is the lint selection, one reason each.
 [tool.ruff]
 src = ["src", "tests"]
+# Research notes and their scripts live beside the code but are not library code.
+extend-exclude = ["notes"]
 
 [tool.ruff.lint]
 select = [
