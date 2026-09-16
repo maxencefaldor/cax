@@ -33,6 +33,8 @@ for name in regimes:
 for t, r in zip(times, rows):
     if r["exact"] != "True":
         ax.annotate("not exact", (t, float(r["mean_ms"])), fontsize=7, color="red")
+    if "invalid" in r["description"]:
+        ax.annotate("invalid (shared GPU)", (t, float(r["mean_ms"])), fontsize=7, color="gray")
 ax.axhline(10.3, ls="--", c="gray", lw=1)
 ax.text(times[0], 10.3, " cubff, random", va="bottom", fontsize=8, color="gray")
 ax.axhline(35.0, ls="--", c="gray", lw=1)

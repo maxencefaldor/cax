@@ -9,7 +9,9 @@ block of random tapes typically exits after a few hundred steps.
 
 The bracket search is a sequential walk from the bracket, exactly the reference's loop,
 vectorised over the block and stopped as soon as every searching tape has its answer
-or has left the tape. It runs only on steps where some tape in the block takes a jump.
+or has left the tape. It runs only on steps where some tape in the block takes a jump,
+and each lane caches its last forward and backward result until a write lands in the
+walked range, so a loop searches once rather than once per iteration.
 
 The kernel targets the Triton backend and runs under `interpret=True` on any backend for
 tests. Tapes are updated in place through an input-output alias.
@@ -103,7 +105,9 @@ def _kernel(
         return target
 
     def one_step(carry):
-        row, pc, head0, head1, direction, live, steps, ops = carry
+        row, pc, head0, head1, direction, live, steps, ops, cache, census = carry
+        fpc, ftgt, fok, bpc, btgt, bok = cache
+        n_open, n_close = census
         # Recomputed from the carried lane ids every step on purpose: as a loop
         # invariant, Triton hoists the row addressing and the step costs 25% more
         # (80% more on jump-heavy soups).
@@ -132,7 +136,42 @@ def _kernel(
                 jnp.where(cmd == Op.COPY01, value0, value1),
             ),
         ).astype(jnp.uint8)
-        plt.store(tape_ref.at[rows, write_pos], write_val, mask=live & writes)
+        writing = live & writes
+        if control != "flip":
+
+            def visited(start: Array, target: Array, forward: bool) -> Array:
+                """Whether the write lands where the cached walk looked."""
+                none = target < 0  # no partner: the walk looked at everything
+                if control == "matched":
+                    lo = start + 1 if forward else target
+                    hi = target if forward else start - 1
+                    within = (write_pos >= lo) & (write_pos <= hi)
+                    everything = write_pos > start if forward else write_pos < start
+                else:
+                    dist = (
+                        write_pos - start if forward else start - write_pos
+                    ) % length
+                    span = (target - start if forward else start - target) % length
+                    within = (dist >= 1) & (dist <= span)
+                    everything = write_pos != start
+                return jnp.where(none, everything, within) | (write_pos == start)
+
+            fok = fok & ~(writing & visited(fpc, ftgt, True))
+            bok = bok & ~(writing & visited(bpc, btgt, False))
+        if control == "cyclic":
+            old_val = plt.load(
+                tape_ref.at[rows, write_pos], mask=writing, other=0
+            ).astype(jnp.int32)
+            new_val = write_val.astype(jnp.int32)
+            delta_open = (new_val == open_byte).astype(jnp.int32) - (
+                old_val == open_byte
+            ).astype(jnp.int32)
+            delta_close = (new_val == close_byte).astype(jnp.int32) - (
+                old_val == close_byte
+            ).astype(jnp.int32)
+            n_open = n_open + jnp.where(writing, delta_open, 0)
+            n_close = n_close + jnp.where(writing, delta_close, 0)
+        plt.store(tape_ref.at[rows, write_pos], write_val, mask=writing)
 
         # Head moves, wrapping on the tape; `~` exchanges the heads.
         inc0 = (cmd == Op.INC0).astype(jnp.int32) - (cmd == Op.DEC0).astype(jnp.int32)
@@ -151,7 +190,27 @@ def _kernel(
             new_halted = jnp.zeros_like(live)
         else:
             new_direction = direction
-            target = search(rows, pc, jump_forward, live & jumping)
+            # A search only reads the bytes between the bracket and its partner, so
+            # the last forward and backward results are reused until a write lands in
+            # the walked range; loops then search once, not once per iteration.
+            hit_f = jump_forward & fok & (fpc == pc)
+            hit_b = jump_backward & bok & (bpc == pc)
+            hit = hit_f | hit_b
+            need = live & jumping & ~hit
+            if control == "cyclic":
+                # On a ring an unmatched bracket walks the whole tape; a census of the
+                # tape's bracket bytes skips the walk when no partner byte exists.
+                need = need & jnp.where(jump_forward, n_close > 0, n_open > 0)
+            walked = search(rows, pc, jump_forward, need)
+            target = jnp.where(hit, jnp.where(hit_f, ftgt, btgt), walked)
+            fresh_f = live & jump_forward & ~hit
+            fresh_b = live & jump_backward & ~hit
+            fpc = jnp.where(fresh_f, pc, fpc)
+            ftgt = jnp.where(fresh_f, target, ftgt)
+            fok = fok | fresh_f
+            bpc = jnp.where(fresh_b, pc, bpc)
+            btgt = jnp.where(fresh_b, target, btgt)
+            bok = bok | fresh_b
             found = target >= 0
             jumped = jnp.where(found, target, pc)
             if control == "matched":
@@ -182,10 +241,12 @@ def _kernel(
             live & ~finished,
             steps,
             ops,
+            (fpc, ftgt, fok, bpc, btgt, bok),
+            (n_open, n_close),
         )
 
     def loop_cond(carry):
-        return jnp.sum(carry[5].astype(jnp.int32)) > 0
+        return jnp.sum(carry[5].astype(jnp.int32)) > 0  # live
 
     def loop_body(carry):
         for _ in range(unroll):
@@ -198,8 +259,21 @@ def _kernel(
         pc = zero + 2
     else:
         pc, head0, head1 = zero, zero, zero
-    init = (lanes, pc, head0, head1, zero + 1, valid, zero, zero)
-    _r, _pc, _h0, _h1, _d, _live, steps, ops = jax.lax.while_loop(
+    no = jnp.zeros((block,), dtype=bool)
+    cache = (zero, zero, no, zero, zero, no)
+    census = (zero, zero)
+    if control == "cyclic":
+
+        def count(k: int, c: tuple[Array, Array]) -> tuple[Array, Array]:
+            byte = tape_ref[rows, zero + k].astype(jnp.int32)
+            return (
+                c[0] + (byte == open_byte).astype(jnp.int32),
+                c[1] + (byte == close_byte).astype(jnp.int32),
+            )
+
+        census = jax.lax.fori_loop(0, length, count, census)
+    init = (lanes, pc, head0, head1, zero + 1, valid, zero, zero, cache, census)
+    _r, _pc, _h0, _h1, _d, _live, steps, ops, _cache, _census = jax.lax.while_loop(
         loop_cond, loop_body, init
     )
     plt.store(steps_ref.at[rows], steps, mask=valid)

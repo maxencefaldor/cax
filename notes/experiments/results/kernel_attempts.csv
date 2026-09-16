@@ -1,18 +1,26 @@
-utc,description,kwargs,exact,random,enriched,mid,final,mean_ms
-2026-09-16T20:43:52+00:00,"baseline: walk search, block 32, select-store",,True,18.38,29.66,20.80,31.29,25.03
-2026-09-16T20:52:43+00:00,masked store (no read of the overwritten byte); search walks 8 positions per reduction,,True,13.99,24.77,19.38,23.74,20.47
-2026-09-16T20:58:45+00:00,whole-array refs addressed by lane row instead of BlockSpec tiles; no padding,,True,14.01,24.62,19.22,23.15,20.25
-2026-09-16T21:00:56+00:00,"step loop restructured: per-lane finish, loop test once per unroll (unroll=1)",,True,14.06,24.78,19.29,23.19,20.33
-2026-09-16T21:02:35+00:00,initial pc/heads computed in-kernel; only table and tapes as inputs,,True,30.51,25.01,19.54,25.78,25.21
-2026-09-16T21:03:11+00:00,"same, unroll=8 steps per loop test",unroll=8,True,14.43,25.41,20.42,27.65,21.98
-2026-09-16T21:03:12+00:00,initial pc/heads computed in-kernel; only table and tapes as inputs,,True,14.23,24.88,19.74,24.34,20.80
-2026-09-16T21:05:24+00:00,row index carried through the loop instead of hoisted (Triton LICM cost),,True,11.03,13.62,11.73,22.75,14.78
-2026-09-16T21:07:08+00:00,dummy row for dead lanes (interpret-safe masked stores); row carried,,True,10.76,13.74,11.62,21.57,14.42
-2026-09-16T21:07:46+00:00,"search_chunk=4 (dummy row, row carried)",search_chunk=4,True,9.48,13.52,9.86,20.49,13.34
-2026-09-16T21:07:49+00:00,"search_chunk=16 (dummy row, row carried)",search_chunk=16,True,15.25,18.41,17.12,28.20,19.74
-2026-09-16T21:09:01+00:00,search_chunk=2,search_chunk=2,True,8.70,13.94,9.37,21.50,13.38
-2026-09-16T21:09:02+00:00,search_chunk=6,search_chunk=6,True,9.35,13.04,9.80,20.62,13.20
-2026-09-16T21:10:00+00:00,search compares raw bytes against the two bracket bytes instead of a table gather (chunk 4),,True,8.25,11.02,8.77,18.51,11.64
-2026-09-16T21:10:09+00:00,"compare search, search_chunk=8",search_chunk=8,True,9.94,12.54,10.83,18.14,12.86
-2026-09-16T21:10:10+00:00,"compare search, unroll=2",unroll=2,True,8.18,10.99,8.58,16.95,11.17
-2026-09-16T21:11:20+00:00,"compare search, unroll=4",unroll=4,True,8.21,11.19,8.65,18.87,11.73
+utc,description,kwargs,exact,random,enriched,mid,final,mean_ms,cyclic_ms,flip_ms
+2026-09-16T20:43:52+00:00,"baseline: walk search, block 32, select-store",,True,18.38,29.66,20.80,31.29,25.03,,
+2026-09-16T20:52:43+00:00,masked store (no read of the overwritten byte); search walks 8 positions per reduction,,True,13.99,24.77,19.38,23.74,20.47,,
+2026-09-16T20:58:45+00:00,whole-array refs addressed by lane row instead of BlockSpec tiles; no padding,,True,14.01,24.62,19.22,23.15,20.25,,
+2026-09-16T21:00:56+00:00,"step loop restructured: per-lane finish, loop test once per unroll (unroll=1)",,True,14.06,24.78,19.29,23.19,20.33,,
+2026-09-16T21:02:35+00:00,initial pc/heads computed in-kernel; only table and tapes as inputs [GPU shared with another job: invalid],,True,30.51,25.01,19.54,25.78,25.21,,
+2026-09-16T21:03:11+00:00,"same, unroll=8 steps per loop test",unroll=8,True,14.43,25.41,20.42,27.65,21.98,,
+2026-09-16T21:03:12+00:00,initial pc/heads computed in-kernel; only table and tapes as inputs,,True,14.23,24.88,19.74,24.34,20.80,,
+2026-09-16T21:05:24+00:00,row index carried through the loop instead of hoisted (Triton LICM cost),,True,11.03,13.62,11.73,22.75,14.78,,
+2026-09-16T21:07:08+00:00,dummy row for dead lanes (interpret-safe masked stores); row carried,,True,10.76,13.74,11.62,21.57,14.42,,
+2026-09-16T21:07:46+00:00,"search_chunk=4 (dummy row, row carried)",search_chunk=4,True,9.48,13.52,9.86,20.49,13.34,,
+2026-09-16T21:07:49+00:00,"search_chunk=16 (dummy row, row carried)",search_chunk=16,True,15.25,18.41,17.12,28.20,19.74,,
+2026-09-16T21:09:01+00:00,search_chunk=2,search_chunk=2,True,8.70,13.94,9.37,21.50,13.38,,
+2026-09-16T21:09:02+00:00,search_chunk=6,search_chunk=6,True,9.35,13.04,9.80,20.62,13.20,,
+2026-09-16T21:10:00+00:00,search compares raw bytes against the two bracket bytes instead of a table gather (chunk 4),,True,8.25,11.02,8.77,18.51,11.64,,
+2026-09-16T21:10:09+00:00,"compare search, search_chunk=8",search_chunk=8,True,9.94,12.54,10.83,18.14,12.86,,
+2026-09-16T21:10:10+00:00,"compare search, unroll=2",unroll=2,True,8.18,10.99,8.58,16.95,11.17,,
+2026-09-16T21:11:20+00:00,"compare search, unroll=4",unroll=4,True,8.21,11.19,8.65,18.87,11.73,,
+2026-09-16T21:21:51+00:00,"current default (chunk 4, unroll 2, compare search) with cyclic/flip timing",,True,8.18,11.01,8.74,18.65,11.64,67.05,3.05
+2026-09-16T21:21:51+00:00,"current default (chunk 4, unroll 2, compare search) with cyclic/flip timing",,True,8.18,11.01,8.74,18.65,11.64
+2026-09-16T21:23:41+00:00,"search_chunk=16, to read the cyclic column",search_chunk=16,True,13.62,16.48,15.41,23.42,17.23,63.05,2.33
+2026-09-16T21:23:41+00:00,"search_chunk=16, to read the cyclic column",search_chunk=16,True,13.62,16.48,15.41,23.42,17.23
+2026-09-16T21:26:13+00:00,"per-lane cache of the last forward/backward search, invalidated by writes in the walked range",,True,4.54,8.59,4.97,6.98,6.27,53.99,2.30
+2026-09-16T21:26:13+00:00,"per-lane cache of the last forward/backward search, invalidated by writes in the walked range",,True,4.54,8.59,4.97,6.98,6.27
+2026-09-16T21:27:18+00:00,"bracket census, cyclic only (skips ring walks with no partner byte)",,True,4.52,8.49,4.90,6.90,6.20,54.24,3.32
+2026-09-16T21:27:18+00:00,"bracket census, cyclic only (skips ring walks with no partner byte)",,True,4.52,8.49,4.90,6.90,6.20

@@ -136,6 +136,23 @@ for wname, w in workloads.items():
 score = float(np.mean(list(times.values())))
 print(f"mean over regimes: {score:.2f} ms", flush=True)
 
+# The total machines of Phase 2 never halt: every lane runs the whole budget and the
+# search differs (`cyclic` walks a ring, `flip` has none). Timed on the enriched regime.
+extra = {}
+for control in ("cyclic", "flip"):
+    tapes = jnp.asarray(workloads["enriched"])
+    f = jax.jit(
+        lambda t, c=control: run_kernel(t, table, num_steps=8192, control=c, **kw)
+    )
+    f(tapes)[0].block_until_ready()
+    ts = []
+    for _ in range(a.repeats):
+        t0 = time.perf_counter()
+        f(tapes)[0].block_until_ready()
+        ts.append(time.perf_counter() - t0)
+    extra[control] = 1e3 * float(np.median(ts))
+    print(f"{control:9s} on enriched: {extra[control]:8.2f} ms", flush=True)
+
 if not a.no_log:
     log = HERE / "results" / "kernel_attempts.csv"
     new = not log.exists()
@@ -143,8 +160,29 @@ if not a.no_log:
         wr = csv.writer(fh)
         if new:
             wr.writerow(
-                ["utc", "description", "kwargs", "exact", *workloads, "mean_ms"]
+                [
+                    "utc",
+                    "description",
+                    "kwargs",
+                    "exact",
+                    *workloads,
+                    "mean_ms",
+                    "cyclic_ms",
+                    "flip_ms",
+                ]
             )
+        wr.writerow(
+            [
+                datetime.datetime.now(datetime.UTC).isoformat(timespec="seconds"),
+                a.description,
+                " ".join(a.kw),
+                failures == 0,
+                *[f"{times[w]:.2f}" for w in workloads],
+                f"{score:.2f}",
+                f"{extra['cyclic']:.2f}",
+                f"{extra['flip']:.2f}",
+            ]
+        )
         wr.writerow(
             [
                 datetime.datetime.now(datetime.UTC).isoformat(timespec="seconds"),
