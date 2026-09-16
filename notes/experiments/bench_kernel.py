@@ -25,7 +25,11 @@ ap.add_argument("--epochs", type=int, default=32)
 a = ap.parse_args()
 
 table = opcode_table_from_string()
-workloads = {"random": jax.random.randint(jax.random.key(0), (a.num_programs, 64), 0, 256, dtype=jnp.uint8)}
+workloads = {
+    "random": jax.random.randint(
+        jax.random.key(0), (a.num_programs, 64), 0, 256, dtype=jnp.uint8
+    )
+}
 if a.soup:
     workloads["transitioned"] = jnp.asarray(np.load(a.soup)["soup"])
 
@@ -44,10 +48,15 @@ for name, soup in workloads.items():
     perm = jax.random.permutation(jax.random.key(1), soup.shape[0])
     pairs = soup[perm].reshape(-1, 128)
     for block in (int(b) for b in a.blocks.split(",")):
-        f = jax.jit(lambda t, block=block: run_kernel(t, table, num_steps=8192, block=block))
+        f = jax.jit(
+            lambda t, block=block: run_kernel(t, table, num_steps=8192, block=block)
+        )
         ms = median_ms(f, pairs)
         steps = float(f(pairs)[1].mean())
-        print(f"{name:12s} kernel block={block:3d}: {ms:7.2f} ms  (mean steps {steps:.0f})", flush=True)
+        print(
+            f"{name:12s} kernel block={block:3d}: {ms:7.2f} ms  (mean steps {steps:.0f})",
+            flush=True,
+        )
     cs = BFF(rngs=nnx.Rngs(0))
 
     @nnx.jit

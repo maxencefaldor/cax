@@ -22,11 +22,11 @@ References:
 
 """
 
-from functools import partial
 from typing import override
 
 import jax
 import jax.numpy as jnp
+import numpy as np
 from flax import nnx
 from jax import Array
 from jax.sharding import PartitionSpec as P
@@ -115,47 +115,61 @@ class BFF(ComplexSystem[Array, Array]):
         self.shard_axis = shard_axis
         self.rngs = rngs
 
-    def init_state(self, *, num_programs: int, tape_length: int = 64) -> Array:
-        """Create a uniformly random soup.
+    def init_state(
+        self, *, num_programs: int, tape_length: int = 64, num_soups: int | None = None
+    ) -> Array:
+        """Create one or several uniformly random soups.
 
         Args:
             num_programs: Number of programs; must be even so every program is paired.
             tape_length: Bytes per program. The reference uses 64.
+            num_soups: If given, a batch of independent soups with a leading axis of
+                this size; they step together in one kernel launch per epoch.
 
         Returns:
-            Unsigned 8-bit array of shape (num_programs, tape_length).
+            Unsigned 8-bit array of shape (num_programs, tape_length), or
+                (num_soups, num_programs, tape_length).
 
         """
         if num_programs % 2 != 0:
             raise ValueError(f"num_programs must be even, got {num_programs!r}")
-        soup = jax.random.randint(
-            self.rngs.params(), (num_programs, tape_length), 0, 256, dtype=jnp.uint8
-        )
+        shape = (num_programs, tape_length)
+        if num_soups is not None:
+            shape = (num_soups, *shape)
+        soup = jax.random.randint(self.rngs.params(), shape, 0, 256, dtype=jnp.uint8)
         if self.shard_axis is not None:
-            soup = jax.device_put(soup, P(self.shard_axis))
+            spec = P(*([None] * (len(shape) - 2)), self.shard_axis)
+            soup = jax.device_put(soup, spec)
         return soup
 
     def pair_and_run(self, soup: Array, permutation: Array) -> tuple[Array, Array]:
         """Execute one epoch given the pairing.
 
+        Several soups may be passed at once with leading batch axes; their pairs run
+        in one kernel launch, which on a GPU is much cheaper than one launch per soup
+        (a single 2^17-program soup does not fill an H100).
+
         Args:
-            soup: Unsigned 8-bit array of shape (num_programs, tape_length).
-            permutation: Integer array of shape (num_programs,); program
-                `permutation[2i]` is the first half of pair `i`, `permutation[2i + 1]`
-                the second.
+            soup: Unsigned 8-bit array of shape (..., num_programs, tape_length).
+            permutation: Integer array of shape (..., num_programs); program
+                `permutation[..., 2i]` is the first half of pair `i`,
+                `permutation[..., 2i + 1]` the second.
 
         Returns:
             A tuple `(soup, steps)`: the soup after execution, and an int32 array of
-                shape (num_programs // 2,) with the number of steps each pair ran.
+                shape (..., num_programs // 2) with the number of steps each pair ran.
 
         """
-        num_programs, tape_length = soup.shape
-        spec = P(self.shard_axis) if self.shard_axis is not None else None
+        *batch, num_programs, tape_length = soup.shape
+        pair_shape = (*batch, num_programs // 2, 2 * tape_length)
+        axis = self.shard_axis
+        spec = None if axis is None else P(*([None] * len(batch)), axis)
 
         def constrain(x: Array) -> Array:
             return x if spec is None else jax.lax.with_sharding_constraint(x, spec)
 
-        pairs = constrain(soup[permutation]).reshape(num_programs // 2, 2 * tape_length)
+        gathered = jnp.take_along_axis(soup, permutation[..., None], axis=-2)
+        pairs = constrain(gathered).reshape(pair_shape)
         if self.mutation_rate > 0.0:
             key = self.rngs.mutation()
             key_mask, key_byte = jax.random.split(key)
@@ -164,38 +178,46 @@ class BFF(ComplexSystem[Array, Array]):
                 jnp.uint8
             )
             pairs = jnp.where(mutate, replacement, pairs)
-        execute = partial(
-            run,
-            num_steps=self.num_steps,
-            heads_from_tape=self.heads_from_tape,
-            control=self.control,
-            implementation=self.implementation,
-        )
+
+        def execute(pairs: Array, opcode_table: Array) -> tuple[Array, Array]:
+            # One launch for every pair of every soup.
+            flat, steps, _ = run(
+                pairs.reshape(-1, 2 * tape_length),
+                opcode_table,
+                num_steps=self.num_steps,
+                heads_from_tape=self.heads_from_tape,
+                control=self.control,
+                implementation=self.implementation,
+            )
+            return flat.reshape(pairs.shape), steps.reshape(pairs.shape[:-1])
+
         if spec is not None:
             pairs = constrain(pairs)
             # check_vma is off because a Pallas call's outputs carry no varying-axis
             # metadata; the specs above say everything the partitioner needs.
             execute = jax.shard_map(
-                execute,
-                in_specs=(spec, P()),
-                out_specs=(spec, spec, spec),
-                check_vma=False,
+                execute, in_specs=(spec, P()), out_specs=(spec, spec), check_vma=False
             )
-        pairs, steps, _ = execute(pairs, self.opcode_table)
+        pairs, steps = execute(pairs, self.opcode_table)
         # Write back through the inverse permutation: a gather, which partitions as an
         # all-gather plus a local gather, where the equivalent scatter does not.
-        inverse = (
-            jnp.zeros_like(permutation)
-            .at[permutation]
-            .set(jnp.arange(num_programs, dtype=permutation.dtype))
-        )
-        soup = constrain(constrain(pairs.reshape(soup.shape))[inverse])
+        flat_permutation = permutation.reshape(-1, num_programs)
+        offsets = jnp.arange(flat_permutation.shape[0])[:, None] * num_programs
+        inverse = jnp.zeros(flat_permutation.size, dtype=permutation.dtype).at[
+            (flat_permutation + offsets).ravel()
+        ].set(jnp.arange(flat_permutation.size, dtype=permutation.dtype)).reshape(
+            permutation.shape
+        ) - offsets.reshape((*batch, 1))
+        executed = constrain(pairs.reshape(soup.shape))
+        soup = constrain(jnp.take_along_axis(executed, inverse[..., None], axis=-2))
         return soup, steps
 
     @override
     def _step(self, state: Array, input: Array | None = None) -> Array:
-        num_programs = state.shape[0]
-        permutation = jax.random.permutation(self.rngs.pairing(), num_programs)
+        *batch, num_programs, _ = state.shape
+        keys = jax.random.split(self.rngs.pairing(), int(np.prod(batch)) or 1)
+        permutation = jax.vmap(lambda k: jax.random.permutation(k, num_programs))(keys)
+        permutation = permutation.reshape(*batch, num_programs)
         soup, _ = self.pair_and_run(state, permutation)
         return soup
 

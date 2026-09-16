@@ -15,3 +15,4 @@ utc,description,kwargs,exact,random,enriched,mid,final,mean_ms
 2026-09-16T21:10:00+00:00,search compares raw bytes against the two bracket bytes instead of a table gather (chunk 4),,True,8.25,11.02,8.77,18.51,11.64
 2026-09-16T21:10:09+00:00,"compare search, search_chunk=8",search_chunk=8,True,9.94,12.54,10.83,18.14,12.86
 2026-09-16T21:10:10+00:00,"compare search, unroll=2",unroll=2,True,8.18,10.99,8.58,16.95,11.17
+2026-09-16T21:11:20+00:00,"compare search, unroll=4",unroll=4,True,8.21,11.19,8.65,18.87,11.73

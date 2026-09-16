@@ -421,3 +421,20 @@ def test_bff_sharded_epoch_matches_unsharded() -> None:
         out_sharded, steps_sharded = nnx.jit(epoch)(sharded, soup_sharded)
     assert bool(jnp.all(out == out_sharded))
     assert bool(jnp.all(steps == steps_sharded))
+
+
+def test_bff_batched_soups_match_single() -> None:
+    """A batch of soups steps exactly as each soup would alone (no mutation)."""
+    cs = BFF(num_steps=200, mutation_rate=0.0, rngs=nnx.Rngs(0))
+    soups = cs.init_state(num_programs=64, num_soups=3)
+    keys = jax.random.split(jax.random.key(9), 3)
+    permutations = jax.vmap(lambda k: jax.random.permutation(k, 64))(keys)
+    batched, steps = cs.pair_and_run(soups, permutations)
+    assert batched.shape == soups.shape
+    assert steps.shape == (3, 32)
+    for i in range(3):
+        single, single_steps = cs.pair_and_run(soups[i], permutations[i])
+        assert bool(jnp.all(single == batched[i]))
+        assert bool(jnp.all(single_steps == steps[i]))
+    stepped = cs(soups)
+    assert stepped.shape == soups.shape

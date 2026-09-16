@@ -28,6 +28,7 @@ Regenerated from `experiments/results/kernel_attempts.csv`; `experiments/plot_at
 | 13 | 21:10 | search compares raw bytes against the two bracket bytes instead of a table gather (chunk 4) | 8.25 | 11.02 | 8.77 | 18.51 | 11.64 |
 | 14 | 21:10 | compare search, search_chunk=8 | 9.94 | 12.54 | 10.83 | 18.14 | 12.86 |
 | 15 | 21:10 | compare search, unroll=2 | 8.18 | 10.99 | 8.58 | 16.95 | 11.17 |
+| 16 | 21:11 | compare search, unroll=4 | 8.21 | 11.19 | 8.65 | 18.87 | 11.73 |
 
 ## Findings
 
@@ -93,6 +94,25 @@ Regenerated from `experiments/results/kernel_attempts.csv`; `experiments/plot_at
 - **Unroll 2 now helps a little** (mean 11.2, final 17.0) where 8 hurt; with the cheaper search the body is small enough for two copies.
   Default is now 2; 4 is being measured.
   Chunk 8 with the compare search is worse than 4 (12.9), as before.
+- **Unroll 4: worse than 2** (mean 11.7 against 11.2); 2 stays.
+- **Full epoch of the paper's soup (`bench_kernel.py`, brotli excluded): 7.2 ms random, 19.7 ms transitioned**, of which the kernel is 6.3 and 19.1; the pairing gather, mutation and write-back are under a millisecond.
+  This afternoon the epoch was 21 ms; cubff is 12.3 ms random and 35 ms transitioned on the same GPU.
+- **Two-phase compaction (everything for 256–1024 steps, then only the survivors): exact, and slower** (scratch `kernel_twophase.py`, random 13.2 ms against 8.2).
+  The 8% of survivors are 164 warps, one or two per SM, and a lone warp's step is about 1.7 µs of latency; 2048 warps only look fast because 16 per SM overlap.
+  So the per-step *latency* is the target now, not the work: a step is a store followed by loads of the same tape line, and on Hopper a global store invalidates the L1 line, so the loads go to L2.
+  Two consequences: bigger soups are nearly free per program (more warps per SM), and the next attempts prefetch the next step's inputs so a step's loads overlap the previous step's compute.
+- **No-store ablation: inconclusive.**
+  Removing the tape writes (wrong semantics, timing only) leaves random at 8.0 ms against 8.2, so store-induced L1 invalidation is not the dominant cost either; the per-step cost needs a profiler, not more ablations.
+- **Prefetching the next instruction byte during the step: exact, slightly slower** (random 8.8 ms against 8.2).
+  The extra load and the masked load cost more than the latency they hide, so the instruction-byte load is not the critical chain either.
+- **Several soups per kernel launch: 2.4× throughput.**
+  (scratch `batch_scaling.py`) One 2^17 soup is 2048 warps, 15 per SM, too few to hide a step's latency.
+  Stacking the pairs of R soups into one launch (random regime): 1 soup 8.2 ms; 2 soups 5.6 ms per soup; 4 → 4.6; 8 → 3.8; 16 → 3.5.
+  Exactness is untouched (a lane never sees another tape) and this is exactly what the many-seed experiments need, so `BFF.pair_and_run` now accepts a leading batch of soups and `soup_run.py --soups R` runs R seeds per process.
+- **Packed-flags decode (one gather yields head deltas, write kind, flags): exact, slightly slower** (random 8.5 ms against 8.2).
+  The compares it replaces were never the cost; ALU work is not the bottleneck at this occupancy.
+- **Profiler:** Nsight Compute is not on the box and the apt repository only offers 2022 builds that predate the H100, so the climb stays empirical.
+- **End to end with 8 soups per process** (`soup_run.py --soups 8`, brotli included): 4.9 ms per soup-epoch, so 16k epochs of 8 seeds take about 10 minutes on one GPU and 64 seeds fit in the same time on eight.
 
 ## Reading the kernel: where the time could go, and ideas
 

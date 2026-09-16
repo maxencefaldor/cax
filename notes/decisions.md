@@ -3,6 +3,12 @@
 Newest first.
 Each entry: what was decided, the evidence, what it would take to reverse.
 
+## 2026-09-16 · Many seeds run as a batch of soups in one process, not one process per soup
+
+`BFF.pair_and_run` takes soups with leading batch axes and runs every pair of every soup in one kernel launch; `soup_run.py --soups R` uses it.
+Evidence (`07_kernel_hillclimb.md`): one 2^17 soup is 2048 warps and leaves an H100 under-occupied; 8 soups per launch cost 3.8 ms per soup-epoch against 8.2 alone, 16 soups 3.5 ms. Exact by construction (a lane never sees another soup's tape) and tested against the single-soup path.
+Reverse if a soup size or variant makes one soup fill the GPU on its own.
+
 ## 2026-09-16 · The GPU interpreter is one Pallas kernel; the XLA scan stays as the portable reference
 
 Measured (`05_gpu_throughput.md`): the XLA scan's step costs 40 µs on an H100 at any batch size because it is 20 to 40 kernels and nothing (unrolling, CUDA graphs, a different prefix sum) fuses them.
