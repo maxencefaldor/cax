@@ -153,6 +153,13 @@ Regenerated from `experiments/results/kernel_attempts.csv`; `experiments/plot_at
   So the chunk is per control (4 matched, 16 cyclic), attempt 18.
 - **Trimming control-constant arrays from the loop carry (direction outside `flip`, census outside `cyclic`): identical timings.**
   Triton already drops them; not adopted.
+- **Two-phase compaction, revisited on top of the cache: yes for batches, no for one soup.**
+  The kernel now runs from a resumable per-tape state (`_launch`), so a run can be every tape for 256 steps and then only the survivors, gathered into a buffer of an eighth of the batch (everyone again if more survive).
+  On one 2^17 soup it loses (attempt 19: mean 6.5 against 6.2, the all-alive regimes pay for the extra launch); on 4 soups it gives 1.3 ms per soup against 3.6, on 8 soups 0.94 against 3.3.
+  So it is gated on batch size (`two_phase_min = 2^18` tapes, attempt 20), the harness gained a "8 random soups per launch" column, and the phase-1 length does not matter between 128 and 512.
+- **A resumable state costs 6% unless fresh runs initialise in-kernel.**
+  Loading the initial pointer, heads and counters from the state array (needed for the second phase) slowed the single-soup path from 4.53 to 4.82 ms on random with identical outputs; a constant direction outside `flip` did not recover it, a static `fresh` flag that starts from constants did (4.51, and 7.18 on final against 7.40).
+  Loaded initial values leave the loop-carried registers without the range facts the compiler had from constants.
 
 ## Reading the kernel: where the time could go, and ideas
 

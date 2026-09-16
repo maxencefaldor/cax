@@ -136,6 +136,20 @@ for wname, w in workloads.items():
 score = float(np.mean(list(times.values())))
 print(f"mean over regimes: {score:.2f} ms", flush=True)
 
+# Eight random soups stacked into one launch, per soup: the many-seed production case.
+stacked = jnp.asarray(
+    np.concatenate([np.roll(workloads["random"], 17 * i, axis=0) for i in range(8)])
+)
+f = jax.jit(lambda t: run_kernel(t, table, num_steps=8192, **kw))
+f(stacked)[0].block_until_ready()
+ts = []
+for _ in range(a.repeats):
+    t0 = time.perf_counter()
+    f(stacked)[0].block_until_ready()
+    ts.append(time.perf_counter() - t0)
+batch8 = 1e3 * float(np.median(ts)) / 8
+print(f"random, 8 soups per launch: {batch8:8.2f} ms per soup", flush=True)
+
 # The total machines of Phase 2 never halt: every lane runs the whole budget and the
 # search differs (`cyclic` walks a ring, `flip` has none). Timed on the enriched regime.
 extra = {}
