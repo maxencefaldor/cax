@@ -29,6 +29,7 @@ from .language import Op, is_instruction
 
 def _kernel(
     table_ref,
+    brackets_ref,
     tape_in_ref,
     tape_ref,
     steps_ref,
@@ -55,6 +56,8 @@ def _kernel(
     dummy = padded - 1
     rows = jnp.where(valid, lanes, dummy)  # for the loads and stores outside the loop
     zero = jnp.zeros((block,), dtype=jnp.int32)
+    open_byte = brackets_ref[0]
+    close_byte = brackets_ref[1]
 
     def search(rows: Array, pc: Array, forward: Array, need: Array) -> Array:
         """Position of the matching bracket for the tapes in `need`, else -1."""
@@ -76,9 +79,11 @@ def _kernel(
             else:
                 inside = jnp.ones_like(need)
                 pos = (pos + length) % length
-            op = table_ref[tape_ref[rows, pos].astype(jnp.int32)]
-            opening = (op == Op.LOOP_START).astype(jnp.int32)
-            closing = (op == Op.LOOP_END).astype(jnp.int32)
+            # Two compares on the raw byte instead of a dependent table gather; every
+            # opcode table maps each bracket to exactly one byte.
+            byte = tape_ref[rows, pos].astype(jnp.int32)
+            opening = (byte == open_byte).astype(jnp.int32)
+            closing = (byte == close_byte).astype(jnp.int32)
             delta = jnp.where(forward, opening - closing, closing - opening)
             active = need & ~found & inside & (k < length)
             depth = jnp.where(active, depth + delta, depth)
@@ -222,14 +227,16 @@ def run_kernel(
     control: Control = "matched",
     block: int = 32,
     search_chunk: int = 4,
-    unroll: int = 1,
+    unroll: int = 2,
     interpret: bool = False,
 ) -> tuple[Array, Array, Array]:
     """Run a batch of tapes inside one kernel; same function as `interpreter.run`.
 
     Args:
         tapes: Unsigned 8-bit array of shape (num_tapes, length).
-        opcode_table: Integer array of shape (256,) mapping bytes to `Op` values.
+        opcode_table: Integer array of shape (256,) mapping bytes to `Op` values;
+            each bracket must map from exactly one byte, as every table built by the
+            language module does.
         num_steps: Step budget per tape.
         heads_from_tape: Whether the first two bytes seed the heads.
         control: Control-flow rule; see the interpreter module.
@@ -266,20 +273,28 @@ def run_kernel(
     tape_spec = pl.BlockSpec((padded, length), lambda i: (0, 0))
     vec_spec = pl.BlockSpec((padded,), lambda i: (0,))
     vec_shape = jax.ShapeDtypeStruct((padded,), jnp.int32)
+    table = opcode_table.astype(jnp.int32)
+    brackets = jnp.stack(
+        [jnp.argmax(table == Op.LOOP_START), jnp.argmax(table == Op.LOOP_END)]
+    ).astype(jnp.int32)
     out_tapes, steps, ops = pl.pallas_call(
         kernel,
         grid=(blocks,),
-        in_specs=[pl.BlockSpec((256,), lambda i: (0,)), tape_spec],
+        in_specs=[
+            pl.BlockSpec((256,), lambda i: (0,)),
+            pl.BlockSpec((2,), lambda i: (0,)),
+            tape_spec,
+        ],
         out_specs=(tape_spec, vec_spec, vec_spec),
         out_shape=(
             jax.ShapeDtypeStruct((padded, length), tapes.dtype),
             vec_shape,
             vec_shape,
         ),
-        input_output_aliases={1: 0},
+        input_output_aliases={2: 0},
         interpret=interpret,
         compiler_params=plt.CompilerParams(num_warps=max(1, block // 32)),
-    )(opcode_table.astype(jnp.int32), tapes)
+    )(table, brackets, tapes)
     return out_tapes[:num], steps[:num], ops[:num]
 
 

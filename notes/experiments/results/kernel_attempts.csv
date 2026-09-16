@@ -10,3 +10,8 @@ utc,description,kwargs,exact,random,enriched,mid,final,mean_ms
 2026-09-16T21:07:08+00:00,dummy row for dead lanes (interpret-safe masked stores); row carried,,True,10.76,13.74,11.62,21.57,14.42
 2026-09-16T21:07:46+00:00,"search_chunk=4 (dummy row, row carried)",search_chunk=4,True,9.48,13.52,9.86,20.49,13.34
 2026-09-16T21:07:49+00:00,"search_chunk=16 (dummy row, row carried)",search_chunk=16,True,15.25,18.41,17.12,28.20,19.74
+2026-09-16T21:09:01+00:00,search_chunk=2,search_chunk=2,True,8.70,13.94,9.37,21.50,13.38
+2026-09-16T21:09:02+00:00,search_chunk=6,search_chunk=6,True,9.35,13.04,9.80,20.62,13.20
+2026-09-16T21:10:00+00:00,search compares raw bytes against the two bracket bytes instead of a table gather (chunk 4),,True,8.25,11.02,8.77,18.51,11.64
+2026-09-16T21:10:09+00:00,"compare search, search_chunk=8",search_chunk=8,True,9.94,12.54,10.83,18.14,12.86
+2026-09-16T21:10:10+00:00,"compare search, unroll=2",unroll=2,True,8.18,10.99,8.58,16.95,11.17

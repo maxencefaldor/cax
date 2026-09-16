@@ -23,6 +23,11 @@ Regenerated from `experiments/results/kernel_attempts.csv`; `experiments/plot_at
 | 8 | 21:07 | dummy row for dead lanes (interpret-safe masked stores); row carried | 10.76 | 13.74 | 11.62 | 21.57 | 14.42 |
 | 9 | 21:07 | search_chunk=4 (dummy row, row carried) | 9.48 | 13.52 | 9.86 | 20.49 | 13.34 |
 | 10 | 21:07 | search_chunk=16 (dummy row, row carried) | 15.25 | 18.41 | 17.12 | 28.20 | 19.74 |
+| 11 | 21:09 | search_chunk=2 | 8.70 | 13.94 | 9.37 | 21.50 | 13.38 |
+| 12 | 21:09 | search_chunk=6 | 9.35 | 13.04 | 9.80 | 20.62 | 13.20 |
+| 13 | 21:10 | search compares raw bytes against the two bracket bytes instead of a table gather (chunk 4) | 8.25 | 11.02 | 8.77 | 18.51 | 11.64 |
+| 14 | 21:10 | compare search, search_chunk=8 | 9.94 | 12.54 | 10.83 | 18.14 | 12.86 |
+| 15 | 21:10 | compare search, unroll=2 | 8.18 | 10.99 | 8.58 | 16.95 | 11.17 |
 
 ## Findings
 
@@ -78,6 +83,16 @@ Regenerated from `experiments/results/kernel_attempts.csv`; `experiments/plot_at
   Most matches are within a few positions; a big chunk visits positions nobody needs.
   Default is now 4; 2 and 6 are being measured.
 - **Masked load of the second head's byte only for `,`: no change** (within noise on all four regimes); not adopted.
+- **Chunks 2, 4 and 6 are within noise** (means 13.4, 13.3, 13.2); 4 stays.
+- **Bracket bytes by compare instead of table gather in the search: yes.**
+  Two compares on the raw byte against the two bracket bytes (passed in as a 2-element input, computed from the table with `argmax`) replace a dependent gather per visited position: random 8.3 ms (was 9.5), enriched 11.1 (13.3), mid 8.7 (9.8), final 19.9 (23.2), exact.
+  Valid because every opcode table maps each bracket from exactly one byte.
+  Ported as attempt 9.
+- **Attempt 9 (compare search in the shipped kernel): mean 11.6 ms**, random 8.3, enriched 11.0, mid 8.8, final 18.5.
+  Ahead of cubff on the same box in every regime measured (10.3 random, 35 transitioned).
+- **Unroll 2 now helps a little** (mean 11.2, final 17.0) where 8 hurt; with the cheaper search the body is small enough for two copies.
+  Default is now 2; 4 is being measured.
+  Chunk 8 with the compare search is worse than 4 (12.9), as before.
 
 ## Reading the kernel: where the time could go, and ideas
 
