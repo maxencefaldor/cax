@@ -132,14 +132,14 @@ def _kernel(
                 cmd == Op.MINUS, value0 - 1, jnp.where(cmd == Op.COPY01, value0, value1)
             ),
         ).astype(jnp.uint8)
+        # The overwritten byte is already loaded: value1 under `.`, else value0.
+        old = jnp.where(cmd == Op.COPY01, value1, value0).astype(jnp.int32)
+        new = write_val.astype(jnp.int32)
         if control != "flip":
             # Only a write that makes or unmakes a bracket can change a search.
-            cached = writing & (fok | bok) if control == "matched" else writing
-            old = plt.load(tape_ref.at[rows, write_pos], mask=cached, other=0)
-            old, new = old.astype(jnp.int32), write_val.astype(jnp.int32)
             was = (old == open_byte) | (old == close_byte)
             becomes = (new == open_byte) | (new == close_byte)
-            rewrite = cached & (was | becomes)
+            rewrite = writing & (was | becomes)
             fok = fok & ~(rewrite & visited(fpc, ftgt, write_pos, True))
             bok = bok & ~(rewrite & visited(bpc, btgt, write_pos, False))
         if control == "cyclic":

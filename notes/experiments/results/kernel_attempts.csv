@@ -34,3 +34,9 @@ utc,description,kwargs,exact,random,enriched,mid,final,mean_ms,cyclic_ms,flip_ms
 2026-09-16T21:47:23+00:00,unroll 4 (cyclic column),unroll=4,True,4.60,8.62,5.01,8.85,6.77,45.76,4.96
 2026-09-16T21:50:50+00:00,cache invalidated only by writes that make or unmake a bracket,,True,4.86,6.17,4.91,4.88,5.21,44.27,3.27
 2026-09-16T21:50:50+00:00,cache invalidated only by writes that make or unmake a bracket,,True,4.86,6.17,4.91,4.88,5.21
+2026-09-16T21:52:58+00:00,overwritten byte taken from the loaded head values instead of a masked load,,True,4.68,5.98,4.68,4.47,4.95,43.94,3.24
+2026-09-16T21:52:58+00:00,overwritten byte taken from the loaded head values instead of a masked load,,True,4.68,5.98,4.68,4.47,4.95
+2026-09-16T21:53:24+00:00,re-tune: unroll=1 with the cache,unroll=1,True,4.80,6.12,4.81,4.62,5.09,44.70,2.35
+2026-09-16T21:53:24+00:00,re-tune: unroll=1 with the cache,unroll=1,True,4.80,6.12,4.81,4.62,5.09
+2026-09-16T21:53:29+00:00,re-tune: search_chunk=8 with the cache,search_chunk=8,True,4.65,6.03,4.66,4.45,4.95,46.74,2.28
+2026-09-16T21:53:29+00:00,re-tune: search_chunk=8 with the cache,search_chunk=8,True,4.65,6.03,4.66,4.45,4.95

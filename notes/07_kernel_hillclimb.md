@@ -46,6 +46,14 @@ Regenerated from `experiments/results/kernel_attempts.csv`; `experiments/plot_at
 | 30 | 21:46 | block 64 (cyclic and flip columns) | 5.45 | 12.22 | 7.47 | 26.93 | 13.02 | 114.13 | 18.61 | None |
 | 31 | 21:47 | capacity 1/4 (batch8 column) | 4.54 | 8.55 | 4.92 | 7.46 | 6.37 | 45.22 | 3.91 | None |
 | 32 | 21:47 | unroll 4 (cyclic column) | 4.60 | 8.62 | 5.01 | 8.85 | 6.77 | 45.76 | 4.96 | None |
+| 33 | 21:50 | cache invalidated only by writes that make or unmake a bracket | 4.86 | 6.17 | 4.91 | 4.88 | 5.21 | 44.27 | 3.27 | None |
+| 34 | 21:50 | cache invalidated only by writes that make or unmake a bracket | 4.86 | 6.17 | 4.91 | 4.88 | 5.21 | None | None | None |
+| 35 | 21:52 | overwritten byte taken from the loaded head values instead of a masked load | 4.68 | 5.98 | 4.68 | 4.47 | 4.95 | 43.94 | 3.24 | None |
+| 36 | 21:52 | overwritten byte taken from the loaded head values instead of a masked load | 4.68 | 5.98 | 4.68 | 4.47 | 4.95 | None | None | None |
+| 37 | 21:53 | re-tune: unroll=1 with the cache | 4.80 | 6.12 | 4.81 | 4.62 | 5.09 | 44.70 | 2.35 | None |
+| 38 | 21:53 | re-tune: unroll=1 with the cache | 4.80 | 6.12 | 4.81 | 4.62 | 5.09 | None | None | None |
+| 39 | 21:53 | re-tune: search_chunk=8 with the cache | 4.65 | 6.03 | 4.66 | 4.45 | 4.95 | 46.74 | 2.28 | None |
+| 40 | 21:53 | re-tune: search_chunk=8 with the cache | 4.65 | 6.03 | 4.66 | 4.45 | 4.95 | None | None | None |
 
 ## Findings
 
@@ -178,6 +186,11 @@ Regenerated from `experiments/results/kernel_attempts.csv`; `experiments/plot_at
 - **A third compaction for batches: no.** Slower (3.0 ms per soup against 0.92 at 8 soups: every extra launch and gather costs more than the tail it trims) and the prototype was not even exact; dropped.
 - **Two-phase at two or three soups per launch:** random 2.0 against 4.4 ms per soup at two, 1.4 against 4.2 at three; mid and final lose 4 to 7%.
   The gate stays at 2^18 tapes (four soups), where the random gain is 2.8× for a similar loss; a caller with random-dominated batches of two can lower `two_phase_min`.
+- **The overwritten byte needs no load:** under `.` it is the byte at head1, otherwise the byte at head0, both loaded every step anyway.
+  Replacing the masked load of attempt 24: random 4.68 ms (4.86), enriched 5.98 (6.18), mid 4.69 (4.90), final 4.44 (5.15); `cyclic` final 5.07 (5.64).
+  Exact; attempt 25.
+- **Re-tuning after the cache changes:** search chunk 8 gives exactly chunk 4's numbers (mean 4.95); unroll 1 is worse (5.09).
+  Defaults stay.
 
 ## Reading the kernel: where the time could go, and ideas
 
