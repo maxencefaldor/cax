@@ -1,7 +1,8 @@
 # Phase 1 results: faithful BFF in CAX
 
-Status: in progress (2026-09-16).
-Numbers below are updated as runs finish.
+Status: laptop-scale results, 2026-09-16.
+The full-scale reproduction on H100s is in `06_phase1_full_scale.md` and the GPU throughput measurements in `05_gpu_throughput.md`; those supersede the throughput and emergence numbers here.
+The exactness checks, the seeded-takeover rates and the collapse analysis remain the record.
 
 ## What was built
 
@@ -50,8 +51,8 @@ The outcome is bimodal in every run: hoe either stays below 0.3 or exceeds 3; th
 | 3 | epoch 231,105 (9.5e8) | hoe 4.2 for ~2k epochs, then **collapse**; nothing after |
 | 4 | epoch 108,993 (4.5e8) and again ~337k | first one transient (peak hoe 1.8, gone within 2k epochs); second one at hoe 5.5 and running |
 
-Every takeover at this soup size has so far collapsed within ~10k epochs.
-The paper's soups are 16 times larger and its Figure 5 shows takeovers persisting to 16k epochs, so this is a small-soup effect, a finding, and a warning: N = 8192 is not a faithful proxy for the headline statistic.
+Every takeover at this soup size collapsed within ~10k epochs.
+At 2^17 programs all four takeovers persisted (`06_phase1_full_scale.md`), so this is a small-soup effect: N = 8192 is not a faithful proxy for the headline statistic, and the collapse itself is the finding.
 Checkpoints around the seed-1 collapse (172k, 176k, 180k, 184k) are being scored with the detector to tell whether the replicators die or drift out of the 64-byte frame.
 
 ## CAX continues cubff's takeover (cross-implementation dynamics check)

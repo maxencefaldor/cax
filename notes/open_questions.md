@@ -1,5 +1,8 @@
 # Open questions
 
+- **Takeover persistence vs soup size.**
+  Answered in part: all takeovers collapse at 2^13 programs (cycles of emergence, collapse and fast re-emergence from the enriched remains) and all persist at 2^17 (`06_phase1_full_scale.md`).
+  Open: where between 2^13 and 2^17 the boundary lies, and what the destructive mutant is (the 172k/176k checkpoints are in `experiments/results/checkpoints/`).
 - **Does time-to-transition scale with interactions across soup sizes?**
   The paper's drift in the first ~1000 epochs is per epoch, takeover is faster in small soups, and the appearance hazard is per interaction.
   Data: cubff at N = 8192 (4 seeds running) vs the paper's N = 2^17 distribution.
