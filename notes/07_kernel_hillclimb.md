@@ -8,36 +8,44 @@ Reference on the same box and soups: cubff does the random regime in 10.3 ms per
 ## Attempts
 
 Milliseconds per 65,536 pairs × 8192 steps on one H100; every row passed the exactness gate unless marked.
-The `cyclic` and `flip` columns (enriched regime, every lane runs the whole budget) exist from attempt 13 on.
+The `cyclic` and `flip` columns (enriched regime, every lane runs the whole budget) exist from attempt 13 on, the "8 soups" column (random, per soup, eight soups in one launch) from attempt 20.
 Regenerated from `experiments/results/kernel_attempts.csv`; `experiments/plot_attempts.py` draws it.
 
-| # | When (UTC) | Change | random | enriched | mid | final | mean | cyclic | flip |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| 0 | 20:43 | baseline: walk search, block 32, select-store | 18.38 | 29.66 | 20.80 | 31.29 | 25.03 |  |  |
-| 1 | 20:52 | masked store (no read of the overwritten byte); search walks 8 positions per reduction | 13.99 | 24.77 | 19.38 | 23.74 | 20.47 |  |  |
-| 2 | 20:58 | whole-array refs addressed by lane row instead of BlockSpec tiles; no padding | 14.01 | 24.62 | 19.22 | 23.15 | 20.25 |  |  |
-| 3 | 21:00 | step loop restructured: per-lane finish, loop test once per unroll (unroll=1) | 14.06 | 24.78 | 19.29 | 23.19 | 20.33 |  |  |
-| 4 | 21:02 | initial pc/heads computed in-kernel; only table and tapes as inputs [GPU shared with another job: invalid] | 30.51 | 25.01 | 19.54 | 25.78 | 25.21 |  |  |
-| 5 | 21:03 | same, unroll=8 steps per loop test | 14.43 | 25.41 | 20.42 | 27.65 | 21.98 |  |  |
-| 6 | 21:03 | initial pc/heads computed in-kernel; only table and tapes as inputs | 14.23 | 24.88 | 19.74 | 24.34 | 20.80 |  |  |
-| 7 | 21:05 | row index carried through the loop instead of hoisted (Triton LICM cost) | 11.03 | 13.62 | 11.73 | 22.75 | 14.78 |  |  |
-| 8 | 21:07 | dummy row for dead lanes (interpret-safe masked stores); row carried | 10.76 | 13.74 | 11.62 | 21.57 | 14.42 |  |  |
-| 9 | 21:07 | search_chunk=4 (dummy row, row carried) | 9.48 | 13.52 | 9.86 | 20.49 | 13.34 |  |  |
-| 10 | 21:07 | search_chunk=16 (dummy row, row carried) | 15.25 | 18.41 | 17.12 | 28.20 | 19.74 |  |  |
-| 11 | 21:09 | search_chunk=2 | 8.70 | 13.94 | 9.37 | 21.50 | 13.38 |  |  |
-| 12 | 21:09 | search_chunk=6 | 9.35 | 13.04 | 9.80 | 20.62 | 13.20 |  |  |
-| 13 | 21:10 | search compares raw bytes against the two bracket bytes instead of a table gather (chunk 4) | 8.25 | 11.02 | 8.77 | 18.51 | 11.64 |  |  |
-| 14 | 21:10 | compare search, search_chunk=8 | 9.94 | 12.54 | 10.83 | 18.14 | 12.86 |  |  |
-| 15 | 21:10 | compare search, unroll=2 | 8.18 | 10.99 | 8.58 | 16.95 | 11.17 |  |  |
-| 16 | 21:11 | compare search, unroll=4 | 8.21 | 11.19 | 8.65 | 18.87 | 11.73 |  |  |
-| 17 | 21:21 | current default (chunk 4, unroll 2, compare search) with cyclic/flip timing | 8.18 | 11.01 | 8.74 | 18.65 | 11.64 | 67.05 | 3.05 |
-| 18 | 21:21 | current default (chunk 4, unroll 2, compare search) with cyclic/flip timing | 8.18 | 11.01 | 8.74 | 18.65 | 11.64 | None | None |
-| 19 | 21:23 | search_chunk=16, to read the cyclic column | 13.62 | 16.48 | 15.41 | 23.42 | 17.23 | 63.05 | 2.33 |
-| 20 | 21:23 | search_chunk=16, to read the cyclic column | 13.62 | 16.48 | 15.41 | 23.42 | 17.23 | None | None |
-| 21 | 21:26 | per-lane cache of the last forward/backward search, invalidated by writes in the walked range | 4.54 | 8.59 | 4.97 | 6.98 | 6.27 | 53.99 | 2.30 |
-| 22 | 21:26 | per-lane cache of the last forward/backward search, invalidated by writes in the walked range | 4.54 | 8.59 | 4.97 | 6.98 | 6.27 | None | None |
-| 23 | 21:27 | bracket census, cyclic only (skips ring walks with no partner byte) | 4.52 | 8.49 | 4.90 | 6.90 | 6.20 | 54.24 | 3.32 |
-| 24 | 21:27 | bracket census, cyclic only (skips ring walks with no partner byte) | 4.52 | 8.49 | 4.90 | 6.90 | 6.20 | None | None |
+| # | When (UTC) | Change | random | enriched | mid | final | mean | cyclic | flip | 8 soups |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 0 | 20:43 | baseline: walk search, block 32, select-store | 18.38 | 29.66 | 20.80 | 31.29 | 25.03 |  |  |  |
+| 1 | 20:52 | masked store (no read of the overwritten byte); search walks 8 positions per reduction | 13.99 | 24.77 | 19.38 | 23.74 | 20.47 |  |  |  |
+| 2 | 20:58 | whole-array refs addressed by lane row instead of BlockSpec tiles; no padding | 14.01 | 24.62 | 19.22 | 23.15 | 20.25 |  |  |  |
+| 3 | 21:00 | step loop restructured: per-lane finish, loop test once per unroll (unroll=1) | 14.06 | 24.78 | 19.29 | 23.19 | 20.33 |  |  |  |
+| 4 | 21:02 | initial pc/heads computed in-kernel; only table and tapes as inputs [GPU shared with another job: invalid] | 30.51 | 25.01 | 19.54 | 25.78 | 25.21 |  |  |  |
+| 5 | 21:03 | same, unroll=8 steps per loop test | 14.43 | 25.41 | 20.42 | 27.65 | 21.98 |  |  |  |
+| 6 | 21:03 | initial pc/heads computed in-kernel; only table and tapes as inputs | 14.23 | 24.88 | 19.74 | 24.34 | 20.80 |  |  |  |
+| 7 | 21:05 | row index carried through the loop instead of hoisted (Triton LICM cost) | 11.03 | 13.62 | 11.73 | 22.75 | 14.78 |  |  |  |
+| 8 | 21:07 | dummy row for dead lanes (interpret-safe masked stores); row carried | 10.76 | 13.74 | 11.62 | 21.57 | 14.42 |  |  |  |
+| 9 | 21:07 | search_chunk=4 (dummy row, row carried) | 9.48 | 13.52 | 9.86 | 20.49 | 13.34 |  |  |  |
+| 10 | 21:07 | search_chunk=16 (dummy row, row carried) | 15.25 | 18.41 | 17.12 | 28.20 | 19.74 |  |  |  |
+| 11 | 21:09 | search_chunk=2 | 8.70 | 13.94 | 9.37 | 21.50 | 13.38 |  |  |  |
+| 12 | 21:09 | search_chunk=6 | 9.35 | 13.04 | 9.80 | 20.62 | 13.20 |  |  |  |
+| 13 | 21:10 | search compares raw bytes against the two bracket bytes instead of a table gather (chunk 4) | 8.25 | 11.02 | 8.77 | 18.51 | 11.64 |  |  |  |
+| 14 | 21:10 | compare search, search_chunk=8 | 9.94 | 12.54 | 10.83 | 18.14 | 12.86 |  |  |  |
+| 15 | 21:10 | compare search, unroll=2 | 8.18 | 10.99 | 8.58 | 16.95 | 11.17 |  |  |  |
+| 16 | 21:11 | compare search, unroll=4 | 8.21 | 11.19 | 8.65 | 18.87 | 11.73 |  |  |  |
+| 17 | 21:21 | current default (chunk 4, unroll 2, compare search) with cyclic/flip timing | 8.18 | 11.01 | 8.74 | 18.65 | 11.64 | 67.05 | 3.05 |  |
+| 18 | 21:23 | search_chunk=16, to read the cyclic column | 13.62 | 16.48 | 15.41 | 23.42 | 17.23 | 63.05 | 2.33 |  |
+| 19 | 21:26 | per-lane cache of the last forward/backward search, invalidated by writes in the walked range | 4.54 | 8.59 | 4.97 | 6.98 | 6.27 | 53.99 | 2.30 |  |
+| 20 | 21:27 | bracket census, cyclic only (skips ring walks with no partner byte) | 4.52 | 8.49 | 4.90 | 6.90 | 6.20 | 54.24 | 3.32 |  |
+| 21 | 21:33 | search_chunk=16 on the cache kernel (for the cyclic column) | 4.60 | 8.58 | 5.09 | 7.34 | 6.40 | 44.93 | 2.28 |  |
+| 22 | 21:34 | search chunk per control: 4 matched, 16 cyclic | 4.53 | 8.53 | 4.92 | 6.93 | 6.23 | 45.06 | 3.30 |  |
+| 23 | 21:36 | two-phase: all tapes for 256 steps, then survivors compacted (1/8 buffer) | 3.81 | 9.18 | 5.51 | 7.65 | 6.54 | 46.72 | 2.33 |  |
+| 24 | 21:38 | two-phase, first=512 | 4.99 | 9.11 | 5.38 | 7.44 | 6.73 | 47.10 | 2.31 | None |
+| 25 | 21:38 | two-phase from 2^18 tapes; batch8 column added | 5.00 | 9.08 | 5.36 | 7.61 | 6.76 | 46.97 | 2.29 | None |
+| 26 | 21:38 | two-phase, first=128 | 4.98 | 9.03 | 5.37 | 7.62 | 6.75 | 47.03 | 3.82 | None |
+| 27 | 21:41 | tidy rewrite; halted derived after the loop instead of carried | 4.84 | 8.93 | 5.22 | 7.30 | 6.57 | 46.95 | 2.32 | None |
+| 28 | 21:45 | resumable state for two-phase, fresh runs initialised in-kernel; tidy rewrite | 4.53 | 8.55 | 4.91 | 8.55 | 6.64 | 45.12 | 4.26 | None |
+| 29 | 21:46 | same as previous, re-measured on an idle box | 4.57 | 8.58 | 4.94 | 6.93 | 6.25 | 45.04 | 2.31 | None |
+| 30 | 21:46 | block 64 (cyclic and flip columns) | 5.45 | 12.22 | 7.47 | 26.93 | 13.02 | 114.13 | 18.61 | None |
+| 31 | 21:47 | capacity 1/4 (batch8 column) | 4.54 | 8.55 | 4.92 | 7.46 | 6.37 | 45.22 | 3.91 | None |
+| 32 | 21:47 | unroll 4 (cyclic column) | 4.60 | 8.62 | 5.01 | 8.85 | 6.77 | 45.76 | 4.96 | None |
 
 ## Findings
 
@@ -160,10 +168,16 @@ Regenerated from `experiments/results/kernel_attempts.csv`; `experiments/plot_at
 - **A resumable state costs 6% unless fresh runs initialise in-kernel.**
   Loading the initial pointer, heads and counters from the state array (needed for the second phase) slowed the single-soup path from 4.53 to 4.82 ms on random with identical outputs; a constant direction outside `flip` did not recover it, a static `fresh` flag that starts from constants did (4.51, and 7.18 on final against 7.40).
   Loaded initial values leave the loop-carried registers without the range facts the compiler had from constants.
-
 - **Attempt 23, the shipped kernel re-measured on an idle box: mean 6.25 ms** (random 4.6, enriched 8.6, mid 4.9, final 6.9), 0.91 ms per soup with 8 soups per launch, `cyclic` 45, `flip` 2.3.
   Harness numbers taken while another job compiles on the box drift by up to 20% on the all-alive columns (attempt 22); measure alone.
 - **Two-warp blocks, once more, for the total machines: no** (`cyclic` 114 ms, `flip` 18.6).
+- **Probes on the two-phase kernel:** unroll 4 hurts the matched regimes again (mean 6.8) and does nothing for `cyclic`; a survivor buffer of a quarter instead of an eighth changes nothing (0.88 against 0.91 ms per soup at 8 soups).
+- **Invalidate the search cache only on bracket writes: exact, and the largest gain since the cache.**
+  A write can only change a search result if the old or the new byte is a bracket; checking that (one masked load of the overwritten byte) instead of invalidating on any write in the range gives enriched 6.05 ms (was 8.57), final 4.74 (7.37), mid 4.76 (4.93), random 4.74 (4.53, the load's cost); `cyclic` random 17.4 (18.7).
+  Ported as attempt 24 with the load restricted to lanes that hold a cached search.
+- **A third compaction for batches: no.** Slower (3.0 ms per soup against 0.92 at 8 soups: every extra launch and gather costs more than the tail it trims) and the prototype was not even exact; dropped.
+- **Two-phase at two or three soups per launch:** random 2.0 against 4.4 ms per soup at two, 1.4 against 4.2 at three; mid and final lose 4 to 7%.
+  The gate stays at 2^18 tapes (four soups), where the random gain is 2.8× for a similar loss; a caller with random-dominated batches of two can lower `two_phase_min`.
 
 ## Reading the kernel: where the time could go, and ideas
 

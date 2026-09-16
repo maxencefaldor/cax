@@ -133,11 +133,16 @@ def _kernel(
             ),
         ).astype(jnp.uint8)
         if control != "flip":
-            fok = fok & ~(writing & visited(fpc, ftgt, write_pos, True))
-            bok = bok & ~(writing & visited(bpc, btgt, write_pos, False))
-        if control == "cyclic":
-            old = plt.load(tape_ref.at[rows, write_pos], mask=writing, other=0)
+            # Only a write that makes or unmakes a bracket can change a search.
+            cached = writing & (fok | bok) if control == "matched" else writing
+            old = plt.load(tape_ref.at[rows, write_pos], mask=cached, other=0)
             old, new = old.astype(jnp.int32), write_val.astype(jnp.int32)
+            was = (old == open_byte) | (old == close_byte)
+            becomes = (new == open_byte) | (new == close_byte)
+            rewrite = cached & (was | becomes)
+            fok = fok & ~(rewrite & visited(fpc, ftgt, write_pos, True))
+            bok = bok & ~(rewrite & visited(bpc, btgt, write_pos, False))
+        if control == "cyclic":
             n_open += jnp.where(writing, (new == open_byte) * 1 - (old == open_byte), 0)
             n_close += jnp.where(
                 writing, (new == close_byte) * 1 - (old == close_byte), 0
