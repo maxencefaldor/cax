@@ -143,6 +143,12 @@ Regenerated from `experiments/results/kernel_attempts.csv`; `experiments/plot_at
   So the census ships behind a `control == "cyclic"` guard (attempt 16) and the matched path keeps the cache only.
 - **Attempt 15 (cache in the shipped kernel): mean 6.3 ms**, random 4.5, enriched 8.6, mid 5.0, final 7.0; `cyclic` 54, `flip` 2.3.
   Four times the baseline's mean; against cubff on the same GPU, 2.3× on random and 5× on the transitioned soup.
+- **Direct check against cubff's binary after the cache and census** (`fidelity.py`, 16,384 tapes, both head conventions): 0 mismatches in tapes and op counts.
+- **Two cache entries per direction: no.** Register pressure costs more than the extra hits: random 6.0 ms against 4.6, mid 6.4 against 4.9; only `cyclic` enriched gains (54 → 44).
+  Not adopted, not even behind the `cyclic` guard.
+- **Soups per launch, re-measured with the cache:** random 4.6 ms alone, 3.3 at 8 soups, 3.1 at 16; final 7.1 alone, 5.4 at 8, 5.1 at 16.
+  End to end with 8 soups per process, brotli included: 4.5 ms per soup-epoch.
+- The plot and the table are published as a page: <https://claude.ai/artifact/9x45eF1eD6q1RJNNkcU7RS>.
 
 ## Reading the kernel: where the time could go, and ideas
 
