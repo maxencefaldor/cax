@@ -149,9 +149,10 @@ Regenerated from `experiments/results/kernel_attempts.csv`; `experiments/plot_at
 - **Soups per launch, re-measured with the cache:** random 4.6 ms alone, 3.3 at 8 soups, 3.1 at 16; final 7.1 alone, 5.4 at 8, 5.1 at 16.
   End to end with 8 soups per process, brotli included: 4.5 ms per soup-epoch.
 - The plot and the table are published as a page: <https://claude.ai/artifact/9x45eF1eD6q1RJNNkcU7RS>.
-
-- **Chunk 16 with the cache: `cyclic` 54 → 45 ms, matched regimes +3%.** So the chunk is per control (4 matched, 16 cyclic), attempt 18.
-- **Trimming control-constant arrays from the loop carry (direction outside `flip`, census outside `cyclic`): identical timings.** Triton already drops them; not adopted.
+- **Chunk 16 with the cache: `cyclic` 54 → 45 ms, matched regimes +3%.**
+  So the chunk is per control (4 matched, 16 cyclic), attempt 18.
+- **Trimming control-constant arrays from the loop carry (direction outside `flip`, census outside `cyclic`): identical timings.**
+  Triton already drops them; not adopted.
 
 ## Reading the kernel: where the time could go, and ideas
 

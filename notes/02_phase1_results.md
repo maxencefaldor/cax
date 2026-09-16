@@ -38,9 +38,10 @@ Under a loaded machine the CAX numbers degrade several-fold (XLA's thread pool s
 | paper | 2^17 | 1000 | 22% | |
 | cubff (here) | 2^17 | 40 | 25% | 14–40% |
 | cubff (here) | 8192 | 200 | 18% | 14–24% |
-| CAX | 8192 | 6 so far | 0% | (pending, 60 planned) |
+| CAX | 8192 | 60 | 12% | 6–22% |
 
-The outcome is bimodal in every run: hoe either stays below 0.3 or exceeds 3; the two thresholds in use (1 and 3) never disagree.
+The outcome is bimodal in every run of every implementation: hoe either stays below 0.3 or exceeds 3; the two thresholds in use (1 and 3) never disagree.
+CAX 7/60 against cubff 37/200 at the same size: Fisher exact p = 0.25, no detectable difference.
 
 ## Emergence from a random soup, N = 8192, mutation 1/4096 (cubff, 4 seeds, 400k epochs = 1.6e9 interactions each)
 
@@ -49,9 +50,9 @@ The outcome is bimodal in every run: hoe either stays below 0.3 or exceeds 3; th
 | 1 | epoch 129,921 (5.3e8 interactions) | takeover to hoe 5.9 by 170k, **collapse** to 0.1 by 180k, brief rebound at 184k, random again by 190k |
 | 2 | none in 400k epochs | |
 | 3 | epoch 231,105 (9.5e8) | hoe 4.2 for ~2k epochs, then **collapse**; nothing after |
-| 4 | epoch 108,993 (4.5e8) and again ~337k | first one transient (peak hoe 1.8, gone within 2k epochs); second one at hoe 5.5 and running |
+| 4 | epoch 108,993 (4.5e8) and again 329k | first one transient (peak hoe 1.8, gone within 2k epochs); the second held at hoe 5.5–5.7 for the remaining 70k epochs to the end of the run |
 
-Every takeover at this soup size collapsed within ~10k epochs.
+Three of the four takeovers at this soup size collapsed within ~10k epochs; the last one (seed 4's second) persisted for 70k epochs to the end of the run.
 At 2^17 programs all four takeovers persisted (`06_phase1_full_scale.md`), so this is a small-soup effect: N = 8192 is not a faithful proxy for the headline statistic, and the collapse itself is the finding.
 Checkpoints around the seed-1 collapse (172k, 176k, 180k, 184k) are being scored with the detector to tell whether the replicators die or drift out of the 64-byte frame.
 
