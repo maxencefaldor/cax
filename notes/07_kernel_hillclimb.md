@@ -161,6 +161,10 @@ Regenerated from `experiments/results/kernel_attempts.csv`; `experiments/plot_at
   Loading the initial pointer, heads and counters from the state array (needed for the second phase) slowed the single-soup path from 4.53 to 4.82 ms on random with identical outputs; a constant direction outside `flip` did not recover it, a static `fresh` flag that starts from constants did (4.51, and 7.18 on final against 7.40).
   Loaded initial values leave the loop-carried registers without the range facts the compiler had from constants.
 
+- **Attempt 23, the shipped kernel re-measured on an idle box: mean 6.25 ms** (random 4.6, enriched 8.6, mid 4.9, final 6.9), 0.91 ms per soup with 8 soups per launch, `cyclic` 45, `flip` 2.3.
+  Harness numbers taken while another job compiles on the box drift by up to 20% on the all-alive columns (attempt 22); measure alone.
+- **Two-warp blocks, once more, for the total machines: no** (`cyclic` 114 ms, `flip` 18.6).
+
 ## Reading the kernel: where the time could go, and ideas
 
 Per step, per warp, the chain is: load byte at `pc` → table lookup (dependent load) → decode → loads at `head0`, `head1`, and at the write position (dependent on the decode) → one store → head/pc arithmetic → warp reduction of `live` → loop back.

@@ -36,11 +36,10 @@ a = ap.parse_args()
 kw = {}
 for item in a.kw:
     k, v = item.split("=")
-    kw[k] = (
-        int(v)
-        if v.lstrip("-").isdigit()
-        else (v if v not in ("True", "False") else v == "True")
-    )
+    try:
+        kw[k] = int(v) if v.lstrip("-").isdigit() else float(v)
+    except ValueError:
+        kw[k] = v == "True" if v in ("True", "False") else v
 
 bench = pathlib.Path(a.bench_dir)
 bench.mkdir(parents=True, exist_ok=True)
