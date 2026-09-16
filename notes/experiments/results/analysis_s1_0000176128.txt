@@ -1,0 +1,16 @@
+programs 8192 high-order entropy 3.18
+score histogram (score: count): {0: 8086, 64: 106}
+replicators (score >= 5): 106  (score >= 48): 106
+   11x   !{     [   ^   ) 6.   >tY ~{H ]qV { C \ >  .M  o \   [~ {9     
+   11x       9{ ~[   \ o  M.  > \ C { Vq] H{~ Yt>   .6 )   ^   [     {! 
+    9x       9{ ~[   \ o  M.  > \ C { Vq] H{~ Yt>   .6 )   ^   [     {! 
+    9x   !{     [   ^   ) 6.   >tY ~{H ]qV { C \ >  .M  o \   [~ {9     
+    8x   !{     [   ^   ) 6. I >tY ~{H ] 2 { CT\ >  .M  o \   [~ {9     
+score 64:  !{     [   ^   ) 6.   >tY ~{n ]qV { C \ >  .M  o \   [~ {9     
+score 64:  !{ R   [   7[  ) 6.   >tY ~{H ]qV { C \ >  .M  o \   [~ {9     
+score 64:  !{     [   ^   ) 6.   >tY ~{H ]qV { C \ >  .M  o \   [~ {9     
+score 64:  !{     [   ^   ) 6.   >tY ~{H ]qV { C \ >  .M  o \   [~ {9     
+score 64:  !{     [   ^   ) 6.   >tY ~{H ]qV { C \ >  .M  o \   [~ {9     
+score 64:      9{ ~[   \ o  M.  > \ C { Vq] H{~ Yt>   .6 )   ^   [     {! 
+score 64:  !{     [   ^   ) 6. I >tY ~{H ] 2 { CT\ >  .M  o \   [~ {9     
+score 64:      9{ ~[   \ o  M.  > \TC { 2 ] H{~ Yt> I .6 )   ^   [     {! 
