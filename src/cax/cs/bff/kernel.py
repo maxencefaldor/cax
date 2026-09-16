@@ -300,7 +300,7 @@ def run_kernel(
     heads_from_tape: bool = False,
     control: Control = "matched",
     block: int = 32,
-    search_chunk: int = 4,
+    search_chunk: int | None = None,
     unroll: int = 2,
     interpret: bool = False,
 ) -> tuple[Array, Array, Array]:
@@ -317,7 +317,8 @@ def run_kernel(
         block: Tapes per kernel block; a block runs until its last tape halts, so
             smaller blocks waste fewer lanes on random soups. One warp is 32.
         search_chunk: Tape positions the bracket search visits between two tests
-            of whether any lane is still searching.
+            of whether any lane is still searching; 4 by default, 16 for `"cyclic"`
+            whose walks are long.
         unroll: Steps a block executes between two tests of whether any lane is
             still running.
         interpret: Run the kernel in Pallas interpret mode (any backend, slow).
@@ -327,6 +328,8 @@ def run_kernel(
 
     """
     num, length = tapes.shape
+    if search_chunk is None:
+        search_chunk = 16 if control == "cyclic" else 4
     blocks = -(-num // block)
     padded = blocks * block + 1
     tapes = jnp.concatenate(

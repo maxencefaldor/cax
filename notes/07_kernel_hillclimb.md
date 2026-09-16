@@ -150,6 +150,9 @@ Regenerated from `experiments/results/kernel_attempts.csv`; `experiments/plot_at
   End to end with 8 soups per process, brotli included: 4.5 ms per soup-epoch.
 - The plot and the table are published as a page: <https://claude.ai/artifact/9x45eF1eD6q1RJNNkcU7RS>.
 
+- **Chunk 16 with the cache: `cyclic` 54 → 45 ms, matched regimes +3%.** So the chunk is per control (4 matched, 16 cyclic), attempt 18.
+- **Trimming control-constant arrays from the loop carry (direction outside `flip`, census outside `cyclic`): identical timings.** Triton already drops them; not adopted.
+
 ## Reading the kernel: where the time could go, and ideas
 
 Per step, per warp, the chain is: load byte at `pc` → table lookup (dependent load) → decode → loads at `head0`, `head1`, and at the write position (dependent on the decode) → one store → head/pc arithmetic → warp reduction of `live` → loop back.

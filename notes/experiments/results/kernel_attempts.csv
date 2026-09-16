@@ -24,3 +24,7 @@ utc,description,kwargs,exact,random,enriched,mid,final,mean_ms,cyclic_ms,flip_ms
 2026-09-16T21:26:13+00:00,"per-lane cache of the last forward/backward search, invalidated by writes in the walked range",,True,4.54,8.59,4.97,6.98,6.27
 2026-09-16T21:27:18+00:00,"bracket census, cyclic only (skips ring walks with no partner byte)",,True,4.52,8.49,4.90,6.90,6.20,54.24,3.32
 2026-09-16T21:27:18+00:00,"bracket census, cyclic only (skips ring walks with no partner byte)",,True,4.52,8.49,4.90,6.90,6.20
+2026-09-16T21:33:46+00:00,search_chunk=16 on the cache kernel (for the cyclic column),search_chunk=16,True,4.60,8.58,5.09,7.34,6.40,44.93,2.28
+2026-09-16T21:33:46+00:00,search_chunk=16 on the cache kernel (for the cyclic column),search_chunk=16,True,4.60,8.58,5.09,7.34,6.40
+2026-09-16T21:34:32+00:00,"search chunk per control: 4 matched, 16 cyclic",,True,4.53,8.53,4.92,6.93,6.23,45.06,3.30
+2026-09-16T21:34:32+00:00,"search chunk per control: 4 matched, 16 cyclic",,True,4.53,8.53,4.92,6.93,6.23
