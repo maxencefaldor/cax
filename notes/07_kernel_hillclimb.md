@@ -46,14 +46,11 @@ Regenerated from `experiments/results/kernel_attempts.csv`; `experiments/plot_at
 | 30 | 21:46 | block 64 (cyclic and flip columns) | 5.45 | 12.22 | 7.47 | 26.93 | 13.02 | 114.13 | 18.61 | None |
 | 31 | 21:47 | capacity 1/4 (batch8 column) | 4.54 | 8.55 | 4.92 | 7.46 | 6.37 | 45.22 | 3.91 | None |
 | 32 | 21:47 | unroll 4 (cyclic column) | 4.60 | 8.62 | 5.01 | 8.85 | 6.77 | 45.76 | 4.96 | None |
-| 33 | 21:50 | cache invalidated only by writes that make or unmake a bracket | 4.86 | 6.17 | 4.91 | 4.88 | 5.21 | 44.27 | 3.27 | None |
-| 34 | 21:50 | cache invalidated only by writes that make or unmake a bracket | 4.86 | 6.17 | 4.91 | 4.88 | 5.21 | None | None | None |
-| 35 | 21:52 | overwritten byte taken from the loaded head values instead of a masked load | 4.68 | 5.98 | 4.68 | 4.47 | 4.95 | 43.94 | 3.24 | None |
-| 36 | 21:52 | overwritten byte taken from the loaded head values instead of a masked load | 4.68 | 5.98 | 4.68 | 4.47 | 4.95 | None | None | None |
-| 37 | 21:53 | re-tune: unroll=1 with the cache | 4.80 | 6.12 | 4.81 | 4.62 | 5.09 | 44.70 | 2.35 | None |
-| 38 | 21:53 | re-tune: unroll=1 with the cache | 4.80 | 6.12 | 4.81 | 4.62 | 5.09 | None | None | None |
-| 39 | 21:53 | re-tune: search_chunk=8 with the cache | 4.65 | 6.03 | 4.66 | 4.45 | 4.95 | 46.74 | 2.28 | None |
-| 40 | 21:53 | re-tune: search_chunk=8 with the cache | 4.65 | 6.03 | 4.66 | 4.45 | 4.95 | None | None | None |
+| 33 | 21:50 | cache invalidated only by writes that make or unmake a bracket | 4.86 | 6.17 | 4.91 | 4.88 | 5.21 | None | None | None |
+| 34 | 21:52 | overwritten byte taken from the loaded head values instead of a masked load | 4.68 | 5.98 | 4.68 | 4.47 | 4.95 | None | None | None |
+| 35 | 21:53 | re-tune: unroll=1 with the cache | 4.80 | 6.12 | 4.81 | 4.62 | 5.09 | None | None | None |
+| 36 | 21:53 | re-tune: search_chunk=8 with the cache | 4.65 | 6.03 | 4.66 | 4.45 | 4.95 | None | None | None |
+| 37 | 21:57 | cyclic: per-position match table with validity bits; matched keeps the two-entry cache | 4.69 | 5.94 | 4.70 | 4.55 | 4.97 | None | None | None |
 
 ## Findings
 
@@ -191,6 +188,12 @@ Regenerated from `experiments/results/kernel_attempts.csv`; `experiments/plot_at
   Exact; attempt 25.
 - **Re-tuning after the cache changes:** search chunk 8 gives exactly chunk 4's numbers (mean 4.95); unroll 1 is worse (5.09).
   Defaults stay.
+- **A per-position match table** (scratch `kernel_mtable.py`: validity bits in four registers per lane, targets in a global scratch, cleared on any bracket write) **is 3.7× on `cyclic`** (random 8.0 ms against 17.2, enriched 11.8 against 44) but loses on the evolved matched soups (mid 5.3 against 4.7, final 6.1 against 4.5): replicators write brackets constantly and the whole table clears each time, where the two-entry cache survived by knowing its ranges.
+  Next: the table plus a hull of the cached walks, so writes outside it, the copied region, do not clear it.
+- **Match table with a hull of cached walks: no** for the matched regimes (random 5.1 ms against 4.7, final 5.2 against 4.5): the two extra registers cost more than the saved clears.
+  So the kernel keeps both mechanisms, chosen by control: the two-entry range cache for `matched`, the per-position table for `cyclic` (attempt 26).
+- **Attempt 26: `cyclic` 44 → 11.5 ms** with the per-position match table, matched regimes unchanged (mean 4.97).
+  Both caches ride in the loop carry for every control; the unused one is a constant and costs nothing (measured earlier), which keeps one code path and the type checker quiet.
 
 ## Reading the kernel: where the time could go, and ideas
 

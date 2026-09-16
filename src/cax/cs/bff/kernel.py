@@ -33,6 +33,7 @@ def _kernel(
     state_in_ref,
     tape_ref,
     state_ref,
+    match_ref,
     *,
     num: int,
     padded: int,
@@ -107,7 +108,7 @@ def _kernel(
 
     def one_step(carry):
         row, pc, head0, head1, direction, live, steps, ops, cache, census = carry
-        (fpc, ftgt, fok), (bpc, btgt, bok) = cache
+        (fpc, ftgt, fok), (bpc, btgt, bok), bits = cache
         n_open, n_close = census
         # Recomputed every step on purpose: hoisted, the addressing costs 25% more.
         rows = jnp.where(live, row, dummy)
@@ -135,13 +136,15 @@ def _kernel(
         # The overwritten byte is already loaded: value1 under `.`, else value0.
         old = jnp.where(cmd == Op.COPY01, value1, value0).astype(jnp.int32)
         new = write_val.astype(jnp.int32)
-        if control != "flip":
-            # Only a write that makes or unmakes a bracket can change a search.
-            was = (old == open_byte) | (old == close_byte)
-            becomes = (new == open_byte) | (new == close_byte)
-            rewrite = writing & (was | becomes)
+        # Only a write that makes or unmakes a bracket can change a search.
+        was = (old == open_byte) | (old == close_byte)
+        becomes = (new == open_byte) | (new == close_byte)
+        rewrite = writing & (was | becomes)
+        if control == "matched":
             fok = fok & ~(rewrite & visited(fpc, ftgt, write_pos, True))
             bok = bok & ~(rewrite & visited(bpc, btgt, write_pos, False))
+        elif control == "cyclic":
+            bits = tuple(jnp.where(rewrite, 0, b) for b in bits)
         if control == "cyclic":
             n_open += jnp.where(writing, (new == open_byte) * 1 - (old == open_byte), 0)
             n_close += jnp.where(
@@ -164,26 +167,46 @@ def _kernel(
             new_halted = false
         else:
             new_direction = direction
-            hit_f = jump_forward & fok & (fpc == pc)
-            hit_b = jump_backward & bok & (bpc == pc)
-            hit = hit_f | hit_b
-            need = live & jumping & ~hit
-            if control == "cyclic":  # no partner byte on the tape: no walk
+            word, bit = pc >> 5, 1 << (pc & 31)  # the table's slot for this position
+            if control == "matched":
+                # Two entries, the last forward and the last backward search.
+                hit_f = jump_forward & fok & (fpc == pc)
+                hit_b = jump_backward & bok & (bpc == pc)
+                hit = hit_f | hit_b
+                known = jnp.where(hit_f, ftgt, btgt)
+                need = live & jumping & ~hit
+            else:
+                # One entry per position, in a scratch table; a bit per position says
+                # whether it is current. On a ring an unmatched bracket walks the whole
+                # tape, so the census also skips walks with no partner byte at all.
+                mask = bits[0]
+                for w in range(1, length // 32):
+                    mask = jnp.where(word == w, bits[w], mask)
+                hit = jumping & ((mask & bit) != 0)
+                known = match_ref[rows, pc]
+                need = live & jumping & ~hit
                 need = need & jnp.where(jump_forward, n_close > 0, n_open > 0)
             walked = search(rows, pc, jump_forward, need)
-            target = jnp.where(hit, jnp.where(hit_f, ftgt, btgt), walked)
-            fresh_f = live & jump_forward & ~hit
-            fresh_b = live & jump_backward & ~hit
-            fpc, ftgt, fok = (
-                jnp.where(fresh_f, pc, fpc),
-                jnp.where(fresh_f, target, ftgt),
-                fok | fresh_f,
-            )
-            bpc, btgt, bok = (
-                jnp.where(fresh_b, pc, bpc),
-                jnp.where(fresh_b, target, btgt),
-                bok | fresh_b,
-            )
+            target = jnp.where(hit, known, walked)
+            if control == "matched":
+                fresh_f = need & jump_forward
+                fresh_b = need & jump_backward
+                fpc, ftgt, fok = (
+                    jnp.where(fresh_f, pc, fpc),
+                    jnp.where(fresh_f, target, ftgt),
+                    fok | fresh_f,
+                )
+                bpc, btgt, bok = (
+                    jnp.where(fresh_b, pc, bpc),
+                    jnp.where(fresh_b, target, btgt),
+                    bok | fresh_b,
+                )
+            else:
+                plt.store(match_ref.at[rows, pc], target, mask=need)
+                bits = tuple(
+                    jnp.where(need & (word == w), b | bit, b)
+                    for w, b in enumerate(bits)
+                )
             found = target >= 0
             jumped = jnp.where(found, target, pc)
             if control == "matched":  # an unmatched taken jump lands off the tape
@@ -212,7 +235,7 @@ def _kernel(
             live & ~finished,
             steps,
             ops,
-            ((fpc, ftgt, fok), (bpc, btgt, bok)),
+            ((fpc, ftgt, fok), (bpc, btgt, bok), bits),
             (n_open, n_close),
         )
 
@@ -235,7 +258,9 @@ def _kernel(
         halted = halted != 0
     direction = state_ref[DIRECTION, rows] if control == "flip" else zero + 1
     live = valid & ~halted & (steps < num_steps)
-    cache = ((zero, zero, false), (zero, zero, false))
+    # Both caches ride in the carry; the unused one is constant and costs nothing.
+    entries = ((zero, zero, false), (zero, zero, false))
+    cache = (*entries, tuple(zero for _ in range(length // 32)))
     census = (zero, zero)
     if control == "cyclic":  # bracket bytes on each tape, kept exact under writes
 
@@ -291,7 +316,7 @@ def _launch(
     )
     tape_spec = pl.BlockSpec((padded, length), lambda i: (0, 0))
     state_spec = pl.BlockSpec((7, padded), lambda i: (0, 0))
-    tapes, state = pl.pallas_call(
+    tapes, state, _ = pl.pallas_call(
         kernel,
         grid=(blocks,),
         in_specs=[
@@ -300,10 +325,11 @@ def _launch(
             tape_spec,
             state_spec,
         ],
-        out_specs=(tape_spec, state_spec),
+        out_specs=(tape_spec, state_spec, tape_spec),
         out_shape=(
             jax.ShapeDtypeStruct((padded, length), tapes.dtype),
             jax.ShapeDtypeStruct((7, padded), jnp.int32),
+            jax.ShapeDtypeStruct((padded, length), jnp.int32),  # cyclic match table
         ),
         input_output_aliases={2: 0, 3: 1},
         interpret=interpret,
