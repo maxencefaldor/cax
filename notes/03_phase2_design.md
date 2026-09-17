@@ -114,8 +114,7 @@ Totality is paid for in compute (every tape runs the full budget, 2.5× the matc
 
 | epoch | soups replicator-dominated |
 | --- | --- |
-| 8,192 | 55 of 96 (57 %) |
-| 16,384 | 80 of 96 (83 %, ± 7.5) |
+| 8,192 | 244 of 384 (63.5 % ± 4.8) |
+| 16,384 | 337 of 384 (87.8 % ± 3.3) |
 
-The reference machine's figure is 38 % of 1,008 (`06`); the ring more than doubles it.
-More batches land through the morning; the launcher runs 384 soups in all.
+The reference machine's figure is 38.1 % of 1,008 (`06`); the ring more than doubles it.

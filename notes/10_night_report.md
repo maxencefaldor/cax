@@ -11,7 +11,7 @@ Details per topic: `03` (Phase 2), `06` and `runs/phase1` (Phase 1), `08` (space
    Median transition epoch 5,280; the histogram matches Figure 6's spread from 2k to 12k.
 1. **Direction-flip brackets are dead: zero replicators in 20 million programs.**
    The brief's favoured primitive fails its first test; cyclic nearest-bracket beats the reference (18 vs 10 replicators per 10 million).
-1. **Cyclic soups transition in 83 % of 96 seeds by 16k epochs**, against 38 % for the reference.
+1. **Cyclic soups transition in 88 % of 384 seeds by 16k epochs**, against 38 % for the reference.
    The principled, total, halt-free variant is a gain, not a cost, on the emergence axis.
 1. **Space slows emergence 25× and does not prevent it.**
    Three of four toruses transition, at 48k, 159k and 205k epochs; every takeover persists; a planted replicator takes over a torus in 3,000 epochs as a growing colony.
@@ -43,7 +43,7 @@ Programs tested per replicator found, 10 million programs per cell, detector sco
 | flip | two | 0 (best score 2) | 0 (best score 4) |
 | any | swap | 0 | 0 |
 
-Then cyclic soups at scale (`runs/phase2/cyclic_stat`, scored with the detector since entropy is blind for total machines): 55 of 96 replicator-dominated by 8k epochs and 80 of 96 (83 % ± 7.5) by 16k, against 38 % for the reference.
+Then cyclic soups at scale (`runs/phase2/cyclic_stat`, scored with the detector since entropy is blind for total machines): 244 of 384 replicator-dominated by 8k epochs and 337 of 384 (87.8 % ± 3.3) by 16k, against 38.1 % for the reference.
 The replicators are ordinary BFF replicators, palindromic tapes like `[<,} ] },<[` with their mirror images; they score 64 under the reference semantics too.
 High-order entropy is not a transition signal for total machines: smearing loops push it past 3 within 64 epochs.
 
