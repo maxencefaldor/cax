@@ -133,3 +133,27 @@ Under an income below that, a replicator lives off the bank its slot accumulated
 Frugality, halting after the copy instead of looping to the cap, is the first new trait the economy selects for.
 
 Running (`runs/econ`, 2^17 programs, four soups each, 32k epochs): reference control at incomes 512, 2,048 and 8,192 (the last never kills), cyclic at 4,096 and 6,144 (a cyclic pair always spends 8,192, about half each).
+
+## The economy's first readings (2026-09-18, 00:30 London)
+
+`runs/econ`, 2^17 programs, four soups per income, 32k epochs; assays with the cost columns in `runs/assays/econ_*.csv`.
+
+| control, income | at 32k epochs |
+| --- | --- |
+| reference, 512 | 3 of 4 transitioned; two live with 1-3 % deaths per epoch and no bank |
+| reference, 2,048 | 1 of 4 transitioned, energy banked, no deaths |
+| reference, 8,192 | 1 of 4 transitioned late; never kills |
+| cyclic, 4,096 | all four at an equilibrium: 30 % of the soup is one inert tape of commas |
+| cyclic, 6,144 | all four transitioned, energy banked |
+
+**Frugal replicators evolved.**
+Without the economy every dominant replicator spends the whole budget: `spends` = 1.00 at every checkpoint of every plain soup, because the reference's replicators loop until the cap.
+Under an income of 512, soup 3's dominant lineage, at 17-35 % of the soup for 32k epochs, spends 0.11 of the budget (about 900 steps), replicates at 0.98, and has a core of 14-20 bytes with robustness 0.65-0.75 against 8-10 bytes and 0.82 for the spendthrifts.
+Soup 1 alternates between frugal dominants (spends 0.09-0.11, share 15-26 %) and spendthrift ones that never hold more than a fraction of a percent.
+A second selected trait, cost, produced a longer and less robust core: the halting mechanism is paid for in bytes.
+This is the first change in what a replicator *is* that the programme has produced, and it came from the resource, as predicted.
+
+**The cyclic break-even income produces an inert equilibrium**, not cooperation: at income 4,096 a cyclic pair costs exactly the income per half, and a tape of 64 commas, which does nothing and so costs nothing extra, holds 30 % of every soup with 0.03 % deaths per epoch.
+The assay that seemed to call it a replicator, `replicates_in_soup` at 1.00, was passing because its soup partners were copies of itself; soup partners are now half-damaged like kin, and the reading is a half.
+
+Next: the assays' `spends` trajectory over more seeds and incomes, and whether the frugal core keeps growing.

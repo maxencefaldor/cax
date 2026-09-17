@@ -116,11 +116,15 @@ def assays(
         - `replicates`: detector score against random partners, over the length,
           taking the program or its mirror image as the child, since some
           replicators write themselves reversed.
-        - `replicates_in_soup`: the same against partners from the soup; much higher
-          than `replicates` means the program needs a host, a parasite.
-        - `replicates_with_kin`: the same with damaged copies of itself as partners,
-          half of the bytes randomised, the same half in every chain; an inert program
-          leaves the damage in place and scores about a half.
+        - `replicates_in_soup`: the same against partners from the soup, half of
+          their bytes randomised; much higher than `replicates` means the program
+          needs a host, a parasite.
+        - `replicates_with_kin`: the same with copies of itself as partners, half
+          damaged the same way.
+
+        The damage is the same half of the bytes in every chain, so that an inert
+        program, whose child is the damaged partner itself, scores about a half
+        instead of passing whenever the partner happens to equal it.
         - `survives`: as the second half of a pair with a random first half, the
           fraction of its bytes intact afterwards.
         - `survives_in_soup`: the same with first halves from the soup.
@@ -135,10 +139,9 @@ def assays(
 
     """
     num, length = programs.shape
-    # The same half of the bytes is damaged in every chain, so that an inert program,
-    # whose child is the damaged partner itself, scores no more than a half.
     damage = jax.random.bernoulli(jax.random.key(0), 1 / 2, (num, 1, length))
     kin = jnp.where(damage, random_partners, programs[:, None, :])
+    soup_partners = jnp.where(damage, random_partners, soup_partners)
 
     score = partial(
         mirror_score, opcode_table=opcode_table, num_steps=num_steps, control=control
