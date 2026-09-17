@@ -121,3 +121,14 @@ The early "dominant" tapes of two soups are runs of a single byte written by sme
 With the current physics there is nothing beyond replication to find, in either machine, and the instruments would see it if there were.
 That is the expected result, and it is the case for the resource: without something to be efficient at, to steal or to defend, selection has one axis.
 Energy is next.
+
+## Energy, built (2026-09-17, night)
+
+`cax.cs.bff.economy.BFFEconomy(income, bff)`: the state is `EconomyState(soup, energy)`; each epoch every program is paid `income` and charged the steps the pair spent with the pointer in its half (`run` now returns that count as its fourth value, from the kernel and the interpreter alike, exact between them); a program below zero is replaced by random bytes with its energy reset to `income`.
+`soup_run.py --income E` logs mean energy and the death rate.
+
+What income means: a random pair costs its first program about a hundred steps and its second almost nothing, so random soups bank energy at nearly the full income; a replicating pair costs each half about 4,000, because the reference's replicators loop until the budget.
+Under an income below that, a replicator lives off the bank its slot accumulated while random, then dies unless it copies more cheaply than it earns.
+Frugality, halting after the copy instead of looping to the cap, is the first new trait the economy selects for.
+
+Running (`runs/econ`, 2^17 programs, four soups each, 32k epochs): reference control at incomes 512, 2,048 and 8,192 (the last never kills), cyclic at 4,096 and 6,144 (a cyclic pair always spends 8,192, about half each).
