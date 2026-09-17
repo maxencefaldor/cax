@@ -18,7 +18,7 @@ import jax
 import jax.numpy as jnp
 from jax import Array
 
-from .detector import NUM_CHAINS, _run_chains, replication_score, score_from_tapes
+from .detector import NUM_CHAINS, _run_chains, score_from_tapes
 from .interpreter import Control, run
 
 
@@ -45,6 +45,46 @@ def run_pairs(
     """
     tapes = jnp.concatenate([first, second], axis=-1)
     return run(tapes, opcode_table, num_steps=num_steps, control=control)[0]
+
+
+def mirror_score(
+    programs: Array,
+    partners: Array,
+    opcode_table: Array,
+    *,
+    num_steps: int = 8192,
+    control: Control = "matched",
+) -> Array:
+    """`replication_score` that also accepts the mirror image as the child.
+
+    Some replicators write themselves reversed; the reference detector requires the
+    child to equal the program and scores them zero. Here the higher of the two
+    readings, program or reversed program, is returned.
+
+    Args:
+        programs: Unsigned 8-bit array of shape (num, length).
+        partners: Unsigned 8-bit array of shape (num, NUM_CHAINS, length).
+        opcode_table: Integer array of shape (256,) mapping bytes to `Op` values.
+        num_steps: Step budget per execution.
+        control: Control-flow rule.
+
+    Returns:
+        Integer array of shape (num,) with scores in [0, length].
+
+    """
+    chains = jax.vmap(
+        partial(
+            _run_chains,
+            opcode_table=opcode_table,
+            num_steps=num_steps,
+            heads_from_tape=False,
+            control=control,
+        )
+    )
+    tapes = chains(programs, partners)
+    straight = jax.vmap(score_from_tapes)(programs, tapes)
+    mirrored = jax.vmap(score_from_tapes)(programs[:, ::-1], tapes)
+    return jnp.maximum(straight, mirrored)
 
 
 @partial(jax.jit, static_argnames=("num_steps", "control"))
@@ -96,21 +136,9 @@ def assays(
     damage = jax.random.bernoulli(jax.random.key(0), 1 / 2, (num, 1, length))
     kin = jnp.where(damage, random_partners, programs[:, None, :])
 
-    def score(programs: Array, partners: Array) -> Array:
-        chains = jax.vmap(
-            partial(
-                _run_chains,
-                opcode_table=opcode_table,
-                num_steps=num_steps,
-                heads_from_tape=False,
-                control=control,
-            )
-        )
-        tapes = chains(programs, partners)
-        straight = jax.vmap(score_from_tapes)(programs, tapes)
-        mirrored = jax.vmap(score_from_tapes)(programs[:, ::-1], tapes)
-        return jnp.maximum(straight, mirrored)
-
+    score = partial(
+        mirror_score, opcode_table=opcode_table, num_steps=num_steps, control=control
+    )
     execute = partial(
         run_pairs, opcode_table=opcode_table, num_steps=num_steps, control=control
     )
@@ -184,7 +212,7 @@ def mutational_scan(
     partners = jax.random.randint(
         key_partner, (length * variants, NUM_CHAINS, length), 0, 256, dtype=jnp.uint8
     )
-    scores = replication_score(
+    scores = mirror_score(
         mutants, partners, opcode_table, num_steps=num_steps, control=control
     )
     return jnp.mean((scores >= threshold).reshape(length, variants), axis=-1)

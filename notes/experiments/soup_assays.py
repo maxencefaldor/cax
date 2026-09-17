@@ -2,10 +2,10 @@
 
 Usage: soup_assays.py OUT.csv CKPT.npz [CKPT.npz ...] [--control matched] [--top 8]
        [--soup 0] [--scan_top 1]
-For every checkpoint (all soups in it unless --soup is given): the top lineages by
-instruction sequence, each represented by its most common exact tape, get the seven
-assays (partners drawn from the soup and at random, host = the dominant tape); the top
-`scan_top` lineages also get the mutational scan (core length, core span, robustness).
+For every checkpoint (all soups in it unless --soup is given): the most common exact
+tapes, each with the share of the instruction-sequence lineage it belongs to, get the
+seven assays (partners drawn from the soup and at random, host = the dominant tape);
+the top `scan_top` also get the mutational scan (core length, core span, robustness).
 One CSV row per lineage per checkpoint; the dominant lineage's hash per checkpoint
 gives the turnover.
 """
@@ -42,6 +42,7 @@ INSTRUCTION = NP_TABLE < 10
 
 
 def sequence_hash(soup: np.ndarray) -> np.ndarray:
+    """Hash of each tape's instruction sequence, ignoring where the instructions sit."""
     op = NP_TABLE[soup].astype(np.uint64)
     mask = INSTRUCTION[soup]
     weights = np.cumprod(np.full(soup.shape[-1], 1000003, dtype=np.uint64))
@@ -50,14 +51,19 @@ def sequence_hash(soup: np.ndarray) -> np.ndarray:
 
 
 def lineages(soup: np.ndarray, top: int) -> list[tuple[int, float, np.ndarray]]:
-    """(hash, share, representative tape) of the `top` lineages by share."""
+    """(lineage hash, lineage share, tape) for the `top` most common exact tapes.
+
+    The most common exact tapes are the canonical forms of the soup's replicators;
+    the lineage is the instruction sequence each belongs to, with its share.
+    """
     h = sequence_hash(soup)
     values, counts = np.unique(h, return_counts=True)
+    share = dict(zip(values.tolist(), (counts / len(soup)).tolist(), strict=True))
+    tapes, n = np.unique(soup, axis=0, return_counts=True)
     out = []
-    for i in np.argsort(-counts)[:top]:
-        members = soup[h == values[i]]
-        tapes, n = np.unique(members, axis=0, return_counts=True)
-        out.append((int(values[i]), counts[i] / len(soup), tapes[np.argmax(n)]))
+    for i in np.argsort(-n)[:top]:
+        lineage = int(sequence_hash(tapes[i][None])[0])
+        out.append((lineage, share[lineage], tapes[i]))
     return out
 
 
