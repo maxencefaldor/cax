@@ -128,6 +128,10 @@ def assays(
           program as second half, the fraction of the host's bytes changed.
         - `copies_partner`: as the first half with a random partner, the fraction of
           its own bytes that afterwards equal the partner's: reproducing the other.
+        - `spends`: as the first half with a random partner, the steps the pair spends
+          in its half over the budget; what it costs under an economy.
+        - `partner_pays`: the same for the steps spent in the partner's half; a
+          program that makes its partner do the work.
 
     """
     num, length = programs.shape
@@ -153,7 +157,11 @@ def assays(
     hosts = jnp.broadcast_to(host, programs.shape)
     after_host = execute(programs, hosts)[:, length:]
     partner = random_partners[:, 0, :]
-    after_partner = execute(programs, partner)[:, :length]
+    pairs = jnp.concatenate([programs, partner], axis=-1)
+    out, steps, _, first = run(
+        pairs, opcode_table, num_steps=num_steps, control=control
+    )
+    after_partner = out[:, :length]
     return {
         "replicates": score(programs, random_partners) / length,
         "replicates_in_soup": score(programs, soup_partners) / length,
@@ -162,6 +170,8 @@ def assays(
         "survives_in_soup": survival(soup_partners),
         "overwrites_host": jnp.mean(after_host != hosts, axis=-1),
         "copies_partner": jnp.mean(after_partner == partner, axis=-1),
+        "spends": first / num_steps,
+        "partner_pays": (steps - first) / num_steps,
     }
 
 

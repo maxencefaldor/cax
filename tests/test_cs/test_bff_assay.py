@@ -39,6 +39,8 @@ def test_assays_of_a_replicator_and_of_noise() -> None:
         "survives_in_soup",
         "overwrites_host",
         "copies_partner",
+        "spends",
+        "partner_pays",
     }
     for value in out.values():
         assert value.shape == (2,)
@@ -48,6 +50,9 @@ def test_assays_of_a_replicator_and_of_noise() -> None:
     assert float(out["replicates"][1]) < 0.1
     assert float(out["replicates_with_kin"][0]) > 0.25
     assert float(out["overwrites_host"][0]) > float(out["overwrites_host"][1])
+    # The replicator loops to the budget; noise runs off its half in a few steps.
+    assert float(out["spends"][0]) + float(out["partner_pays"][0]) > 0.9
+    assert float(out["spends"][1]) < 0.1
 
 
 def test_run_pairs_shape() -> None:

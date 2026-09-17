@@ -82,6 +82,8 @@ fields = [
     "survives_in_soup",
     "overwrites_host",
     "copies_partner",
+    "spends",
+    "partner_pays",
     "core_length",
     "core_span",
     "robustness",
