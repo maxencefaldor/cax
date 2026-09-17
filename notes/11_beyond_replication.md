@@ -115,6 +115,7 @@ The early "dominant" tapes of two soups are runs of a single byte written by sme
 
 - **The room goes unused.**
   With four times the tape, the replicating core stays at 10 to 13 bytes for 65k epochs, and nothing else in the tape is conserved.
+  The cyclic machine on 256-byte tapes (`long_cyclic_seed64.csv`, four of four soups transitioned) is the same: cores of 8 to 15 bytes throughout.
 - So the cap on complexity was never the tape length; it is that nothing but copying is selected.
 
 **Conclusion.**
