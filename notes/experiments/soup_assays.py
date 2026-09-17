@@ -130,6 +130,7 @@ with path.open("a") as f:
                             jax.random.key(rank),
                             TABLE,
                             control=a.control,
+                            threshold=3 * soup.shape[1] // 4,
                         )
                     )
                     core = np.nonzero(scan < 0.5)[0]

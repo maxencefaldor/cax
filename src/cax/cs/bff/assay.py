@@ -18,7 +18,7 @@ import jax
 import jax.numpy as jnp
 from jax import Array
 
-from .detector import NUM_CHAINS, replication_score
+from .detector import NUM_CHAINS, _run_chains, replication_score, score_from_tapes
 from .interpreter import Control, run
 
 
@@ -73,10 +73,14 @@ def assays(
     Returns:
         A dict of float32 arrays of shape (num,), each in [0, 1]:
 
-        - `replicates`: detector score against random partners, over the length.
+        - `replicates`: detector score against random partners, over the length,
+          taking the program or its mirror image as the child, since some
+          replicators write themselves reversed.
         - `replicates_in_soup`: the same against partners from the soup; much higher
           than `replicates` means the program needs a host, a parasite.
-        - `replicates_with_kin`: the same with copies of itself as partners.
+        - `replicates_with_kin`: the same with damaged copies of itself as partners,
+          half of the bytes randomised, the same half in every chain; an inert program
+          leaves the damage in place and scores about a half.
         - `survives`: as the second half of a pair with a random first half, the
           fraction of its bytes intact afterwards.
         - `survives_in_soup`: the same with first halves from the soup.
@@ -87,13 +91,26 @@ def assays(
 
     """
     num, length = programs.shape
-    kin = jnp.broadcast_to(programs[:, None, :], random_partners.shape)
-    score = partial(
-        replication_score,
-        opcode_table=opcode_table,
-        num_steps=num_steps,
-        control=control,
-    )
+    # The same half of the bytes is damaged in every chain, so that an inert program,
+    # whose child is the damaged partner itself, scores no more than a half.
+    damage = jax.random.bernoulli(jax.random.key(0), 1 / 2, (num, 1, length))
+    kin = jnp.where(damage, random_partners, programs[:, None, :])
+
+    def score(programs: Array, partners: Array) -> Array:
+        chains = jax.vmap(
+            partial(
+                _run_chains,
+                opcode_table=opcode_table,
+                num_steps=num_steps,
+                heads_from_tape=False,
+                control=control,
+            )
+        )
+        tapes = chains(programs, partners)
+        straight = jax.vmap(score_from_tapes)(programs, tapes)
+        mirrored = jax.vmap(score_from_tapes)(programs[:, ::-1], tapes)
+        return jnp.maximum(straight, mirrored)
+
     execute = partial(
         run_pairs, opcode_table=opcode_table, num_steps=num_steps, control=control
     )
