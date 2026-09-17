@@ -8,6 +8,7 @@ References:
 
 """
 
+from .assay import assays, mutational_scan, run_pairs
 from .cs import BFF, local_pairing, skeleton_hash
 from .detector import (
     CHAIN_LENGTH,
@@ -51,6 +52,7 @@ __all__ = [
     "GridState",
     "Op",
     "ThreadState",
+    "assays",
     "byte_entropy",
     "compressed_bits_per_byte",
     "high_order_entropy",
@@ -59,6 +61,7 @@ __all__ = [
     "local_pairing",
     "match_bracket",
     "match_bracket_cyclic",
+    "mutational_scan",
     "opcode_table_from_bytes",
     "opcode_table_from_string",
     "opcode_table_permuted",
@@ -66,6 +69,7 @@ __all__ = [
     "parse",
     "replication_score",
     "run",
+    "run_pairs",
     "sample_partners",
     "score_from_tapes",
     "skeleton_hash",
