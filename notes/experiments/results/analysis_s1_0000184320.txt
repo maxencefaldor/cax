@@ -1,0 +1,16 @@
+programs 8192 high-order entropy 3.185
+score histogram (score: count): {0: 5892, 4: 6, 63: 14, 64: 2280}
+replicators (score >= 5): 2294  (score >= 48): 2294
+   78x   ~y[[ <   zYYY,= }] rMrq  ] }  } ]  qrMr ]} =,YYYz   < [[y~     
+   77x       ~y[[ <   zYYY,= }] rMrq  ] }  } ]  qrMr ]} =,YYYz   < [[y~ 
+   69x       ~y [ <   zYYY,= }] rLrq  ] } {} ] = rMr ]} ',YYYz   < [[y~ 
+   69x   ~y[[ <   zYYY,' }] rMr = ] }{ } ]  qrLr ]} =,YYYz   < [ y~     
+   40x  +-.q[ <   zYYY,  }] r rq   qrMDrq < q  r ]} =,wYYz   < [[y~   : 
+score 64:      ~y/[Y<   zYYY,= }] rMrq  ] }  s ]G qrMr ]} =,YYYz   < [[y~ 
+score 64:      ~y [ <   jYYY,= }] rMrq  ] } x} ]  qrMr ]} =,YYYz  u< [[y~ 
+score 64:      ~y[[ <   zYYY,= }] rMrq  ] }    ]  qrMr ]} =,YYYz   < [[y~ 
+score 64:      ~y[[ <   zYYY,= }] rMrq  ] }  } ]  qrMr ]} =,YYYz   < [[y~ 
+score 64:      ~y[[ <   zYYY,= }] rMrq  ] }  } ]  qrMr ]} =,YYYz   < [[y~ 
+score 64:  :   ~y[[ <   zYYw,= }] r  q < qrDMrq   qr r ]}  ,YYYz   < [q.-+
+score 64:  ~y[[ <   zYYY,= }] rMrq G] s  } ]  qrMr ]} =,YYYz   <Y[/y~     
+score 64:    ~y[[ <   zYYY,= } Mrq# ] }  } [   YMr ]} =,YYYq   < [[y~     

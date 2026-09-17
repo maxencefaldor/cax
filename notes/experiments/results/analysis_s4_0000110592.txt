@@ -1,0 +1,18 @@
+programs 8192 high-order entropy 0.154
+score histogram (score: count): {0: 8177, 1: 2, 3: 1, 4: 1, 5: 1, 8: 3, 9: 1, 60: 1, 62: 1, 63: 3, 64: 1}
+replicators (score >= 5): 11  (score >= 48): 6
+    1x  7hhhg hhhhh hhhh0.. <,,  \Kh: IIII IIIIII IIIU<    zz@ 000||    
+    1x  0000. /< &i6>>800? ;    vqGb[,}I7h   LhJ          K YY 0000000g0
+    1x  }}}<   hh hh  I   h     000[,}I7h< K:hh<7 ..  xx#  <e0   000x0<F
+    1x    {Q    < 0  hI0i  <  I_  ~:<  @ 0K0  9:y :r0  0:o  <  . <*77970
+    1x  0{  < 0[rS = .    0          @                      G    <};;5;0
+score 64:  000z|B0   |  00 <0[,}I7 K   %h<7  ]]  7< hK 0Kh7I},[<0 x0000 0 
+score 63:   00 00B0 6 / ~00.j v[,}  7K  Khh<7]  7< KK  K 7I},[ 00K0KK00 0K
+score 63:  0;400z00   [,}I7h   Kh <7 8]]  7<h%   K 7I},[0< 00 iFF00 00 0j>
+score 63: [00 ww0 0U00 [,}I77K  KK <7  ]7<hhK  K7  },[v j. 007@70  0h00000
+score 62: ,000 0_ 0h00 [,}I7 K  KK <7  ]7<hhK  K7  },[v j.00  / 5<0 } 08 )
+score 60:  000|  0 A    66[<0[,}I7     %h<7  ]x  7< hK 0 h7I},[ 0. 0<10.0 
+score  9:  0 0<00h0 0<[,}h7hK  KIH< 5 ]]K 7<h%   K 7I},[0<  0 8 000  00000
+score  8: 0000;00/0 ;  0|0  <0[,}I7 K   %h<7  ]]  7< hK 0Kh7I},[j0}<0 0000
+
+[exited with code 0]

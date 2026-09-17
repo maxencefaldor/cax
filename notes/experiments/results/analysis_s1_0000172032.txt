@@ -1,0 +1,16 @@
+programs 8192 high-order entropy 5.663
+score histogram (score: count): {0: 2660, 1: 28, 2: 9, 63: 20, 64: 5475}
+replicators (score >= 5): 5495  (score >= 48): 5495
+   66x      {   [   z J  FN.K y>    { u] {~ ` >e  .    :I3pj[  {J  l   z
+   66x  z   l  J{  [jp3I:    .  e> ` ~{ ]u {    >y K.NF  J z   [   {    
+   58x  H   :   l { 9[   \  Ak .  O>H~:M{   ]  {~  W>  h.Z$*      2[   {
+   58x  {   [2      *$Z.h  >W  ~{  ]   {M:~H>O  . kA  \   [9 { l   :   H
+   54x   U{ W [2     v  Z.  5> "  {  ]   { : (>   .         [  { d 7   [
+score 64:  U{ W [2     v  Z.  5> "  {  ]   { : (>   .         [  { d 7   [
+score 64:   {   [     J  FM.K y>_   { u] {~ ` >!  .    :I3pj[4 {J  l   zne
+score 64: H   :   l { 9[   \  Ak .  O>H~:M{   ]  {~  W>  h.Z$*      2[   {
+score 64: 9f7Fd {  [   \    l.  >H\:  { S ]  {~  W>   .E * 2  cE2[ [F  {  
+score 64: 9f Fd {  [ J \    l.  >E\:  { S ]  {~  W>   .E *     E2[ [F  {  
+score 64: j~{   [     J  FN.K y>_   { u] {~ ` >e  .    :I3pj[ .{   l   zne
+score 64: j~{   [     J  FN.K y>_   {$u] {~ ` >e  .    :I3p [  {   l   zne
+score 64:     7 dZ{  [$ E\    B.   >H % {N  ]\ {~  *>   .  By    E2[u  { \

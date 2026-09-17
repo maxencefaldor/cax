@@ -1,0 +1,39 @@
+utc,description,kwargs,exact,random,enriched,mid,final,mean_ms,cyclic_ms,flip_ms,batch8_ms
+2026-09-16T20:43:52+00:00,"baseline: walk search, block 32, select-store",,True,18.38,29.66,20.80,31.29,25.03,,,
+2026-09-16T20:52:43+00:00,masked store (no read of the overwritten byte); search walks 8 positions per reduction,,True,13.99,24.77,19.38,23.74,20.47,,,
+2026-09-16T20:58:45+00:00,whole-array refs addressed by lane row instead of BlockSpec tiles; no padding,,True,14.01,24.62,19.22,23.15,20.25,,,
+2026-09-16T21:00:56+00:00,"step loop restructured: per-lane finish, loop test once per unroll (unroll=1)",,True,14.06,24.78,19.29,23.19,20.33,,,
+2026-09-16T21:02:35+00:00,initial pc/heads computed in-kernel; only table and tapes as inputs [GPU shared with another job: invalid],,True,30.51,25.01,19.54,25.78,25.21,,,
+2026-09-16T21:03:11+00:00,"same, unroll=8 steps per loop test",unroll=8,True,14.43,25.41,20.42,27.65,21.98,,,
+2026-09-16T21:03:12+00:00,initial pc/heads computed in-kernel; only table and tapes as inputs,,True,14.23,24.88,19.74,24.34,20.80,,,
+2026-09-16T21:05:24+00:00,row index carried through the loop instead of hoisted (Triton LICM cost),,True,11.03,13.62,11.73,22.75,14.78,,,
+2026-09-16T21:07:08+00:00,dummy row for dead lanes (interpret-safe masked stores); row carried,,True,10.76,13.74,11.62,21.57,14.42,,,
+2026-09-16T21:07:46+00:00,"search_chunk=4 (dummy row, row carried)",search_chunk=4,True,9.48,13.52,9.86,20.49,13.34,,,
+2026-09-16T21:07:49+00:00,"search_chunk=16 (dummy row, row carried)",search_chunk=16,True,15.25,18.41,17.12,28.20,19.74,,,
+2026-09-16T21:09:01+00:00,search_chunk=2,search_chunk=2,True,8.70,13.94,9.37,21.50,13.38,,,
+2026-09-16T21:09:02+00:00,search_chunk=6,search_chunk=6,True,9.35,13.04,9.80,20.62,13.20,,,
+2026-09-16T21:10:00+00:00,search compares raw bytes against the two bracket bytes instead of a table gather (chunk 4),,True,8.25,11.02,8.77,18.51,11.64,,,
+2026-09-16T21:10:09+00:00,"compare search, search_chunk=8",search_chunk=8,True,9.94,12.54,10.83,18.14,12.86,,,
+2026-09-16T21:10:10+00:00,"compare search, unroll=2",unroll=2,True,8.18,10.99,8.58,16.95,11.17,,,
+2026-09-16T21:11:20+00:00,"compare search, unroll=4",unroll=4,True,8.21,11.19,8.65,18.87,11.73,,,
+2026-09-16T21:21:51+00:00,"current default (chunk 4, unroll 2, compare search) with cyclic/flip timing",,True,8.18,11.01,8.74,18.65,11.64,67.05,3.05,
+2026-09-16T21:23:41+00:00,"search_chunk=16, to read the cyclic column",search_chunk=16,True,13.62,16.48,15.41,23.42,17.23,63.05,2.33,
+2026-09-16T21:26:13+00:00,"per-lane cache of the last forward/backward search, invalidated by writes in the walked range",,True,4.54,8.59,4.97,6.98,6.27,53.99,2.30,
+2026-09-16T21:27:18+00:00,"bracket census, cyclic only (skips ring walks with no partner byte)",,True,4.52,8.49,4.90,6.90,6.20,54.24,3.32,
+2026-09-16T21:33:46+00:00,search_chunk=16 on the cache kernel (for the cyclic column),search_chunk=16,True,4.60,8.58,5.09,7.34,6.40,44.93,2.28,
+2026-09-16T21:34:32+00:00,"search chunk per control: 4 matched, 16 cyclic",,True,4.53,8.53,4.92,6.93,6.23,45.06,3.30,
+2026-09-16T21:36:47+00:00,"two-phase: all tapes for 256 steps, then survivors compacted (1/8 buffer)",,True,3.81,9.18,5.51,7.65,6.54,46.72,2.33,
+2026-09-16T21:38:25+00:00,"two-phase, first=512",first=512,True,4.99,9.11,5.38,7.44,6.73,47.10,2.31
+2026-09-16T21:38:25+00:00,two-phase from 2^18 tapes; batch8 column added,,True,5.00,9.08,5.36,7.61,6.76,46.97,2.29
+2026-09-16T21:38:25+00:00,"two-phase, first=128",first=128,True,4.98,9.03,5.37,7.62,6.75,47.03,3.82
+2026-09-16T21:41:02+00:00,tidy rewrite; halted derived after the loop instead of carried,,True,4.84,8.93,5.22,7.30,6.57,46.95,2.32
+2026-09-16T21:45:34+00:00,"resumable state for two-phase, fresh runs initialised in-kernel; tidy rewrite",,True,4.53,8.55,4.91,8.55,6.64,45.12,4.26
+2026-09-16T21:46:45+00:00,"same as previous, re-measured on an idle box",,True,4.57,8.58,4.94,6.93,6.25,45.04,2.31
+2026-09-16T21:46:46+00:00,block 64 (cyclic and flip columns),block=64,True,5.45,12.22,7.47,26.93,13.02,114.13,18.61
+2026-09-16T21:47:22+00:00,capacity 1/4 (batch8 column),capacity=0.25,True,4.54,8.55,4.92,7.46,6.37,45.22,3.91
+2026-09-16T21:47:23+00:00,unroll 4 (cyclic column),unroll=4,True,4.60,8.62,5.01,8.85,6.77,45.76,4.96
+2026-09-16T21:50:50+00:00,cache invalidated only by writes that make or unmake a bracket,,True,4.86,6.17,4.91,4.88,5.21
+2026-09-16T21:52:58+00:00,overwritten byte taken from the loaded head values instead of a masked load,,True,4.68,5.98,4.68,4.47,4.95
+2026-09-16T21:53:24+00:00,re-tune: unroll=1 with the cache,unroll=1,True,4.80,6.12,4.81,4.62,5.09
+2026-09-16T21:53:29+00:00,re-tune: search_chunk=8 with the cache,search_chunk=8,True,4.65,6.03,4.66,4.45,4.95
+2026-09-16T21:57:55+00:00,cyclic: per-position match table with validity bits; matched keeps the two-entry cache,,True,4.69,5.94,4.70,4.55,4.97

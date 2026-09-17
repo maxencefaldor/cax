@@ -29,3 +29,4 @@ site/
 
 # Executed notebooks: built on demand, published as a release asset, never committed
 docs/build/
+runs/

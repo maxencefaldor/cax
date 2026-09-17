@@ -1,0 +1,16 @@
+programs 8192 high-order entropy 0.039
+score histogram (score: count): {0: 8192}
+replicators (score >= 5): 0  (score >= 48): 0
+    1x    x [  \G       M Z >FItC U  `>H%  {   \ >  .Mv9  uz{ |  &M M{a 
+    1x  ' 'ug{u   :  '          '>    \i  f    \.>. .     .{> {{{y c~{  
+    1x  \|   B [    m    {  > \CN{{  I{f t {{C       M~{ {  |  7{0#b | .
+    1x  z {I0zzz# [   % I  | & Q >      ]]qV . CQ^ >  .MG   H I  zzz{{1 
+    1x  z 0zF}       >%/  g  . Q!>Wu   z  Q w  g   %Yz [ &  J{{   1z000 
+score  0:   x [  \G       M Z >FItC U  `>H%  {   \ >  .Mv9  uz{ |  &M M{a 
+score  0: t{{          xZ 5  T  g  %  { ~ {QV3    [ [9 >C&| {    0w80{  0 
+score  0:    |  L         M.  > JQC {  qqYq>q f{ CQ  >4    {  W {{ y{   0 
+score  0: Z{ { |  B 0    Q    > \\C <     { C \ >  .       ,H {9 {   z sZZ
+score  0:    [ { }  0    oM.    \   { Y*   Yt>aQ .  g   % 9 {,  {{|;t| {0 
+score  0: g 0 zx  @|Z   z, t $@[4w >t6     ! CC \ >  MM    00p{ [ 0  {{|:9
+score  0:  {{&{  -    ||%{ YYQI.   >ggg {./0sh \\         <   { zd  '|<00 
+score  0: H{{{ /, &{0   %/  g  . Q >tY  { X> Qu.  g       &  } | gg 00  {0

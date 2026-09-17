@@ -13,3 +13,4 @@ Each system is a subclass of `cax.core.ComplexSystem` and follows the perceive/u
 - [Reaction-Diffusion (Gray-Scott)](cs/reaction_diffusion.md)
 - [Particle Life](cs/particle_life.md)
 - [Boids](cs/boids.md)
+- [BFF](cs/bff.md)
