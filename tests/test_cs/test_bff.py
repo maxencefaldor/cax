@@ -105,7 +105,7 @@ def test_step_head_wraps_tape() -> None:
 
 def test_run_halts_off_the_end() -> None:
     tapes = jnp.zeros((1, 128), dtype=jnp.uint8)
-    _, steps, ops = run(tapes, TABLE, num_steps=8192)
+    _, steps, ops, _ = run(tapes, TABLE, num_steps=8192)
     assert int(steps[0]) == 128
     assert int(ops[0]) == 0
 
@@ -113,22 +113,22 @@ def test_run_halts_off_the_end() -> None:
 def test_run_unmatched_bracket_halts() -> None:
     # `[` with zero at head0 and no `]` anywhere: the taken jump fails, halt.
     tapes = tape_from("0[")[None]
-    _, steps, _ = run(tapes, TABLE, num_steps=8192)
+    _, steps, _, _ = run(tapes, TABLE, num_steps=8192)
     assert int(steps[0]) == 2
     # `]` with nonzero at head0 (the `]` byte itself) and no `[`: halt.
     tapes = tape_from("]")[None]
-    _, steps, _ = run(tapes, TABLE, num_steps=8192)
+    _, steps, _, _ = run(tapes, TABLE, num_steps=8192)
     assert int(steps[0]) == 1
     # An untaken jump never scans: `[` with nonzero at head0 falls through.
     tapes = tape_from("[")[None]
-    _, steps, _ = run(tapes, TABLE, num_steps=8192)
+    _, steps, _, _ = run(tapes, TABLE, num_steps=8192)
     assert int(steps[0]) == 128
 
 
 def test_run_infinite_loop_uses_budget() -> None:
     # `+[]`: tape[0] becomes nonzero, `[` falls through, `]` jumps back, forever.
     tapes = tape_from("+[]")[None]
-    _, steps, ops = run(tapes, TABLE, num_steps=1000)
+    _, steps, ops, _ = run(tapes, TABLE, num_steps=1000)
     assert int(steps[0]) == 1000
     assert int(ops[0]) == 1000
 
@@ -137,7 +137,7 @@ def test_run_forward_skip_nested() -> None:
     # tape[0] is the zero byte, so `[` is taken and must skip past the matching outer
     # `]`, with nesting, and only then execute the final `+` on tape[0].
     tapes = tape_from("0[[+]]+")[None]
-    out, steps, _ = run(tapes, TABLE, num_steps=8192)
+    out, steps, _, _ = run(tapes, TABLE, num_steps=8192)
     assert int(out[0, 0]) == 1
     # The jump lands on the outer `]`; positions 2 to 4 are never visited.
     assert int(steps[0]) == 124
@@ -164,7 +164,7 @@ def test_run_matches_step() -> None:
         {"scan_fraction": 1.0, "compact_after": 300},
         {"scan_fraction": 1 / 256, "compact_after": 10, "compact_fraction": 1 / 256},
     ):
-        out_tape, out_steps, out_ops = run(
+        out_tape, out_steps, out_ops, _ = run(
             tapes, TABLE, num_steps=300, heads_from_tape=True, **kwargs
         )
         assert bool(jnp.all(out_tape == ref_tape))
@@ -179,7 +179,7 @@ def test_paper_replicator_copies_itself() -> None:
     """
     program = "[[{.>]-]]-]>.{[["
     tapes = tape_from(program)[None]
-    out, steps, _ = run(tapes, TABLE, num_steps=8192, heads_from_tape=False)
+    out, steps, _, _ = run(tapes, TABLE, num_steps=8192, heads_from_tape=False)
     assert int(steps[0]) == 8192
     assert program in unparse(out[0, 64:])
 
@@ -197,7 +197,7 @@ def test_bff_step_shape_and_dtype() -> None:
 def test_bff_pair_and_run_keeps_slots() -> None:
     cs = BFF(num_steps=1, mutation_rate=0.0, rngs=nnx.Rngs(0))
     soup = cs.init_state(num_programs=16)
-    out, steps = cs.pair_and_run(soup, jnp.arange(16))
+    out, steps, _ = cs.pair_and_run(soup, jnp.arange(16))
     assert steps.shape == (8,)
     assert int((out != soup).sum()) <= 8
 
@@ -278,7 +278,7 @@ def test_flip_walls_hold_a_pointer_that_starts_inside() -> None:
     """
     tape = jnp.zeros((128,), dtype=jnp.uint8).at[0].set(100).at[100].set(1)
     tape = tape.at[1:4].set(parse("]+]"))
-    out, steps, ops = run(
+    out, steps, ops, _ = run(
         tape[None], TABLE, num_steps=300, control="flip", heads_from_tape=True
     )
     assert int(steps[0]) == 300
@@ -288,7 +288,7 @@ def test_flip_walls_hold_a_pointer_that_starts_inside() -> None:
 
 def test_flip_never_halts_and_wraps() -> None:
     tapes = jnp.zeros((1, 128), dtype=jnp.uint8)
-    _, steps, _ = run(tapes, TABLE, num_steps=1000, control="flip")
+    _, steps, _, _ = run(tapes, TABLE, num_steps=1000, control="flip")
     assert int(steps[0]) == 1000
 
 
@@ -296,7 +296,7 @@ def test_cyclic_unmatched_is_noop_and_wraps() -> None:
     # `0[` : the taken `[` has no partner anywhere; under `cyclic` it falls through
     # and the pointer keeps circling the tape for the whole budget.
     tapes = tape_from("0[")[None]
-    _, steps, _ = run(tapes, TABLE, num_steps=1000, control="cyclic")
+    _, steps, _, _ = run(tapes, TABLE, num_steps=1000, control="cyclic")
     assert int(steps[0]) == 1000
 
 
@@ -354,7 +354,7 @@ def test_swap_heads_copy_idiom() -> None:
     tapes = tape_from(">~.", 128)[None]
     tapes = jnp.asarray(parse(">~.", opcode_table=table))
     tapes = jnp.zeros((1, 128), dtype=jnp.uint8).at[0, :3].set(tapes)
-    out, _, ops = run(tapes, table, num_steps=10)
+    out, _, ops, _ = run(tapes, table, num_steps=10)
     assert int(out[0, 1]) == int(out[0, 0]) == ord(">")
     assert int(ops[0]) == 3
 
@@ -412,7 +412,8 @@ def test_bff_sharded_epoch_matches_unsharded() -> None:
 
     def epoch(cs: BFF, soup: jnp.ndarray) -> tuple[jnp.ndarray, jnp.ndarray]:
         permutation = jax.random.permutation(jax.random.key(5), soup.shape[0])
-        return cs.pair_and_run(soup, permutation)
+        out, steps, _ = cs.pair_and_run(soup, permutation)
+        return out, steps
 
     with jax.set_mesh(mesh):
         plain = BFF(num_steps=300, rngs=nnx.Rngs(0))
@@ -432,11 +433,11 @@ def test_bff_batched_soups_match_single() -> None:
     soups = cs.init_state(num_programs=64, num_soups=3)
     keys = jax.random.split(jax.random.key(9), 3)
     permutations = jax.vmap(lambda k: jax.random.permutation(k, 64))(keys)
-    batched, steps = cs.pair_and_run(soups, permutations)
+    batched, steps, _ = cs.pair_and_run(soups, permutations)
     assert batched.shape == soups.shape
     assert steps.shape == (3, 32)
     for i in range(3):
-        single, single_steps = cs.pair_and_run(soups[i], permutations[i])
+        single, single_steps, _ = cs.pair_and_run(soups[i], permutations[i])
         assert bool(jnp.all(single == batched[i]))
         assert bool(jnp.all(single_steps == steps[i]))
     stepped = cs(soups)
@@ -481,3 +482,26 @@ def test_skeleton_hash_ignores_data_bytes() -> None:
     hashes = [skeleton_hash(s, cs.opcode_table) for s in (soup, same, flipped)]
     assert bool((hashes[0] == hashes[1]).all())
     assert bool((hashes[0] != hashes[2]).all())
+
+
+def test_bff_energy_economy() -> None:
+    from cax.cs.bff import BFFEconomy, EconomyState
+
+    # All-zero tapes: every pair runs its 64 steps in the first half, so with no
+    # income the first program of each pair dies and is replaced by random bytes.
+    cs = BFFEconomy(
+        income=0, bff=BFF(num_steps=64, mutation_rate=0.0, rngs=nnx.Rngs(0))
+    )
+    state = cs.init_state(num_programs=16)
+    assert state.energy.shape == (16,)
+    state = EconomyState(soup=jnp.zeros((16, 64), jnp.uint8), energy=state.energy)
+    out = cs(state, num_steps=1)
+    assert bool((out.energy == 0).all())
+    assert int((out.soup != 0).any(axis=-1).sum()) == 8
+    assert cs.render(out).shape == (16, 64, 3)
+    # With an income covering the budget nobody dies and energy only accumulates.
+    rich = BFFEconomy(
+        income=64, bff=BFF(num_steps=64, mutation_rate=0.0, rngs=nnx.Rngs(0))
+    )
+    out = rich(rich.init_state(num_programs=16), num_steps=2)
+    assert bool((out.energy >= 64).all()) and bool((out.energy <= 192).all())

@@ -9,7 +9,7 @@ References:
 """
 
 from .assay import assays, mutational_scan, run_pairs
-from .cs import BFF, local_pairing, skeleton_hash
+from .cs import BFF, inverse_permutation, local_pairing, skeleton_hash
 from .detector import (
     CHAIN_LENGTH,
     NUM_CHAINS,
@@ -17,6 +17,7 @@ from .detector import (
     sample_partners,
     score_from_tapes,
 )
+from .economy import BFFEconomy, EconomyState
 from .grid import BFFGrid, GridState
 from .interpreter import (
     Control,
@@ -47,8 +48,10 @@ __all__ = [
     "COMMAND_CHARS",
     "NUM_CHAINS",
     "OP_CHARS",
+    "BFFEconomy",
     "BFFGrid",
     "Control",
+    "EconomyState",
     "GridState",
     "Op",
     "ThreadState",
@@ -57,6 +60,7 @@ __all__ = [
     "compressed_bits_per_byte",
     "high_order_entropy",
     "initial_thread_state",
+    "inverse_permutation",
     "is_instruction",
     "local_pairing",
     "match_bracket",

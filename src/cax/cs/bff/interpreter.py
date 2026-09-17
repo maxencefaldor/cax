@@ -66,6 +66,8 @@ class ThreadState:
         halted: Scalar bool; once set, the thread is a no-op for the remaining steps.
         steps: Scalar int32, number of steps executed so far, no-ops included.
         ops: Scalar int32, number of executed steps whose byte was an instruction.
+        first: Scalar int32, number of executed steps with the pointer in the first
+            half of the tape; the rest were spent in the second half.
 
     """
 
@@ -77,6 +79,7 @@ class ThreadState:
     halted: Array
     steps: Array
     ops: Array
+    first: Array
 
 
 def initial_thread_state(tape: Array, *, heads_from_tape: bool) -> ThreadState:
@@ -114,6 +117,7 @@ def initial_thread_state(tape: Array, *, heads_from_tape: bool) -> ThreadState:
         halted=jnp.zeros((), dtype=bool),
         steps=zero,
         ops=zero,
+        first=zero,
     )
 
 
@@ -271,6 +275,7 @@ def _execute(
         halted=state.halted | new_halted,
         steps=state.steps + live,
         ops=state.ops + (live & is_instruction(cmd)),
+        first=state.first + (live & (pc < length // 2)),
     )
 
 
@@ -401,7 +406,7 @@ def run(
     compact_after: int = 256,
     compact_fraction: float = 1 / 8,
     implementation: Implementation = "auto",
-) -> tuple[Array, Array, Array]:
+) -> tuple[Array, Array, Array, Array]:
     """Run a batch of tapes, each for at most `num_steps` steps.
 
     Every tape is executed independently for the same result as `step` applied
@@ -439,10 +444,11 @@ def run(
             `"auto"` to pick the kernel on GPU and the scan elsewhere.
 
     Returns:
-        A tuple `(tapes, steps, ops)`: the tapes after execution, with the same shape
-            as the input; the number of steps each tape executed before halting or
-            exhausting the budget; and the number of those steps that executed an
-            instruction rather than a data byte.
+        A tuple `(tapes, steps, ops, first)`: the tapes after execution, with the same
+            shape as the input; the number of steps each tape executed before halting
+            or exhausting the budget; the number of those steps that executed an
+            instruction rather than a data byte; and the number spent with the pointer
+            in the first half of the tape.
 
     """
     if implementation == "auto":
@@ -469,7 +475,7 @@ def run(
     state = _run_batch(state, opcode_table, first, scan_capacity, control)
     remaining = num_steps - first
     if remaining == 0:
-        return state.tape, state.steps, state.ops
+        return state.tape, state.steps, state.ops, state.first
 
     compact_capacity = capacity(compact_fraction, num)
     alive = ~state.halted
@@ -493,7 +499,7 @@ def run(
         return _run_batch(state, opcode_table, remaining, scan_capacity, control)
 
     state = jax.lax.cond(count <= compact_capacity, run_compacted, run_all, state)
-    return state.tape, state.steps, state.ops
+    return state.tape, state.steps, state.ops, state.first
 
 
 __all__ = [

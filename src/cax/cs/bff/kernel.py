@@ -23,7 +23,7 @@ from .interpreter import Control
 from .language import Op, is_instruction
 
 # Rows of the per-tape state array.
-PC, HEAD0, HEAD1, DIRECTION, HALTED, STEPS, OPS = range(7)
+PC, HEAD0, HEAD1, DIRECTION, HALTED, STEPS, OPS, FIRST = range(8)
 
 
 def _kernel(
@@ -107,7 +107,7 @@ def _kernel(
         return jnp.where(target < 0, everything, within) | (pos == start)
 
     def one_step(carry):
-        row, pc, head0, head1, direction, live, steps, ops, cache, census = carry
+        row, pc, head0, head1, direction, live, steps, ops, first, cache, census = carry
         (fpc, ftgt, fok), (bpc, btgt, bok), bits = cache
         n_open, n_close = census
         # Recomputed every step on purpose: hoisted, the addressing costs 25% more.
@@ -225,6 +225,7 @@ def _kernel(
 
         steps = steps + live.astype(jnp.int32)
         ops = ops + (live & is_instruction(cmd)).astype(jnp.int32)
+        first = first + (live & (pc < length // 2)).astype(jnp.int32)
         finished = new_halted | (steps >= num_steps)
         return (
             row,
@@ -235,6 +236,7 @@ def _kernel(
             live & ~finished,
             steps,
             ops,
+            first,
             ((fpc, ftgt, fok), (bpc, btgt, bok), bits),
             (n_open, n_close),
         )
@@ -249,11 +251,11 @@ def _kernel(
 
     rows = jnp.where(valid, lanes, dummy)
     if fresh:  # a run from the start: constants, not loads
-        pc, head0, head1, steps, ops = zero, zero, zero, zero, zero
+        pc, head0, head1, steps, ops, first = (zero,) * 6
         halted = false
     else:
-        pc, head0, head1, _d, halted, steps, ops = (
-            state_ref[i, rows] for i in range(7)
+        pc, head0, head1, _d, halted, steps, ops, first = (
+            state_ref[i, rows] for i in range(8)
         )
         halted = halted != 0
     direction = state_ref[DIRECTION, rows] if control == "flip" else zero + 1
@@ -269,11 +271,11 @@ def _kernel(
             return c[0] + (byte == open_byte), c[1] + (byte == close_byte)
 
         census = jax.lax.fori_loop(0, length, count, census)
-    init = (lanes, pc, head0, head1, direction, live, steps, ops, cache, census)
+    init = (lanes, pc, head0, head1, direction, live, steps, ops, first, cache, census)
     out = jax.lax.while_loop(loop_cond, loop_body, init)
-    pc, head0, head1, direction, live, steps, ops = out[1:8]
+    pc, head0, head1, direction, live, steps, ops, first = out[1:9]
     halted = ~live & (steps < num_steps)  # stopped short of the budget
-    final = (pc, head0, head1, direction, halted.astype(jnp.int32), steps, ops)
+    final = (pc, head0, head1, direction, halted.astype(jnp.int32), steps, ops, first)
     for i, value in enumerate(final):
         plt.store(state_ref.at[i, rows], value, mask=valid)
 
@@ -297,7 +299,7 @@ def _launch(
     padded = blocks * block + 1  # spare lanes of the last block, plus the dummy row
     pad = padded - num
     tapes = jnp.concatenate([tapes, jnp.zeros((pad, length), tapes.dtype)])
-    state = jnp.concatenate([state, jnp.zeros((7, pad), jnp.int32)], axis=1)
+    state = jnp.concatenate([state, jnp.zeros((8, pad), jnp.int32)], axis=1)
     table = opcode_table.astype(jnp.int32)
     brackets = jnp.stack(
         [jnp.argmax(table == Op.LOOP_START), jnp.argmax(table == Op.LOOP_END)]
@@ -315,7 +317,7 @@ def _launch(
         fresh=fresh,
     )
     tape_spec = pl.BlockSpec((padded, length), lambda i: (0, 0))
-    state_spec = pl.BlockSpec((7, padded), lambda i: (0, 0))
+    state_spec = pl.BlockSpec((8, padded), lambda i: (0, 0))
     tapes, state, _ = pl.pallas_call(
         kernel,
         grid=(blocks,),
@@ -328,7 +330,7 @@ def _launch(
         out_specs=(tape_spec, state_spec, tape_spec),
         out_shape=(
             jax.ShapeDtypeStruct((padded, length), tapes.dtype),
-            jax.ShapeDtypeStruct((7, padded), jnp.int32),
+            jax.ShapeDtypeStruct((8, padded), jnp.int32),
             jax.ShapeDtypeStruct((padded, length), jnp.int32),  # cyclic match table
         ),
         input_output_aliases={2: 0, 3: 1},
@@ -367,7 +369,7 @@ def run_kernel(
     capacity: float = 1 / 8,
     two_phase_min: int = 1 << 18,
     interpret: bool = False,
-) -> tuple[Array, Array, Array]:
+) -> tuple[Array, Array, Array, Array]:
     """Run a batch of tapes inside one kernel; same function as `interpreter.run`.
 
     With `"matched"` control and at least `two_phase_min` tapes the run has two
@@ -417,12 +419,12 @@ def run_kernel(
         head1 = tapes[:, 1].astype(jnp.int32) % length
     else:
         pc, head0, head1 = zero, zero, zero
-    state = jnp.stack([pc, head0, head1, zero + 1, zero, zero, zero])
+    state = jnp.stack([pc, head0, head1, zero + 1, zero, zero, zero, zero])
 
     fresh = not heads_from_tape
     if control != "matched" or first >= num_steps or num < two_phase_min:
         tapes, state = launch(tapes, state, opcode_table, fresh=fresh)
-        return tapes, state[STEPS], state[OPS]
+        return tapes, state[STEPS], state[OPS], state[FIRST]
 
     tapes, state = launch(tapes, state, opcode_table, num_steps=first, fresh=fresh)
     alive = state[HALTED] == 0
@@ -445,7 +447,7 @@ def run_kernel(
         return launch(*args, opcode_table)
 
     tapes, state = jax.lax.cond(count <= size, survivors, everyone, (tapes, state))
-    return tapes, state[STEPS], state[OPS]
+    return tapes, state[STEPS], state[OPS], state[FIRST]
 
 
 __all__ = ["run_kernel"]

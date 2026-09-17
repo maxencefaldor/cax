@@ -46,7 +46,7 @@ for heads in (False, True):
             tapes = sample(rng, n, kind)
             ref_t, ref_ops = oracle(tapes, steps, heads)
             t0 = time.time()
-            out_t, out_steps, out_ops = run(
+            out_t, out_steps, out_ops, _ = run(
                 jnp.asarray(tapes), table, num_steps=steps, heads_from_tape=heads
             )
             out_t = np.asarray(jax.block_until_ready(out_t))

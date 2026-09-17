@@ -64,6 +64,23 @@ def local_pairing(key: Array, height: int, width: int) -> Array:
     return jnp.where(swap, pairs[:, ::-1], pairs).reshape(-1)
 
 
+def inverse_permutation(permutation: Array) -> Array:
+    """Inverse of each permutation in a batch, for write-back by gather.
+
+    A gather partitions as an all-gather plus a local gather under sharding, where the
+    equivalent scatter does not.
+    """
+    *batch, num = permutation.shape
+    flat = permutation.reshape(-1, num)
+    offsets = jnp.arange(flat.shape[0])[:, None] * num
+    inverse = (
+        jnp.zeros(flat.size, dtype=permutation.dtype)
+        .at[(flat + offsets).ravel()]
+        .set(jnp.arange(flat.size, dtype=permutation.dtype))
+    )
+    return inverse.reshape(permutation.shape) - offsets.reshape((*batch, 1))
+
+
 def skeleton_hash(soup: Array, opcode_table: Array) -> Array:
     """Hash the instruction skeleton of every program.
 
@@ -215,7 +232,9 @@ class BFF(ComplexSystem[Array, Array]):
             soup = jax.device_put(soup, spec)
         return soup
 
-    def pair_and_run(self, soup: Array, permutation: Array) -> tuple[Array, Array]:
+    def pair_and_run(
+        self, soup: Array, permutation: Array
+    ) -> tuple[Array, Array, Array]:
         """Execute one epoch given the pairing.
 
         Several soups may be passed at once with leading batch axes; their pairs run
@@ -229,8 +248,9 @@ class BFF(ComplexSystem[Array, Array]):
                 `permutation[..., 2i + 1]` the second.
 
         Returns:
-            A tuple `(soup, steps)`: the soup after execution, and an int32 array of
-                shape (..., num_programs // 2) with the number of steps each pair ran.
+            A tuple `(soup, steps, first)`: the soup after execution, and two int32
+                arrays of shape (..., num_programs // 2) with the number of steps each
+                pair ran and how many of them had the pointer in the first half.
 
         """
         *batch, num_programs, tape_length = soup.shape
@@ -252,9 +272,9 @@ class BFF(ComplexSystem[Array, Array]):
             )
             pairs = jnp.where(mutate, replacement, pairs)
 
-        def execute(pairs: Array, opcode_table: Array) -> tuple[Array, Array]:
+        def execute(pairs: Array, opcode_table: Array) -> tuple[Array, Array, Array]:
             # One launch for every pair of every soup.
-            flat, steps, _ = run(
+            flat, steps, _, first = run(
                 pairs.reshape(-1, 2 * tape_length),
                 opcode_table,
                 num_steps=self.num_steps,
@@ -262,28 +282,24 @@ class BFF(ComplexSystem[Array, Array]):
                 control=self.control,
                 implementation=self.implementation,
             )
-            return flat.reshape(pairs.shape), steps.reshape(pairs.shape[:-1])
+            shape = pairs.shape[:-1]
+            return flat.reshape(pairs.shape), steps.reshape(shape), first.reshape(shape)
 
         if spec is not None:
             pairs = constrain(pairs)
             # check_vma is off because a Pallas call's outputs carry no varying-axis
             # metadata; the specs above say everything the partitioner needs.
             execute = jax.shard_map(
-                execute, in_specs=(spec, P()), out_specs=(spec, spec), check_vma=False
+                execute,
+                in_specs=(spec, P()),
+                out_specs=(spec, spec, spec),
+                check_vma=False,
             )
-        pairs, steps = execute(pairs, self.opcode_table)
-        # Write back through the inverse permutation: a gather, which partitions as an
-        # all-gather plus a local gather, where the equivalent scatter does not.
-        flat_permutation = permutation.reshape(-1, num_programs)
-        offsets = jnp.arange(flat_permutation.shape[0])[:, None] * num_programs
-        inverse = jnp.zeros(flat_permutation.size, dtype=permutation.dtype).at[
-            (flat_permutation + offsets).ravel()
-        ].set(jnp.arange(flat_permutation.size, dtype=permutation.dtype)).reshape(
-            permutation.shape
-        ) - offsets.reshape((*batch, 1))
+        pairs, steps, first = execute(pairs, self.opcode_table)
         executed = constrain(pairs.reshape(soup.shape))
+        inverse = inverse_permutation(permutation)
         soup = constrain(jnp.take_along_axis(executed, inverse[..., None], axis=-2))
-        return soup, steps
+        return soup, steps, first
 
     def sample_pairing(self, key: Array, num_programs: int) -> Array:
         """Draw one epoch's pairing: random, or local when `grid` is set.
@@ -300,13 +316,26 @@ class BFF(ComplexSystem[Array, Array]):
             return jax.random.permutation(key, num_programs)
         return local_pairing(key, *self.grid)
 
+    def pairing(self, num_programs: int, batch: tuple[int, ...]) -> Array:
+        """Draw one epoch's pairing for every soup in a batch.
+
+        Args:
+            num_programs: Number of programs in each soup.
+            batch: Leading batch shape of the soups.
+
+        Returns:
+            Integer array of shape (*batch, num_programs) in the format of
+                `pair_and_run`.
+
+        """
+        keys = jax.random.split(self.rngs.pairing(), int(np.prod(batch)) or 1)
+        permutation = jax.vmap(lambda k: self.sample_pairing(k, num_programs))(keys)
+        return permutation.reshape(*batch, num_programs)
+
     @override
     def _step(self, state: Array, input: Array | None = None) -> Array:
         *batch, num_programs, _ = state.shape
-        keys = jax.random.split(self.rngs.pairing(), int(np.prod(batch)) or 1)
-        permutation = jax.vmap(lambda k: self.sample_pairing(k, num_programs))(keys)
-        permutation = permutation.reshape(*batch, num_programs)
-        soup, _ = self.pair_and_run(state, permutation)
+        soup, _, _ = self.pair_and_run(state, self.pairing(num_programs, tuple(batch)))
         return soup
 
     @nnx.jit

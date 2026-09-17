@@ -48,7 +48,7 @@ def test_grid_1d_matches_interpreter(control: Control, turn: Turn) -> None:
     for seed in range(6):
         tape = enriched_tape(jax.random.key(seed))
         state = cs(single_thread(tape, (0,), 0), num_steps=400)
-        expected, _, _ = run(
+        expected, _, _, _ = run(
             tape[None], TABLE, num_steps=400, control=control, implementation="xla"
         )
         np.testing.assert_array_equal(np.asarray(state.memory), np.asarray(expected[0]))

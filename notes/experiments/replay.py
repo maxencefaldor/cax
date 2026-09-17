@@ -48,7 +48,7 @@ def replay(lang_dir, heads, params_seed=7, N=1024, epochs=4, mutation_prob=1 << 
                     pairs[index, i] = r & 0xFF
         mutated = np.zeros_like(soup)
         mutated[perm] = pairs.reshape(N, 64)
-        out, _ = cs.pair_and_run(jnp.asarray(mutated), jnp.asarray(perm))
+        out, _, _ = cs.pair_and_run(jnp.asarray(mutated), jnp.asarray(perm))
         soup = np.asarray(out)
         ref = np.fromfile(f"{lang_dir}/{epoch:010d}.dat", dtype=np.uint8)[24:].reshape(
             N, 64

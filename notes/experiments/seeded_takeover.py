@@ -28,7 +28,7 @@ a = ap.parse_args()
 def chunk(cs, soup, n):
     def body(cs, soup, _):
         perm = jax.random.permutation(cs.rngs.pairing(), soup.shape[0])
-        soup, _ = cs.pair_and_run(soup, perm)
+        soup, _, _ = cs.pair_and_run(soup, perm)
         return soup, None
 
     soup, _ = nnx.scan(
@@ -45,7 +45,12 @@ prog = np.asarray(parse(a.program, opcode_table=table))
 with open(a.out, "a") as f:
     for seed in range(a.first_seed, a.first_seed + a.seeds):
         t0 = time.time()
-        cs = BFF(opcode_table=table, control=a.control, heads_from_tape=a.heads, rngs=nnx.Rngs(seed))
+        cs = BFF(
+            opcode_table=table,
+            control=a.control,
+            heads_from_tape=a.heads,
+            rngs=nnx.Rngs(seed),
+        )
         soup = cs.init_state(num_programs=a.num_programs)
         soup = soup.at[0, : len(prog)].set(jnp.asarray(prog))
         soup = chunk(cs, soup, a.epochs)
