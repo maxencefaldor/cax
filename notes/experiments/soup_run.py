@@ -161,12 +161,18 @@ if a.grid is not None:
         (out / f"frames_soup{i}").mkdir(exist_ok=True)
 
 
-def save_frames(soup, epoch):
+def save_frames(soup, epoch, energy=None):
     if a.grid is None:
         return
     for i in range(R):
         rgb = np.asarray(viewer.render(soup[i]))
         Image.fromarray(rgb).save(out / f"frames_soup{i}" / f"{epoch:09d}.png")
+        if energy is not None:
+            # Energy on a log scale: black is broke, white is a bank of 2^16 or more.
+            level = np.log2(np.maximum(np.asarray(energy[i]), 1)) / 16
+            grey = (255 * np.clip(level, 0, 1)).astype(np.uint8).reshape(a.grid)
+            (out / f"energy_soup{i}").mkdir(exist_ok=True)
+            Image.fromarray(grey).save(out / f"energy_soup{i}" / f"{epoch:09d}.png")
 
 
 t0 = time.time()
@@ -176,7 +182,7 @@ while epoch < a.max_epochs:
     for _ in range(a.log_every // a.frame_every):
         soup, energy, mean_steps, deaths = advance(soup, energy, a.frame_every)
         epoch += a.frame_every
-        save_frames(soup, epoch)
+        save_frames(soup, epoch, energy)
     all_soups = np.asarray(soup)
     mean_steps = np.asarray(mean_steps)
     for i in range(R):
