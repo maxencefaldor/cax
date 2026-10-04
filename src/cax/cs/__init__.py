@@ -6,6 +6,7 @@ from .flow_lenia import FlowLenia
 from .langton_ant import LangtonAnt
 from .lenia import Lenia
 from .life import Life
+from .mqri import Mqri
 from .particle_lenia import ParticleLenia
 from .particle_life import ParticleLife
 from .reaction_diffusion import ReactionDiffusion
@@ -18,6 +19,7 @@ __all__ = [
     "LangtonAnt",
     "Lenia",
     "Life",
+    "Mqri",
     "ParticleLenia",
     "ParticleLife",
     "ReactionDiffusion",

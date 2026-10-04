@@ -32,6 +32,7 @@ nav:
     - 11 - Conway's Game of Life: examples/11_life.ipynb
     - 12 - Langton's Ant: examples/12_langton_ant.ipynb
     - 13 - Abelian Sandpile: examples/13_sandpile.ipynb
+    - 14 - MQRI plate: examples/14_mqri_plate.ipynb
   - Lenia:
     - 20 - Lenia: examples/20_lenia.ipynb
     - 21 - Flow Lenia: examples/21_flow_lenia.ipynb

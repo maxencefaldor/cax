@@ -5,6 +5,10 @@ Versions follow [semantic versioning](https://semver.org): while CAX is pre-1.0,
 
 ## 0.4.4
 
+### Added
+
+- `cax.cs.mqri` — MQRI plate: frozen fiducial and payload strip, majority-life / phase-diffusion on the free field. Decode rebuilds bytes from the strip after rollout; `reflection_id` hashes synthetic I/Q/U and changes under tamper. See `examples/14_mqri_plate.ipynb`.
+
 ### Changed
 
 - RGBA arrays are premultiplied: colour is scaled by alpha, so a pixel holds the light it emits and a transparent pixel is zero in every channel.
