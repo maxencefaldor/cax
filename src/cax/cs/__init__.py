@@ -10,6 +10,7 @@ from .particle_lenia import ParticleLenia
 from .particle_life import ParticleLife
 from .reaction_diffusion import ReactionDiffusion
 from .sandpile import Sandpile
+from .swarm import Swarm
 
 __all__ = [
     "Boids",
@@ -22,4 +23,5 @@ __all__ = [
     "ParticleLife",
     "ReactionDiffusion",
     "Sandpile",
+    "Swarm",
 ]

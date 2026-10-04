@@ -5,6 +5,10 @@ Versions follow [semantic versioning](https://semver.org): while CAX is pre-1.0,
 
 ## 0.4.4
 
+### Added
+
+- `cax.cs.swarm` — 1-D tag-voting workers (idle / lit / run / match). Isolated mode zeros neighbors across a chunk cut; chained mode does not. Hand-coded consensus, not a trained NCA. See `examples/15_swarm.ipynb`.
+
 ### Changed
 
 - RGBA arrays are premultiplied: colour is scaled by alpha, so a pixel holds the light it emits and a transparent pixel is zero in every channel.

@@ -7,6 +7,7 @@ Each system is a subclass of `cax.core.ComplexSystem` and follows the perceive/u
 - [Conway's Game of Life](cs/life.md)
 - [Langton's Ant](cs/langton_ant.md)
 - [Abelian Sandpile](cs/sandpile.md)
+- [Swarm](cs/swarm.md)
 - [Lenia](cs/lenia.md)
 - [Flow Lenia](cs/flow_lenia.md)
 - [Particle Lenia](cs/particle_lenia.md)
